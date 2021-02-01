@@ -72,28 +72,30 @@
         ref="gridlinesRef"
       />
 
-      <rect
-        v-for="(plot, index) in plots"
-        :key="index"
-        :x="pan.x + plot.x * scale"
-        :y="pan.y + plot.y * scale"
-        :width="plot.width * scale"
-        :height="plot.height * scale"
-        fill="gray"
-      />
+      <svg
+        :x="pan.x"
+        :y="pan.y"
+      >
+        <g
+          :transform="`scale(${scale})`"
+        >
+          <rect
+            v-for="(plot, index) in plots"
+            :key="index"
+            :x="plot.x"
+            :y="plot.y"
+            :width="plot.width"
+            :height="plot.height"
+            fill="gray"
+          />
+        </g>
+      </svg>
     </svg>
 
 
     <footer>
       <nav class="PlotterActions">
-        <Flipper :flip-key="action">
-          <Flipped flip-id="subplot" v-if="action !== 'subplot'">
-            <button @click="action = 'subplot'">Add Subplot</button>
-          </Flipped>
-          <Flipped flip-id="subplot" v-else>
-            <div @click="action = undefined">RED</div>
-          </Flipped>
-        </Flipper>
+        <button @click="handleAddSubplot">Add Subplot</button>
         <button>Add Bed</button>
         <button>Add Crop</button>
         <button>Open</button>
@@ -104,15 +106,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, watch, watchEffect } from 'vue'
-// @ts-ignore
-import { Flipper, Flipped } from 'vue-flip-toolkit'
 
 export default defineComponent({
   name: 'Plotter',
-  components: {
-    Flipper,
-    Flipped,
-  },
   setup() {
     const scale = ref(10)
     const gridlineSettings = reactive({
@@ -136,17 +132,17 @@ export default defineComponent({
       y: 0,
     })
     const panning = ref(false)
-    watch(() => scale.value, (value, previous) => {
-      // const diff = (Number(value) - Number(previous)) / Number(value)
-      const num = Number(value)
-      const oldDeltaX = pan.x - center.x
-      const oldDeltaY = pan.y - center.y
-      const newDeltaX = (num * pan.x - num * center.x) / num
-      const newDeltaY = (num * pan.y - num * center.y) / num
-      // pan.x = diff * pan.x
-      // pan.y = diff * pan.y
-      console.log(1, oldDeltaX, oldDeltaY, newDeltaX, newDeltaY)
-    })
+    // watch(() => scale.value, (value, previous) => {
+    //   // const diff = (Number(value) - Number(previous)) / Number(value)
+    //   const num = Number(value)
+    //   const oldDeltaX = pan.x - center.x
+    //   const oldDeltaY = pan.y - center.y
+    //   const newDeltaX = (num * pan.x - num * center.x) / num
+    //   const newDeltaY = (num * pan.y - num * center.y) / num
+    //   // pan.x = diff * pan.x
+    //   // pan.y = diff * pan.y
+    //   console.log(1, oldDeltaX, oldDeltaY, newDeltaX, newDeltaY)
+    // })
     const center = reactive({
       x: 0,
       y: 0,
@@ -155,7 +151,7 @@ export default defineComponent({
       const { width = 0, height = 0 } = gridlinesRef.value?.getBoundingClientRect() || {}
       center.x = width / 2 - pan.x
       center.y = height / 2 - pan.y
-      console.log(2, center)
+      // console.log(2, center)
     })
 
     const plots = reactive([
@@ -172,8 +168,6 @@ export default defineComponent({
         height: 14,
       },
     ])
-
-    const action = ref(null);
 
     return {
       scale,
@@ -201,8 +195,14 @@ export default defineComponent({
       },
 
       plots,
-
-      action,
+      handleAddSubplot() {
+        plots.push({
+          x: Math.round(center.x / scale.value),
+          y: Math.round(center.y / scale.value),
+          width: Math.round(Math.random() * 9) + 1,
+          height: Math.round(Math.random() * 9) + 1,
+        })
+      },
     }
   },
 })
