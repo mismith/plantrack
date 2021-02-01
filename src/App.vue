@@ -1,15 +1,18 @@
 <template>
-  <Plotter />
+  <!-- <Plotter /> -->
+  <Recorder />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import Plotter from './components/Plotter.vue'
+import Recorder from './components/Recorder.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
-    Plotter
+    Plotter,
+    Recorder,
   }
 })
 </script>
