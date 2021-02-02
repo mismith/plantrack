@@ -105,7 +105,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, defineComponent, reactive, ref, watchEffect } from 'vue'
 
 export default defineComponent({
   name: 'Plotter',

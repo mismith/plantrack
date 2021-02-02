@@ -8,7 +8,7 @@
       :options="options"
     >
       <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
-        <slot :name="slot" v-bind="scope"/>
+        <slot :name="slot" v-bind="scope" />
       </template>
     </TreeNode>
   </ol>

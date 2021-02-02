@@ -72,9 +72,8 @@
 <script lang="ts">
 import { defineComponent, reactive } from 'vue'
 
-import TreeView from './TreeView.vue'
 import data from '../data'
-import { ITreeNode } from './TreeNode.vue'
+import TreeView from '../components/TreeView.vue'
 
 export default defineComponent({
   name: 'Recorder',
@@ -82,7 +81,6 @@ export default defineComponent({
     TreeView,
   },
   setup() {
-
     const treeState = reactive({
       expanded: [],
       selected: [],
@@ -140,68 +138,6 @@ $spacing: 8px;
 
       textarea {
         resize: vertical;
-      }
-    }
-  }
-
-  .TreeView {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-
-    > .TreeNode {
-      > div {
-        display: flex;
-        align-items: center;
-
-        > button:first-child {
-          appearance: none;
-          background: none;
-          color: inherit;
-          font-size: 0;
-          padding: 10px 5.5px;
-          margin: 0;
-          border: none;
-          outline: none;
-          opacity: 0.5;
-          transition: all 0.1s;
-
-          &::after {
-            content: "";
-            border: solid 5px transparent;
-            border-left-color: currentColor;
-            border-left-width: 8px;
-            border-right-width: 0;
-          }
-        }
-
-        > input[type="checkbox"] {
-          transform: scale(1.5);
-          margin: 0.4em $spacing;
-        }
-
-        &.expandable {
-          &.leaf {
-            > button:first-child {
-              visibility: hidden;
-            }
-          }
-        }
-        &.expanded {
-          > button:first-child {
-            transform: rotate(90deg);
-          }
-        }
-
-        &.selectable {
-        }
-        &.selected {
-          background-color: Highlight;
-          color: HighlightText;
-        }
-      }
-      > .TreeView {
-        padding-left: $spacing * 3;
       }
     }
   }
