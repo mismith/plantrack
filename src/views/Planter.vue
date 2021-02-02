@@ -49,79 +49,17 @@
         </ol>
       </template>
     </TreeView>
+
+    <pre>{{data.records}}</pre>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, toRefs } from 'vue'
+import { defineComponent, reactive, ref } from 'vue'
 
-import dataRaw from '../data'
+import data from '../data'
+import { getPlantsInBed, addPlant, movePlant, removePlant } from '../services/plants'
 import TreeView from '../components/TreeView.vue'
-
-function getPlantsInBed(bedId: string, data: any) {
-  const bedRecords = data.records.filter(
-    (record: any) => record.payload?.bedId === bedId || record.payload?.oldBedId === bedId
-  )
-  const plantMap = bedRecords.reduce((acc: any, record: any) => {
-    switch (record.eventId) {
-      case 'seed': {
-        acc[record.payload.plantId] = true
-        break
-      }
-      case 'transplant': {
-        acc[record.payload.plantId] = record.payload.bedId === bedId
-        break
-      }
-      case 'cull': {
-        acc[record.payload.plantId] = false
-        break
-      }
-      default: {
-        break
-      }
-    }
-    return acc;
-  }, {})
-  const plantIds = Object.entries(plantMap).filter(([, v]) => v).map(([k]) => k)
-  const plants = data.plants.filter(({ id }: any) => plantIds.includes(id))
-  return plants
-};
-function addPlant({ bedId, cropId }: any, data: any) {
-  const id = `plant-${Math.random().toString().slice(2)}`
-  data.plants.push({
-    id,
-    cropId,
-  })
-  data.records.push({
-    id: `record-${Math.random().toString().slice(2)}`,
-    eventId: 'seed',
-    payload: {
-      bedId,
-      plantId: id,
-    },
-  })
-}
-function movePlant({ oldBedId, bedId, plantId }: any, data: any) {
-  data.records.push({
-    id: `record-${Math.random().toString().slice(2)}`,
-    eventId: 'transplant',
-    payload: {
-      oldBedId,
-      bedId,
-      plantId,
-    },
-  })
-}
-function removePlant({ bedId, plantId }: any, data: any) {
-  data.records.push({
-    id: `record-${Math.random().toString().slice(2)}`,
-    eventId: 'cull',
-    payload: {
-      bedId,
-      plantId,
-    },
-  })
-}
 
 export default defineComponent({
   name: 'Planter',
@@ -129,6 +67,14 @@ export default defineComponent({
     TreeView,
   },
   setup() {
+    const nodes = data.plots.map((plot) => ({
+      type: 'plot',
+      children: data.beds.filter(({ plotId }) => plotId === plot.id).map((bed) => ({
+        type: 'bed',
+        ...bed,
+      })),
+      ...plot,
+    }));
     const treeState = reactive({
       expanded: [],
       checked: [],
@@ -145,37 +91,21 @@ export default defineComponent({
       // renamable: true,
     })
 
-    const data = reactive(dataRaw)
-    const { plots, beds } = data
-    const nodes = plots.map((plot) => ({
-      type: 'plot',
-      children: beds.filter(({ plotId }) => plotId === plot.id).map((bed) => ({
-        type: 'bed',
-        // children: crops?.map(({ ...plant }) => ({
-        //   ...plant,
-        //   type: 'plant',
-        //   id: Math.random(),
-        // })),
-        ...bed,
-      })),
-      ...plot,
-    }));
-    const newBedId = ref()
     const newCropId = ref()
+    const newBedId = ref()
 
     return {
-
       data,
       nodes,
       treeState,
       treeOptions,
       getPlantsInBed,
 
-      newBedId,
       newCropId,
       handleAdd(bedId: string) {
         addPlant({ bedId, cropId: newCropId.value }, data)
       },
+      newBedId,
       handleMove(oldBedId: string, plantId: string) {
         movePlant({ oldBedId, plantId, bedId: newBedId.value }, data)
       },

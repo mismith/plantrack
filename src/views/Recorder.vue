@@ -2,10 +2,10 @@
   <div class="Recorder">
     <form @submit.prevent="handleSubmit">
       <fieldset>
-        <label>What</label>
-        <select v-model="record.what">
+        <label>Event</label>
+        <select v-model="record.eventId">
           <option
-            v-for="event in events"
+            v-for="event in data.events"
             :key="event.id"
             :value="event.id"
           >
@@ -15,49 +15,23 @@
       </fieldset>
 
       <fieldset>
-        <label>Which</label>
-        <select v-model="record.which" multiple>
-          <option
-            v-for="crop in crops"
-            :key="crop.id"
-            :value="crop.id"
-          >
-            {{crop.id}}: {{crop.name}}
-          </option>
-        </select>
-      </fieldset>
-
-      <fieldset>
-        <label>Where</label>
+        <label>Details</label>
         <TreeView
-          :nodes="plots.map(({ beds, ...plot }) => ({
-            children: beds?.map(({ plants, ...bed }) => ({
-              ...bed,
-              children: plants?.map(({ id, ...plant }) => ({
-                ...plant,
-              })),
-            })),
-            ...plot,
-          }))"
+          :nodes="nodes"
           :state="treeState"
           :options="treeOptions"
         >
-          <template #node-append="{ node, state, tools }">
-            <div v-if="tools.is(state.checked, node)">
-              Checked
-            </div>
-          </template>
         </TreeView>
       </fieldset>
 
       <fieldset>
         <label>When</label>
-        <input type="datetime-local" v-model="record.when" />
+        <input type="datetime-local" v-model="record.at" />
       </fieldset>
 
       <fieldset>
-        <label>How</label>
-        <textarea v-model="record.how"></textarea>
+        <label>Note</label>
+        <textarea v-model="record.note"></textarea>
       </fieldset>
 
       <fieldset>
@@ -74,6 +48,7 @@ import { defineComponent, reactive } from 'vue'
 
 import data from '../data'
 import TreeView from '../components/TreeView.vue'
+import { getPlantsInBed } from '../services/plants';
 
 export default defineComponent({
   name: 'Recorder',
@@ -81,6 +56,18 @@ export default defineComponent({
     TreeView,
   },
   setup() {
+    const nodes = data.plots.map((plot) => ({
+      type: 'plot',
+      children: data.beds.filter(({ plotId }) => plotId === plot.id).map((bed) => ({
+        type: 'bed',
+        children: getPlantsInBed(bed.id, data).map((plant: any) => ({
+          type: 'plant',
+          ...plant,
+        })),
+        ...bed,
+      })),
+      ...plot,
+    }));
     const treeState = reactive({
       expanded: [],
       selected: [],
@@ -88,34 +75,35 @@ export default defineComponent({
       renamed: [],
     })
     const treeOptions = reactive({
+      indentable: true,
       expandable: true,
-      selectable: false,
-      checkable: data.plots.reduce(
-        (acc, { beds }) => acc.concat(beds.map(({ id }) => id)),
-        [] as string[],
-      ),
-      // checkableChildren: true,
-      renamable: false,
+      // selectable: true,
+      checkable: true,
+      checkableRecurses: true,
+      // renamable: true,
     })
 
+    const payload = reactive({
+      // plantId,
+    })
     const record = reactive({
-      what: [],
-      which: [],
-      where: treeState.checked,
-      when: undefined,
-      how: undefined,
+      eventId: undefined,
+      payload,
+      at: undefined,
+      note: undefined,
     })
 
     return {
-      ...reactive(data),
+      data,
       record,
 
+      nodes,
       treeState,
       treeOptions,
 
       handleSubmit() {
-        // if (!record.datetime) {
-        //   record.datetime = new Date();
+        // if (!record.at) {
+        //   record.at = new Date();
         // }
         console.log(record);
       },

@@ -1,4 +1,6 @@
-export default {
+import { reactive } from 'vue'
+
+export default reactive({
   crops: [
     { id: 'TM786', name: 'Tomatoes - Cherry / Sungold' },
     { id: 'PP670', name: 'Peppers / Sweetheart' },
@@ -39,8 +41,8 @@ export default {
     { id: 'AGTHYM', name: 'Thyme' },
   ],
   plants: [
-    { id: 'plant-1', cropId: 'TM786' },
-    { id: 'plant-2', cropId: 'PP670' },
+    { id: 'plant-1', cropId: 'TM786', name: 'Rudy' },
+    { id: 'plant-2', cropId: 'PP670', name: 'Pépé' },
   ],
   records: [
     {
@@ -142,4 +144,4 @@ export default {
     { id: 'harvest' },
     { id: 'cull' },
   ],
-}
+})

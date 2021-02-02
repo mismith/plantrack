@@ -88,6 +88,8 @@ body,
         }
       }
       &.expandable {
+        cursor: default;
+
         &:not(.childrened) {
           .TreeNodeExpand {
             visibility: hidden;
@@ -103,9 +105,6 @@ body,
       .TreeNodeCheck {
         transform: scale(1.5);
         margin: 0.4em $spacing;
-      }
-      &.selectable {
-        cursor: default;
       }
       &.selected {
         &,
