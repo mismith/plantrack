@@ -1,22 +1,27 @@
 <template>
-  <!-- <Plotter /> -->
-  <!-- <Recorder /> -->
-  <Planter />
+  <router-view />
+
+  <router-link
+    v-for="route in routes.filter(({ path }) => path !== '/')"
+    :key="route.path"
+    :to="route.path"
+  >
+    {{route.path}}
+  </router-link>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Plotter from './views/Plotter.vue'
-import Recorder from './views/Recorder.vue'
-import Planter from './views/Planter.vue'
+
+import { routes } from './router'
 
 export default defineComponent({
   name: 'App',
-  components: {
-    Plotter,
-    Recorder,
-    Planter,
-  },
+  setup() {
+    return {
+      routes,
+    }
+  }
 })
 </script>
 
