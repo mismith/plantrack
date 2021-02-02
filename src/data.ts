@@ -1,14 +1,5 @@
-export type TreeNodeType = 'plot' | 'bed' | 'plant' | 'event'
-
-export interface TreeNode {
-  id: string
-  type: TreeNodeType
-  name?: string
-  children?: TreeNode[]
-}
-
 export default {
-  plants: [
+  crops: [
     { id: 'TM786', name: 'Tomatoes - Cherry / Sungold' },
     { id: 'PP670', name: 'Peppers / Sweetheart' },
     { id: 'CU403', name: 'Cucumbers / Picolino' },
