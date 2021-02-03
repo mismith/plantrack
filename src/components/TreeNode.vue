@@ -11,6 +11,8 @@
             return acc
           }, {}),
         }"
+        @mouseenter="tools.is(options.hoverable, node) && tools.set(state.hovered, node, true)"
+        @mouseleave="tools.is(options.hoverable, node) && tools.set(state.hovered, node, false)"
         @click="
           tools.is(options.selectable, node) && !tools.is(state.disabled, node)
             ? tools.toggle(state.selected, node, !$event.metaKey)
@@ -115,7 +117,7 @@ import { defineAsyncComponent, defineComponent, PropType } from 'vue'
 
 import TransitionExpand from './TransitionExpand.vue'
 
-export type Booleanable = boolean | string[] | ((node?: ITreeNode) => Booleanable) | object
+export type Booleanable = string[] | ((node?: ITreeNode) => Booleanable) | boolean | object
 export function is(value: Booleanable, node: ITreeNode): boolean {
   if (typeof value === 'function') {
     return is(value(node), node)

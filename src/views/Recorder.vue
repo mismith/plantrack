@@ -67,9 +67,10 @@ export default defineComponent({
         ...bed,
       })),
       ...plot,
-    }));
+    }))
     const treeState = reactive({
       expanded: [],
+      hovered: [],
       selected: [],
       checked: [],
       disabled: (node: ITreeNode) => node.type !== 'plant' && !tools.walkChildren(
@@ -81,6 +82,7 @@ export default defineComponent({
     const treeOptions = reactive({
       indentable: true,
       expandable: true,
+      hoverable: true,
       // selectable: true,
       // selectable: (node: ITreeNode) => node.type === 'plant',
       checkable: {

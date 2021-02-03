@@ -77,14 +77,15 @@ export default defineComponent({
     }))
     const treeState = reactive({
       expanded: [],
+      hovered: [],
+      selected: [],
       checked: [],
       renamed: [],
-      selected: [],
     })
     const treeOptions = reactive({
-      // hoverable: true,
       indentable: true,
       expandable: true,
+      // hoverable: true,
       // selectable: true,
       checkable: {
         recurse: true, // (node: ITreeNode) => Boolean(node.children?.length),

@@ -55,7 +55,7 @@ body,
       align-items: center;
 
       &.hoverable {
-        &:hover {
+        &.hovered {
           background-color: ButtonFace;
         }
       }
@@ -121,7 +121,7 @@ body,
       }
       &.selected {
         &,
-        &:hover {
+        &.hovered {
           background-color: Highlight;
           color: HighlightText;
         }
