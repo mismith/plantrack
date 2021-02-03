@@ -1,9 +1,31 @@
 <template>
   <div class="Recorder">
+    <AddPlant v-if="isAdding" />
     <form @submit.prevent="handleSubmit">
       <fieldset>
+        <label>
+          Plant(s)
+          <button @click="isAdding = !isAdding">Add Plant</button>
+        </label>
+        <TreeView
+          :nodes="nodes"
+          :state="treeState"
+          :options="treeOptions"
+        >
+          <!-- <template #node-name="{ node }">
+            <span class="TreeNodeName">
+              {{node.name || node.id}}
+              <span v-if="node.type === 'plant'">
+                ({{data.crops.find(({ id }) => node.cropId)?.name}})
+              </span>
+            </span>
+          </template> -->
+        </TreeView>
+      </fieldset>
+
+      <fieldset>
         <label>Event</label>
-        <select v-model="record.eventId">
+        <select v-model="eventId">
           <option
             v-for="event in data.events"
             :key="event.id"
@@ -15,47 +37,44 @@
       </fieldset>
 
       <fieldset>
-        <label>Details</label>
-        <TreeView
-          :nodes="nodes"
-          :state="treeState"
-          :options="treeOptions"
-        >
-        </TreeView>
-      </fieldset>
-
-      <fieldset>
         <label>When</label>
-        <input type="datetime-local" v-model="record.at" />
+        <input type="datetime-local" v-model="at" />
       </fieldset>
 
       <fieldset>
         <label>Note</label>
-        <textarea v-model="record.note"></textarea>
+        <textarea v-model="note"></textarea>
       </fieldset>
 
       <fieldset>
         <button type="submit">Submit</button>
       </fieldset>
     </form>
-
-    <pre>{{record}}</pre>
+    <pre>{{plantIds}}</pre>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from 'vue'
+import { defineComponent, reactive, ref, watch } from 'vue'
 
 import data from '../data'
+import AddPlant from '../components/AddPlant.vue'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
 import { getPlantsInBed } from '../services/plants'
 
 export default defineComponent({
   name: 'Recorder',
   components: {
+    AddPlant,
     TreeView,
   },
   setup() {
+    const isAdding = ref(false)
+    const plantIds = ref([])
+    const eventId = ref()
+    const at = ref(new Date().toISOString())
+    const note = ref()
+
     const nodes = data.plots.map((plot) => ({
       type: 'plot',
       children: data.beds.filter(({ plotId }) => plotId === plot.id).map((bed) => ({
@@ -91,29 +110,29 @@ export default defineComponent({
       // renamable: true,
     })
 
-    const payload = reactive({
-      // plantId,
-    })
-    const record = reactive({
-      eventId: undefined,
-      payload,
-      at: undefined,
-      note: undefined,
+    const allPlantIds = data.plants.map(({ id }) => id)
+    watch(treeState.checked, () => {
+      plantIds.value = treeState.checked.filter(id => allPlantIds.includes(id))
     })
 
     return {
-      data,
-      record,
+      isAdding,
+      plantIds,
+      eventId,
+      at,
+      note,
 
       nodes,
       treeState,
       treeOptions,
 
+      data,
+
       handleSubmit() {
         // if (!record.at) {
-        //   record.at = new Date();
+        //   record.at = new Date()
         // }
-        console.log(record);
+        // console.log(record)
       },
     }
   },
