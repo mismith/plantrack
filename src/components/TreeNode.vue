@@ -12,11 +12,11 @@
           }, {}),
         }"
         @click="
-          tools.is(options.selectable, node)
+          tools.is(options.selectable, node) && !tools.is(state.disabled, node)
             ? tools.toggle(state.selected, node, !$event.metaKey)
             : (node.children?.length
               ? tools.is(options.expandable, node) && tools.toggle(state.expanded, node)
-              : tools.is(options.checkable, node) && tools.toggle(state.checked, node))
+              : tools.is(options.checkable, node) && !tools.is(state.disabled, node) && tools.toggle(state.checked, node))
         "
       >
         <slot name="node-prepend" v-bind="nodeProps" />
@@ -41,24 +41,28 @@
             type="checkbox"
             :checked="
               tools.is(state.checked, node)
-                || (node.children?.length && tools.numLeafs(node) === tools.numChecks(node, state))
+              || (
+                node.children?.length
+                && tools.numLeafs(node) === tools.numChecks(node, state)
+              )
             "
             :indeterminate="
               !(
                 tools.is(state.checked, node)
-                  || (node.children?.length && tools.numLeafs(node) === tools.numChecks(node, state))
+                || (
+                  node.children?.length
+                  && tools.numLeafs(node) === tools.numChecks(node, state)
+                )
               )
-                && Boolean(tools.numChecks(node, state))
+              && Boolean(tools.numChecks(node, state))
             "
+            :disabled="tools.is(state.disabled, node)"
             @change="
               tools.set(
                 state.checked,
                 node,
                 $event.target.checked,
-                tools.is(options.checkableRecurses, node) && {
-                  recurse: true,
-                  skipChildrened: Boolean(node.children?.length),
-                },
+                typeof options.checkable === 'object' && options.checkable,
               )
             "
             @click.stop
@@ -70,6 +74,7 @@
             type="text"
             :value="node.name || node.id"
             :readonly="!tools.is(state.renamed, node)"
+            :disabled="tools.is(state.disabled, node)"
             @click="tools.is(state.renamed, node) && $event.stopPropagation()"
             @input="node.name = $event.target.value"
             @blur="tools.set(state.renamed, node, false)"
@@ -110,7 +115,7 @@ import { defineAsyncComponent, defineComponent, PropType } from 'vue'
 
 import TransitionExpand from './TransitionExpand.vue'
 
-export type Booleanable = boolean | string[] | ((node?: ITreeNode) => Booleanable)
+export type Booleanable = boolean | string[] | ((node?: ITreeNode) => Booleanable) | object
 export function is(value: Booleanable, node: ITreeNode): boolean {
   if (typeof value === 'function') {
     return is(value(node), node)
@@ -118,35 +123,30 @@ export function is(value: Booleanable, node: ITreeNode): boolean {
   if (Array.isArray(value)) {
     return value.includes(node.id)
   }
-  return value
+  return Boolean(value)
 }
 export function set(
   value: Booleanable,
   node: ITreeNode,
   on: boolean,
-  options: { recurse?: boolean, skipChildrened?: boolean } = {},
+  options: { recurse?: Booleanable } = {},
 ): Booleanable {
-  const { recurse, skipChildrened } = options
-  if (!skipChildrened) {
-    if (typeof value === 'function') {
-      return set(value(node), node, on, options)
-    }
-    if (Array.isArray(value)) {
-      const index = value.indexOf(node.id)
-      if (index >= 0 && !on) {
-        value.splice(index, 1)
-      } else if (index < 0 && on) {
-        value.push(node.id)
-      }
-    } else {
-      value = on
-    }
+  if (typeof value === 'function') {
+    return set(value(node), node, on, options)
   }
-  if (recurse) {
-    walkChildren(node, (child) => set(value, child, on, {
-      ...options,
-      skipChildrened: Boolean(child.children?.length),
-    }))
+  if (Array.isArray(value)) {
+    const index = value.indexOf(node.id)
+    if (index >= 0 && !on) {
+      value.splice(index, 1)
+    } else if (index < 0 && on) {
+      value.push(node.id)
+    }
+  } else {
+    value = on
+  }
+
+  if (options.recurse && is(options.recurse, node)) {
+    walkChildren(node, (child) => set(value, child, on, options))
   }
   return value
 }
@@ -179,7 +179,7 @@ export const tools = {
     return walkChildren(node, (child) => !child.children?.length).filter(Boolean).length
   },
   numChecks(node: ITreeNode, state: any) {
-    return walkChildren(node, (child) => tools.is(state.checked, child)).filter(Boolean).length
+    return walkChildren(node, (child) => is(state.checked, child)).filter(Boolean).length
   },
 }
 

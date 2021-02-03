@@ -147,6 +147,12 @@ body,
           }
         }
       }
+
+      &.disabled {
+        .TreeNodeName {
+          opacity: 0.5;
+        }
+      }
     }
   }
 }

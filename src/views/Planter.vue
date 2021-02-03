@@ -86,8 +86,9 @@ export default defineComponent({
       indentable: true,
       expandable: true,
       // selectable: true,
-      // checkable: true,
-      checkableRecurses: true,
+      checkable: {
+        recurse: true, // (node: ITreeNode) => Boolean(node.children?.length),
+      },
       // renamable: true,
     })
 

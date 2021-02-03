@@ -17,9 +17,10 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 
-import TreeNode, { ITreeNode } from './TreeNode.vue'
+import TreeNode, { ITreeNode, tools } from './TreeNode.vue'
 
 export type { ITreeNode }
+export { tools }
 
 export default defineComponent({
   name: 'TreeView',

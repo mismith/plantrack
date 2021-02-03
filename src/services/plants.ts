@@ -1,6 +1,9 @@
 import { DataList, RecordEntry } from '../data'
 
-export function addRecord(record: Omit<RecordEntry, 'id' | 'at'>, data: DataList) {
+export function addRecord(
+  record: Omit<RecordEntry, 'id' | 'at'> & Partial<RecordEntry>,
+  data: DataList,
+) {
   data.records.push({
     id: `record-${Math.random().toString().slice(2)}`,
     at: new Date().toISOString(),

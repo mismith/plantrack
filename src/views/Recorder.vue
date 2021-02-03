@@ -47,7 +47,7 @@
 import { defineComponent, reactive } from 'vue'
 
 import data from '../data'
-import TreeView from '../components/TreeView.vue'
+import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
 import { getPlantsInBed } from '../services/plants'
 
 export default defineComponent({
@@ -72,14 +72,20 @@ export default defineComponent({
       expanded: [],
       selected: [],
       checked: [],
+      disabled: (node: ITreeNode) => node.type !== 'plant' && !tools.walkChildren(
+        node,
+        (child) => child.type === 'plant',
+      ).filter(Boolean).length,
       renamed: [],
     })
     const treeOptions = reactive({
       indentable: true,
       expandable: true,
       // selectable: true,
-      checkable: true,
-      checkableRecurses: true,
+      // selectable: (node: ITreeNode) => node.type === 'plant',
+      checkable: {
+        recurse: true, // (node: ITreeNode) => Boolean(node.children?.length),
+      },
       // renamable: true,
     })
 
