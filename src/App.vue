@@ -47,6 +47,7 @@ body,
   list-style: none;
   padding: 0;
   margin: 0;
+  user-select: none;
 
   > .TreeNode {
     > .TreeNodeLeaf {
@@ -61,17 +62,20 @@ body,
 
       .TreeNodeIndent {
         display: inline-block;
-        width: $spacing * 3;
+        width: 0.6em;
         align-self: stretch;
         // border-right: solid 1px ButtonFace;
       }
 
       .TreeNodeExpand {
         appearance: none;
+        display: inline-block;
+        position: relative;
+        width: 1.5em;
+        height: 1.5em;
         background: none;
         color: inherit;
-        font-size: 0;
-        padding: 10px 5.5px;
+        padding: 0;
         margin: 0;
         border: none;
         outline: none;
@@ -79,12 +83,20 @@ body,
         transition: all 0.1s;
         cursor: inherit;
 
+        > span {
+          display: none;
+        }
+
         &::after {
           content: "";
+          position: absolute;
+          top: 50%;
+          left: 50%;
           border: solid 5px transparent;
           border-left-color: currentColor;
           border-left-width: 8px;
           border-right-width: 0;
+          margin: -5px -4px;
         }
       }
       &.expandable {
@@ -103,8 +115,9 @@ body,
       }
 
       .TreeNodeCheck {
-        transform: scale(1.5);
-        margin: 0.4em $spacing;
+        width: 1.2em;
+        height: 1.2em;
+        margin: 0.2em;
       }
       &.selected {
         &,
@@ -112,6 +125,10 @@ body,
           background-color: Highlight;
           color: HighlightText;
         }
+      }
+
+      .TreeNodeName {
+        padding: 0 0.2em;
       }
 
       &.renamable {

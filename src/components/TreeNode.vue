@@ -6,13 +6,9 @@
         :class="{
           TreeNodeLeaf: true,
           childrened: node.children?.length,
-          ...Object.entries(options).reduce((acc, [key, option]) => {
-            acc[key] = tools.is(option, node);
-            return acc;
-          }, {}),
-          ...Object.entries(state).reduce((acc, [key, item]) => {
-            acc[key] = tools.is(item, node);
-            return acc;
+          ...Object.entries({ ...options, ...state }).reduce((acc, [key, item]) => {
+            acc[key] = tools.is(item, node)
+            return acc
           }, {}),
         }"
         @click="
@@ -37,7 +33,7 @@
             @click.stop="tools.toggle(state.expanded, node)"
             class="TreeNodeExpand"
           >
-            {{tools.is(state.expanded, node) ? '&minus;' : '+'}}
+            <span>{{tools.is(state.expanded, node) ? '&minus;' : '+'}}</span>
           </button>
         </slot>
         <slot name="node-checkable" v-bind="nodeProps" v-if="tools.is(options.checkable, node)">
@@ -83,7 +79,7 @@
           />
         </slot>
         <slot name="node-name" v-bind="nodeProps" v-else>
-          <span class="TreeNodeNode">{{node.name || node.id}}</span>
+          <span class="TreeNodeName">{{node.name || node.id}}</span>
         </slot>
         <slot name="node-append" v-bind="nodeProps" />
       </div>
