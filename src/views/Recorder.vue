@@ -48,7 +48,7 @@ import { defineComponent, reactive } from 'vue'
 
 import data from '../data'
 import TreeView from '../components/TreeView.vue'
-import { getPlantsInBed } from '../services/plants';
+import { getPlantsInBed } from '../services/plants'
 
 export default defineComponent({
   name: 'Recorder',
@@ -60,7 +60,7 @@ export default defineComponent({
       type: 'plot',
       children: data.beds.filter(({ plotId }) => plotId === plot.id).map((bed) => ({
         type: 'bed',
-        children: getPlantsInBed(bed.id, data).map((plant: any) => ({
+        children: getPlantsInBed(bed.id, data).map((plant) => ({
           type: 'plant',
           ...plant,
         })),

@@ -1,6 +1,38 @@
 import { reactive } from 'vue'
 
-export default reactive({
+export interface DataList {
+  crops: Crop[]
+  plants: Plant[]
+  beds: Bed[]
+  plots: Plot[]
+  events: EventType[]
+  records: RecordEntry[]
+}
+export interface Entity {
+  id: string
+  name?: string
+}
+export interface Crop extends Entity {
+}
+export interface Plant extends Entity {
+  cropId: string
+}
+export interface Bed extends Entity {
+  plotId: string
+}
+export interface Plot extends Entity {
+}
+export interface EventType extends Entity {
+}
+export interface RecordEntry {
+  id: string
+  eventId: string
+  plantIds: string[]
+  payload?: Record<string, any>
+  at: string
+}
+
+export default reactive<DataList>({
   crops: [
     { id: 'TM786', name: 'Tomatoes - Cherry / Sungold' },
     { id: 'PP670', name: 'Peppers / Sweetheart' },
@@ -43,31 +75,6 @@ export default reactive({
   plants: [
     { id: 'plant-1', cropId: 'TM786', name: 'Rudy' },
     { id: 'plant-2', cropId: 'PP670', name: 'Pépé' },
-  ],
-  records: [
-    {
-      id: `record-${Math.random().toString().slice(2)}`,
-      eventId: 'seed',
-      payload: {
-        bedId: 'moist',
-        plantId: 'plant-1',
-      },
-    },
-    {
-      id: `record-${Math.random().toString().slice(2)}`,
-      eventId: 'seed',
-      payload: {
-        bedId: 'moist',
-        plantId: 'plant-2',
-      },
-    },
-  ],
-  plots: [
-    { id: 'nursery' },
-    { id: 'wall' },
-    { id: 'buckets' },
-    { id: 'trough' },
-    { id: 'aerogarden' },
   ],
   beds: [
     { id: 'dry', plotId: 'nursery' },
@@ -131,6 +138,13 @@ export default reactive({
     { id: 'AG5', plotId: 'aerogarden' },
     { id: 'AG6', plotId: 'aerogarden' },
   ],
+  plots: [
+    { id: 'nursery' },
+    { id: 'wall' },
+    { id: 'buckets' },
+    { id: 'trough' },
+    { id: 'aerogarden' },
+  ],
   events: [
     { id: 'seed' },
     { id: 'sprout' },
@@ -143,5 +157,25 @@ export default reactive({
     { id: 'prune' },
     { id: 'harvest' },
     { id: 'cull' },
+  ],
+  records: [
+    {
+      id: `record-${Math.random().toString().slice(2)}`,
+      eventId: 'seed',
+      plantIds: ['plant-1'],
+      payload: {
+        bedId: 'moist',
+      },
+      at: new Date().toISOString(),
+    },
+    {
+      id: `record-${Math.random().toString().slice(2)}`,
+      eventId: 'seed',
+      plantIds: ['plant-2'],
+      payload: {
+        bedId: 'moist',
+      },
+      at: new Date().toISOString(),
+    },
   ],
 })

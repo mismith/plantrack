@@ -1,5 +1,6 @@
+import { DataList, RecordEntry } from '../data'
 
-export function addRecord(record: any, data: any) {
+export function addRecord(record: Omit<RecordEntry, 'id' | 'at'>, data: DataList) {
   data.records.push({
     id: `record-${Math.random().toString().slice(2)}`,
     at: new Date().toISOString(),
@@ -7,36 +8,42 @@ export function addRecord(record: any, data: any) {
   })
 }
 
-export function getPlantsInBed(bedId: string, data: any) {
+export function getPlantsInBed(bedId: string, data: DataList) {
   const bedRecords = data.records.filter(
-    (record: any) => record.payload?.bedId === bedId || record.payload?.oldBedId === bedId
+    (record) => record.payload?.bedId === bedId || record.payload?.prevBedId === bedId
   )
-  const plantMap = bedRecords.reduce((acc: any, record: any) => {
+  const plantMap = bedRecords.reduce((acc: Record<string, boolean>, record: RecordEntry) => {
     switch (record.eventId) {
       case 'seed': {
-        acc[record.payload.plantId] = true
+        record.plantIds.forEach((plantId) => {
+          acc[plantId] = true
+        })
         break
       }
       case 'transplant': {
-        acc[record.payload.plantId] = record.payload.bedId === bedId
+        record.plantIds.forEach((plantId) => {
+          acc[plantId] = record.payload?.bedId === bedId
+        })
         break
       }
       case 'cull': {
-        acc[record.payload.plantId] = false
+        record.plantIds.forEach((plantId) => {
+          acc[plantId] = false
+        })
         break
       }
       default: {
         break
       }
     }
-    return acc;
+    return acc
   }, {})
   const plantIds = Object.entries(plantMap).filter(([, v]) => v).map(([k]) => k)
-  const plants = data.plants.filter(({ id }: any) => plantIds.includes(id))
+  const plants = data.plants.filter(({ id }) => plantIds.includes(id))
   return plants
 }
 
-export function addPlant({ bedId, cropId }: any, data: any) {
+export function addPlant({ bedId, cropId }: any, data: DataList) {
   const id = `plant-${Math.random().toString().slice(2)}`
   data.plants.push({
     id,
@@ -44,28 +51,28 @@ export function addPlant({ bedId, cropId }: any, data: any) {
   })
   addRecord({
     eventId: 'seed',
+    plantIds: [id],
     payload: {
       bedId,
-      plantId: id,
     },
   }, data)
 }
-export function movePlant({ oldBedId, bedId, plantId }: any, data: any) {
+export function movePlant(plantId: string, { prevBedId, bedId }: any, data: DataList) {
   addRecord({
     eventId: 'transplant',
+    plantIds: [plantId],
     payload: {
-      oldBedId,
+      prevBedId,
       bedId,
-      plantId,
     },
   }, data)
 }
-export function removePlant({ bedId, plantId }: any, data: any) {
+export function removePlant(plantId: string, { bedId }: any, data: DataList) {
   addRecord({
     eventId: 'cull',
+    plantIds: [plantId],
     payload: {
       bedId,
-      plantId,
     },
   }, data)
 }

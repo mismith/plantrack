@@ -74,7 +74,7 @@ export default defineComponent({
         ...bed,
       })),
       ...plot,
-    }));
+    }))
     const treeState = reactive({
       expanded: [],
       checked: [],
@@ -106,11 +106,11 @@ export default defineComponent({
         addPlant({ bedId, cropId: newCropId.value }, data)
       },
       newBedId,
-      handleMove(oldBedId: string, plantId: string) {
-        movePlant({ oldBedId, plantId, bedId: newBedId.value }, data)
+      handleMove(prevBedId: string, plantId: string) {
+        movePlant(plantId, { prevBedId, bedId: newBedId.value }, data)
       },
       handleRemove(bedId: string, plantId: string) {
-        removePlant({ bedId, plantId }, data)
+        removePlant(plantId, { bedId }, data)
       },
     }
   },
