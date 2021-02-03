@@ -110,19 +110,27 @@ import { defineAsyncComponent, defineComponent, PropType } from 'vue'
 
 import TransitionExpand from './TransitionExpand.vue'
 
-function is(value: boolean | string[], node: ITreeNode) {
-  if (typeof value === 'boolean') return value
-  if (Array.isArray(value)) return value.includes(node.id)
-  return false
+export type Booleanable = boolean | string[] | ((node?: ITreeNode) => Booleanable)
+export function is(value: Booleanable, node: ITreeNode): boolean {
+  if (typeof value === 'function') {
+    return is(value(node), node)
+  }
+  if (Array.isArray(value)) {
+    return value.includes(node.id)
+  }
+  return value
 }
-function set(
-  value: boolean | string[],
+export function set(
+  value: Booleanable,
   node: ITreeNode,
   on: boolean,
   options: { recurse?: boolean, skipChildrened?: boolean } = {},
-): boolean | string[] {
+): Booleanable {
   const { recurse, skipChildrened } = options
   if (!skipChildrened) {
+    if (typeof value === 'function') {
+      return set(value(node), node, on, options)
+    }
     if (Array.isArray(value)) {
       const index = value.indexOf(node.id)
       if (index >= 0 && !on) {
@@ -142,16 +150,16 @@ function set(
   }
   return value
 }
-function toggle(value: boolean | string[], node: ITreeNode, clear = false) {
-  const on = is(value, node);
-  if (typeof value === 'boolean') return set(value, node, !on)
+export function toggle(value: Booleanable, node: ITreeNode, clear = false): Booleanable {
+  if (typeof value === 'function') {
+    return toggle(value(node), node, clear)
+  }
   if (Array.isArray(value)) {
     if (clear) value.splice(0, value.length)
-    return set(value, node, !on)
   }
-  return false
+  return set(value, node, !is(value, node))
 }
-function walkChildren(
+export function walkChildren(
   node: ITreeNode,
   fn: (child: ITreeNode, index: number, children: ITreeNode[]) => any = () => {},
 ): any[] {
@@ -181,6 +189,7 @@ export interface ITreeNode {
   // type: TreeNodeType
   name?: string
   children?: ITreeNode[]
+  [others: string]: any
 }
 
 export default defineComponent({
