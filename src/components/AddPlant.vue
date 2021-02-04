@@ -4,39 +4,40 @@
       <label>Crop</label>
       <select v-model="cropId">
         <option
-          v-for="crop in data.crops"
+          v-for="crop in crops"
           :key="crop.id"
           :value="crop.id"
         >
-          {{crop.id}}: {{crop.name}}
+          {{crop.name}}: {{crop.nickname}}
         </option>
       </select>
     </fieldset>
+
     <fieldset>
       <label>Bed</label>
       <TreeView
         :nodes="nodes"
         :state="treeState"
         :options="treeOptions"
-      >
-        <!-- <template #node-name="{ node }">
-          <span class="TreeNodeName">
-            {{node.name || node.id}}
-            <span v-if="node.type === 'plant'">
-              ({{data.crops.find(({ id }) => node.cropId)?.name}})
-            </span>
-          </span>
-        </template> -->
-      </TreeView>
+      />
+    </fieldset>
+
+    <fieldset>
+      <label>Name</label>
+      <input type="text" v-model="name" :placeholder="placeholder" />
+    </fieldset>
+
+    <fieldset>
+      <button type="submit">Add Plant</button>
     </fieldset>
   </form>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue'
+import { computed, defineComponent, reactive, ref, watch } from 'vue'
 
-import data from '../data'
-import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
+import { database, ServerValue, usePlantDataTree, useRtdbArray } from '../services/firebase'
+import TreeView, { ITreeNode } from '../components/TreeView.vue'
 
 export default defineComponent({
   name: 'AddPlant',
@@ -44,20 +45,21 @@ export default defineComponent({
     TreeView,
   },
   setup() {
-    const cropId = ref(data.crops[0]?.id)
+    const { nodes, beds, plants } = usePlantDataTree()
+    const crops = useRtdbArray(database.ref('/users/mismith/crops'))
+    const cropId = ref(crops.value?.[0]?.id)
+    const bedId = ref(beds.value?.[0]?.id)
+    const name = ref()
+    const placeholder = computed(() => {
+      const crop = crops.value?.find((crop) => crop.id === cropId.value)
+      const cropPlants = plants.value?.filter((plant) => plant.cropId === cropId.value)
+      return `${crop?.name}.${(cropPlants?.length || 0) + 1}`
+    })
 
-    const nodes = data.plots.map((plot) => ({
-      type: 'plot',
-      children: data.beds.filter(({ plotId }) => plotId === plot.id).map((bed) => ({
-        type: 'bed',
-        ...bed,
-      })),
-      ...plot,
-    }))
     const treeState = reactive({
       expanded: [],
       hovered: [],
-      selected: [],
+      selected: [bedId.value],
       checked: [],
       renamed: [],
     })
@@ -70,20 +72,26 @@ export default defineComponent({
       // renamable: true,
     })
 
-    return {
-      cropId,
+    watch(treeState.selected, () => bedId.value = treeState.selected[0])
 
+    return {
       nodes,
       treeState,
       treeOptions,
 
-      data,
+      crops,
+      cropId,
+      bedId,
+      name,
+      placeholder,
 
       handleSubmit() {
-        // if (!record.at) {
-        //   record.at = new Date()
-        // }
-        // console.log(record)
+        database.ref('/users/mismith/plants').push({
+          cropId: cropId.value,
+          bedId: bedId.value,
+          name: name.value || placeholder.value,
+          createdAt: ServerValue.TIMESTAMP,
+        })
       },
     }
   },

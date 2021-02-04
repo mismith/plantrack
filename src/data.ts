@@ -5,34 +5,31 @@ export interface DataList {
   plants: Plant[]
   beds: Bed[]
   plots: Plot[]
-  events: EventType[]
-  records: RecordEntry[]
+  events?: any // @TODO
 }
 export interface Entity {
   id: string
   name?: string
+  createdAt?: string // @TODO: make required
 }
 export interface Crop extends Entity {
 }
+export interface Entry extends Entity {
+  eventId: string
+  payload?: Record<string, any>
+}
 export interface Plant extends Entity {
   cropId: string
+  bedId: string
+  entries?: Entry[]
 }
 export interface Bed extends Entity {
   plotId: string
 }
 export interface Plot extends Entity {
 }
-export interface EventType extends Entity {
-}
-export interface RecordEntry {
-  id: string
-  eventId: string
-  plantIds: string[]
-  payload?: Record<string, any>
-  at: string
-}
 
-export default reactive<DataList>({
+const data = reactive<DataList>({
   crops: [
     { id: 'TM786', name: 'Tomatoes - Cherry / Sungold' },
     { id: 'PP670', name: 'Peppers / Sweetheart' },
@@ -73,8 +70,8 @@ export default reactive<DataList>({
     { id: 'AGTHYM', name: 'Thyme' },
   ],
   plants: [
-    { id: 'plant-1', cropId: 'TM786', name: 'Rudy' },
-    { id: 'plant-2', cropId: 'PP670', name: 'Pépé' },
+    { id: 'plant-1', bedId: 'moist', cropId: 'TM786', name: 'Rudy' },
+    { id: 'plant-2', bedId: 'moist', cropId: 'PP670', name: 'Pépé' },
   ],
   beds: [
     { id: 'dry', plotId: 'nursery' },
@@ -158,24 +155,6 @@ export default reactive<DataList>({
     { id: 'harvest' },
     { id: 'cull' },
   ],
-  records: [
-    {
-      id: `record-${Math.random().toString().slice(2)}`,
-      eventId: 'seed',
-      plantIds: ['plant-1'],
-      payload: {
-        bedId: 'moist',
-      },
-      at: new Date().toISOString(),
-    },
-    {
-      id: `record-${Math.random().toString().slice(2)}`,
-      eventId: 'seed',
-      plantIds: ['plant-2'],
-      payload: {
-        bedId: 'moist',
-      },
-      at: new Date().toISOString(),
-    },
-  ],
 })
+
+export default data

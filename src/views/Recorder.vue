@@ -1,6 +1,6 @@
 <template>
   <div class="Recorder">
-    <AddPlant v-if="isAdding" />
+    <AddPlant v-if="isAdding" style="margin: 32px;" />
     <form @submit.prevent="handleSubmit">
       <fieldset>
         <label>
@@ -47,7 +47,7 @@
       </fieldset>
 
       <fieldset>
-        <button type="submit">Submit</button>
+        <button type="submit">Add Entry</button>
       </fieldset>
     </form>
     <pre>{{plantIds}}</pre>
@@ -58,9 +58,9 @@
 import { defineComponent, reactive, ref, watch } from 'vue'
 
 import data from '../data'
+import { usePlantDataTree } from '../services/firebase'
 import AddPlant from '../components/AddPlant.vue'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
-import { getPlantsInBed } from '../services/plants'
 
 export default defineComponent({
   name: 'Recorder',
@@ -72,21 +72,10 @@ export default defineComponent({
     const isAdding = ref(false)
     const plantIds = ref([])
     const eventId = ref()
-    const at = ref(new Date().toISOString())
+    const at = ref()
     const note = ref()
 
-    const nodes = data.plots.map((plot) => ({
-      type: 'plot',
-      children: data.beds.filter(({ plotId }) => plotId === plot.id).map((bed) => ({
-        type: 'bed',
-        children: getPlantsInBed(bed.id, data).map((plant) => ({
-          type: 'plant',
-          ...plant,
-        })),
-        ...bed,
-      })),
-      ...plot,
-    }))
+    const { nodes, plants } = usePlantDataTree()
     const treeState = reactive({
       expanded: [],
       hovered: [],
@@ -110,7 +99,7 @@ export default defineComponent({
       // renamable: true,
     })
 
-    const allPlantIds = data.plants.map(({ id }) => id)
+    const allPlantIds = plants.value?.map(({ id }) => id) || []
     watch(treeState.checked, () => {
       plantIds.value = treeState.checked.filter(id => allPlantIds.includes(id))
     })
