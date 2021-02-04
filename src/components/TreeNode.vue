@@ -15,7 +15,7 @@
         @mouseleave="tools.is(options.hoverable, node) && tools.set(state.hovered, node, false)"
         @click="
           tools.is(options.selectable, node) && !tools.is(state.disabled, node)
-            ? tools.toggle(state.selected, node, !$event.metaKey)
+            ? tools.toggle(state.selected, node, tools.get(options.selectable, node)?.multiple ? !$event.metaKey : true)
             : (node.children?.length
               ? tools.is(options.expandable, node) && tools.toggle(state.expanded, node)
               : tools.is(options.checkable, node) && !tools.is(state.disabled, node) && tools.toggle(state.checked, node))
@@ -118,14 +118,17 @@ import { defineAsyncComponent, defineComponent, PropType } from 'vue'
 import TransitionExpand from './TransitionExpand.vue'
 
 export type Booleanable = string[] | ((node?: ITreeNode) => Booleanable) | boolean | object
-export function is(value: Booleanable, node: ITreeNode): boolean {
+export function get(value: Booleanable, node: ITreeNode): boolean | object {
   if (typeof value === 'function') {
-    return is(value(node), node)
+    return get(value(node), node)
   }
   if (Array.isArray(value)) {
     return value.includes(node.id)
   }
-  return Boolean(value)
+  return value
+}
+export function is(value: Booleanable, node: ITreeNode): boolean {
+  return Boolean(get(value, node))
 }
 export function set(
   value: Booleanable,
@@ -174,6 +177,7 @@ export function walkChildren(
 }
 export const tools = {
   is,
+  get,
   set,
   toggle,
   walkChildren,
