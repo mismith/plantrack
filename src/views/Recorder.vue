@@ -95,7 +95,7 @@ export default defineComponent({
       hoverable: true,
       // selectable: true,
       // selectable: (node: ITreeNode) => node.type === 'plant',
-      checkable: {
+      checkable: (node:ITreeNode) => node.type !== 'entry' && {
         recurse: true, // (node: ITreeNode) => Boolean(node.children?.length),
       },
       // renamable: true,

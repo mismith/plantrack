@@ -104,9 +104,6 @@ $spacing: 8px;
 
 .AddPlant {
   fieldset > .TreeView {
-    border: solid 1px rgb(118, 118, 118);
-    border-radius: 2px;
-
     .TreeNode {
       > .TreeNodeLeaf {
         &:not(.selectable) {

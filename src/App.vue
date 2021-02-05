@@ -155,5 +155,13 @@ body,
       }
     }
   }
+
+  fieldset > & {
+    justify-content: initial;
+    max-height: 400px;
+    border: solid 1px rgb(118, 118, 118);
+    border-radius: 2px;
+    overflow-y: auto;
+  }
 }
 </style>
