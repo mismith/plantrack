@@ -32,7 +32,7 @@
         <slot name="node-expandable" v-bind="nodeProps" v-if="tools.is(options.expandable, node)">
           <button
             type="button"
-            @click.stop="tools.toggle(state.expanded, node)"
+            @click.stop="tools.toggle(state.expanded, node); $event.altKey && tools.walkChildren(node, (child) => tools.set(state.expanded, child, tools.is(state.expanded, node)))"
             class="TreeNodeExpand"
           >
             <span>{{tools.is(state.expanded, node) ? '&minus;' : '+'}}</span>
