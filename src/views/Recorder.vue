@@ -12,14 +12,16 @@
           :state="treeState"
           :options="treeOptions"
         >
-          <!-- <template #node-name="{ node }">
+          <template #node-name="{ node }">
             <span class="TreeNodeName">
-              {{node.name || node.id}}
-              <span v-if="node.type === 'plant'">
-                ({{data.crops.find(({ id }) => node.cropId)?.name}})
+              <span v-if="node.type === 'entry'">
+                {{node.eventId}} @ {{new Date(node.at).toISOString()}}
               </span>
+              <template v-else>
+                {{node.name || node.id}}
+              </template>
             </span>
-          </template> -->
+          </template>
         </TreeView>
       </fieldset>
 
@@ -27,7 +29,7 @@
         <label>Event</label>
         <select v-model="eventId">
           <option
-            v-for="event in data.events"
+            v-for="event in events"
             :key="event.id"
             :value="event.id"
           >
@@ -47,7 +49,7 @@
       </fieldset>
 
       <fieldset>
-        <button type="submit">Add Entry</button>
+        <button :disabled="!plantIds.length || !eventId" type="submit">Add Entry</button>
       </fieldset>
     </form>
     <pre>{{plantIds}}</pre>
@@ -55,10 +57,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, watch } from 'vue'
+import { defineComponent, reactive, ref, watch, watchEffect } from 'vue'
 
-import data from '../data'
-import { usePlantDataTree } from '../services/firebase'
+import { events, usePlantDataTree } from '../services/data'
+import { database, ServerValue } from '../services/firebase'
 import AddPlant from '../components/AddPlant.vue'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
 
@@ -70,10 +72,10 @@ export default defineComponent({
   },
   setup() {
     const isAdding = ref(false)
-    const plantIds = ref([])
-    const eventId = ref()
-    const at = ref()
-    const note = ref()
+    const plantIds = ref<string[]>([])
+    const eventId = ref<string>()
+    const at = ref<string>()
+    const note = ref<string>()
 
     const { nodes, plants } = usePlantDataTree()
     const treeState = reactive({
@@ -99,9 +101,10 @@ export default defineComponent({
       // renamable: true,
     })
 
-    const allPlantIds = plants.value?.map(({ id }) => id) || []
-    watch(treeState.checked, () => {
-      plantIds.value = treeState.checked.filter(id => allPlantIds.includes(id))
+    watchEffect(() => {
+      plantIds.value = treeState.checked.filter(
+        id => plants.value?.map(({ id }) => id).includes(id)
+      )
     })
 
     return {
@@ -115,13 +118,19 @@ export default defineComponent({
       treeState,
       treeOptions,
 
-      data,
+      events,
 
-      handleSubmit() {
-        // if (!record.at) {
-        //   record.at = new Date()
-        // }
-        // console.log(record)
+      async handleSubmit() {
+        await Promise.all(plantIds.value.map((plantId) => {
+          return database.ref(`/users/mismith/plants/${plantId}/entries`).push({
+            eventId: eventId.value,
+            at: at.value ? new Date(at.value).valueOf() : ServerValue.TIMESTAMP,
+            // payload,
+            note: note.value || null,
+            createdAt: ServerValue.TIMESTAMP,
+          })
+        }))
+        treeState.checked = []
       },
     }
   },

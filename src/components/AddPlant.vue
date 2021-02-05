@@ -36,7 +36,8 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, watch } from 'vue'
 
-import { database, ServerValue, usePlantDataTree, useRtdbArray } from '../services/firebase'
+import { usePlantDataTree } from '../services/data'
+import { database, ServerValue, useRtdbArray } from '../services/firebase'
 import TreeView, { ITreeNode } from '../components/TreeView.vue'
 
 export default defineComponent({
@@ -53,7 +54,7 @@ export default defineComponent({
     const placeholder = computed(() => {
       const crop = crops.value?.find((crop) => crop.id === cropId.value)
       const cropPlants = plants.value?.filter((plant) => plant.cropId === cropId.value)
-      return `${crop?.name}.${(cropPlants?.length || 0) + 1}`
+      return `${crop?.name || 'Plant'}.${(cropPlants?.length || 0) + 1}`
     })
 
     const treeState = reactive({
