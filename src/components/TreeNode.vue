@@ -24,7 +24,7 @@
         <slot name="node-prepend" v-bind="nodeProps" />
         <slot name="node-indentable" v-bind="nodeProps" v-if="tools.is(options.indentable, node)">
           <span
-            v-for="indent of (state.indent || 0)"
+            v-for="indent of (parents?.length || 0)"
             :key="indent"
             class="TreeNodeIndent"
           />
@@ -97,10 +97,8 @@
       <TreeView
         v-if="node.children?.length && tools.is(state.expanded, node)"
         :nodes="node.children"
-        :state="{
-          ...state,
-          indent: (state?.indent || 0) + 1,
-        }"
+        :parents="[...parents, node]"
+        :state="state"
         :options="options"
         :tools="tools"
       >
@@ -189,10 +187,8 @@ export const tools = {
   },
 }
 
-// export type TreeNodeType = 'plot' | 'bed' | 'plant' | 'event'
 export interface ITreeNode {
   id: string
-  // type: TreeNodeType
   name?: string
   children?: ITreeNode[]
   [others: string]: any
@@ -209,6 +205,11 @@ export default defineComponent({
       type: Object as PropType<ITreeNode>,
       required: true,
     },
+    parents: {
+      type: Array as PropType<ITreeNode[]>,
+      required: false,
+      default: [],
+    },
     state: {
       type: Object as PropType<Record<string, any>>,
       default: {},
@@ -218,11 +219,12 @@ export default defineComponent({
       default: {},
     },
   },
-  setup({ node, state, options }) {
+  setup({ node, parents, state, options }) {
     return {
       tools,
       nodeProps: {
         node,
+        parents,
         state,
         options,
         tools,

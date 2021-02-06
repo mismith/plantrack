@@ -4,6 +4,7 @@
       v-for="node in nodes"
       :key="node.id"
       :node="node"
+      :parents="parents"
       :state="state"
       :options="options"
     >
@@ -32,6 +33,11 @@ export default defineComponent({
       type: Array as PropType<ITreeNode[]>,
       required: true,
     },
+    parents: {
+      type: Array as PropType<ITreeNode[]>,
+      required: false,
+      default: [],
+    },
     state: {
       type: Object as PropType<Record<string, any>>,
     },
@@ -42,10 +48,6 @@ export default defineComponent({
       type: Object as PropType<Record<string, any>>,
     },
   },
-  // setup() {
-  //   return {
-  //   }
-  // },
 })
 </script>
 
