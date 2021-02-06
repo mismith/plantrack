@@ -23,6 +23,11 @@
         </select>
       </fieldset>
 
+      <fieldset v-if="eventId === 'transplant'">
+        <label>Where To</label>
+        <PlantTreeView v-model="newBedIds" />
+      </fieldset>
+
       <fieldset>
         <label>When</label>
         <input type="datetime-local" v-model="at" />
@@ -37,6 +42,7 @@
         <button type="submit" :disabled="!plantIds.length || !eventId">Add Entry</button>
       </fieldset>
     </form>
+    <pre>{{newBedIds}}</pre>
     <pre>{{plantIds}}</pre>
   </div>
 </template>
@@ -63,6 +69,7 @@ export default defineComponent({
     const at = ref<string>()
     const note = ref<string>()
 
+    const newBedIds = ref<string[]>([])
 
     return {
       isAdding,
@@ -72,18 +79,33 @@ export default defineComponent({
       note,
 
       events,
+      newBedIds,
 
       async handleSubmit() {
         await Promise.all(plantIds.value.map(async (plantId) => {
+          let payload: Record<string, any> | null = null;
+          if (eventId.value === 'transplant') {
+            const newBedId = newBedIds.value?.[0]
+            if (!newBedId) return // @TODO
+
+            const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
+            const oldBedId = (await bedIdRef.once('value')).val()
+            payload = {
+              oldBedId,
+            }
+            await bedIdRef.set(newBedId)
+          }
+
           await database.ref(`/users/mismith/plants/${plantId}/entries`).push({
             eventId: eventId.value,
             at: at.value ? new Date(at.value).valueOf() : ServerValue.TIMESTAMP,
-            // payload,
+            payload,
             note: note.value || null,
             createdAt: ServerValue.TIMESTAMP,
           } as Omit<Entry, 'id' | 'createdAt'>)
         }))
         plantIds.value = []
+        newBedIds.value = []
       },
     }
   },

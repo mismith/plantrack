@@ -47,10 +47,10 @@ export default defineComponent({
       hovered: [],
       selected: multiple ? [] : modelValue,
       checked: multiple ? modelValue : [],
-      disabled: (node: ITreeNode) => node.type !== 'plant' && !tools.walkChildren(
+      disabled: multiple && ((node: ITreeNode) => node.type !== 'plant' && !tools.walkChildren(
         node,
         (child) => child.type === 'plant',
-      ).filter(Boolean).length,
+      ).filter(Boolean).length),
       renamed: [],
     })
     const treeOptions = reactive({
