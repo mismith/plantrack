@@ -5,7 +5,7 @@
       <fieldset>
         <label>
           Plant(s)
-          <button @click="isAdding = !isAdding">Add Plant</button>
+          <button type="button" @click="isAdding = !isAdding">Add Plant</button>
         </label>
         <TreeView
           :nodes="nodes"
@@ -16,7 +16,7 @@
             <span class="TreeNodeName">
               <span v-if="node.type === 'entry'">
                 {{node.eventId}} @ {{new Date(node.at).toISOString()}}
-                <button @click="handleRemoveEntry(node, parents)">&times;</button>
+                <button type="button" @click="handleRemoveEntry(node, parents)">&times;</button>
               </span>
               <template v-else>
                 {{node.name || node.id}}
@@ -50,7 +50,7 @@
       </fieldset>
 
       <fieldset>
-        <button :disabled="!plantIds.length || !eventId" type="submit">Add Entry</button>
+        <button type="submit" :disabled="!plantIds.length || !eventId">Add Entry</button>
       </fieldset>
     </form>
     <pre>{{plantIds}}</pre>
@@ -98,7 +98,7 @@ export default defineComponent({
       // selectable: true,
       // selectable: (node: ITreeNode) => node.type === 'plant',
       checkable: (node:ITreeNode) => node.type !== 'entry' && {
-        recurse: true, // (node: ITreeNode) => Boolean(node.children?.length),
+        recurse: true,
       },
       // renamable: true,
     })

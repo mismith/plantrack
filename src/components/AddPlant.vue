@@ -28,7 +28,7 @@
     </fieldset>
 
     <fieldset>
-      <button type="submit">Add Plant</button>
+      <button type="submit" :disabled="!cropId || !bedId">Add Plant</button>
     </fieldset>
   </form>
 </template>
