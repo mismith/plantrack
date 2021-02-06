@@ -7,23 +7,7 @@
           Plant(s)
           <button type="button" @click="isAdding = !isAdding">Add Plant</button>
         </label>
-        <TreeView
-          :nodes="nodes"
-          :state="treeState"
-          :options="treeOptions"
-        >
-          <template #node-name="{ node, parents }">
-            <span class="TreeNodeName">
-              <span v-if="node.type === 'entry'">
-                {{node.eventId}} @ {{new Date(node.at).toISOString()}}
-                <button type="button" @click="handleRemoveEntry(node, parents)">&times;</button>
-              </span>
-              <template v-else>
-                {{node.name || node.id}}
-              </template>
-            </span>
-          </template>
-        </TreeView>
+        <PlantTreeView multiple v-model="plantIds" />
       </fieldset>
 
       <fieldset>
@@ -58,19 +42,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, watchEffect } from 'vue'
+import { defineComponent, ref } from 'vue'
 
-import { events, usePlantDataTree } from '../services/data'
+import { events } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
 import AddPlant from '../components/AddPlant.vue'
-import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
-import { Entry, Plant } from '../data'
+import PlantTreeView from '../components/PlantTreeView.vue'
+import { Entry } from '../data'
 
 export default defineComponent({
   name: 'Recorder',
   components: {
     AddPlant,
-    TreeView,
+    PlantTreeView,
   },
   setup() {
     const isAdding = ref(false)
@@ -79,35 +63,6 @@ export default defineComponent({
     const at = ref<string>()
     const note = ref<string>()
 
-    const { nodes, plants } = usePlantDataTree()
-    const treeState = reactive({
-      expanded: [],
-      hovered: [],
-      selected: [],
-      checked: [],
-      disabled: (node: ITreeNode) => node.type !== 'plant' && !tools.walkChildren(
-        node,
-        (child) => child.type === 'plant',
-      ).filter(Boolean).length,
-      renamed: [],
-    })
-    const treeOptions = reactive({
-      indentable: true,
-      expandable: true,
-      hoverable: true,
-      // selectable: true,
-      // selectable: (node: ITreeNode) => node.type === 'plant',
-      checkable: (node:ITreeNode) => node.type !== 'entry' && {
-        recurse: true,
-      },
-      // renamable: true,
-    })
-
-    watchEffect(() => {
-      plantIds.value = treeState.checked.filter(
-        id => plants.value?.map(({ id }) => id).includes(id)
-      )
-    })
 
     return {
       isAdding,
@@ -116,28 +71,19 @@ export default defineComponent({
       at,
       note,
 
-      nodes,
-      treeState,
-      treeOptions,
-
       events,
 
       async handleSubmit() {
-        await Promise.all(plantIds.value.map((plantId) => {
-          return database.ref(`/users/mismith/plants/${plantId}/entries`).push({
+        await Promise.all(plantIds.value.map(async (plantId) => {
+          await database.ref(`/users/mismith/plants/${plantId}/entries`).push({
             eventId: eventId.value,
             at: at.value ? new Date(at.value).valueOf() : ServerValue.TIMESTAMP,
             // payload,
             note: note.value || null,
             createdAt: ServerValue.TIMESTAMP,
-          })
+          } as Omit<Entry, 'id' | 'createdAt'>)
         }))
-        treeState.checked = []
-      },
-
-      async handleRemoveEntry(entry: Entry, parents: ITreeNode[] = []) {
-        const plant = parents[parents.length - 1] as Plant
-        await database.ref(`/users/mismith/plants/${plant.id}/entries/${entry.id}`).remove()
+        plantIds.value = []
       },
     }
   },
