@@ -12,10 +12,11 @@
           :state="treeState"
           :options="treeOptions"
         >
-          <template #node-name="{ node }">
+          <template #node-name="{ node, parents }">
             <span class="TreeNodeName">
               <span v-if="node.type === 'entry'">
                 {{node.eventId}} @ {{new Date(node.at).toISOString()}}
+                <button @click="handleRemoveEntry(node, parents)">&times;</button>
               </span>
               <template v-else>
                 {{node.name || node.id}}
@@ -57,12 +58,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, watch, watchEffect } from 'vue'
+import { defineComponent, reactive, ref, watchEffect } from 'vue'
 
 import { events, usePlantDataTree } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
 import AddPlant from '../components/AddPlant.vue'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
+import { Entry, Plant } from '../data'
 
 export default defineComponent({
   name: 'Recorder',
@@ -131,6 +133,11 @@ export default defineComponent({
           })
         }))
         treeState.checked = []
+      },
+
+      async handleRemoveEntry(entry: Entry, parents: ITreeNode[] = []) {
+        const plant = parents[parents.length - 1] as Plant
+        await database.ref(`/users/mismith/plants/${plant.id}/entries/${entry.id}`).remove()
       },
     }
   },
