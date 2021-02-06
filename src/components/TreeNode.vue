@@ -64,7 +64,7 @@
                 state.checked,
                 node,
                 $event.target.checked,
-                typeof options.checkable === 'object' && options.checkable,
+                tools.get(options.checkable, node),
               )
             "
             @click.stop
