@@ -32,7 +32,7 @@
         <slot name="node-expandable" v-bind="nodeProps" v-if="tools.is(options.expandable, node)">
           <button
             type="button"
-            @click.stop="tools.toggle(state.expanded, node); $event.altKey && tools.walkChildren(node, (child) => tools.set(state.expanded, child, tools.is(state.expanded, node)))"
+            @click.stop="tools.toggle(state.expanded, node); $event.altKey && tools.walkDescendents(node, (child) => tools.set(state.expanded, child, tools.is(state.expanded, node)))"
             class="TreeNodeExpand"
           >
             <span>{{tools.is(state.expanded, node) ? '&minus;' : '+'}}</span>
@@ -149,7 +149,7 @@ export function set(
   }
 
   if (options.recurse && is(options.recurse, node)) {
-    walkChildren(node, (child) => set(value, child, on, options))
+    walkDescendents(node, (child) => set(value, child, on, options))
   }
   return value
 }
@@ -162,14 +162,14 @@ export function toggle(value: Booleanable, node: ITreeNode, clear = false): Bool
   }
   return set(value, node, !is(value, node))
 }
-export function walkChildren(
+export function walkDescendents(
   node: ITreeNode,
   fn: (child: ITreeNode, index: number, children: ITreeNode[]) => any = () => {},
 ): any[] {
   return node?.children?.reduce(
     (acc, child, index, children) => acc
       .concat(fn(child, index, children))
-      .concat(walkChildren(child, fn) || []),
+      .concat(walkDescendents(child, fn) || []),
     [] as ITreeNode[],
   ) || []
 }
@@ -178,12 +178,12 @@ export const tools = {
   get,
   set,
   toggle,
-  walkChildren,
+  walkDescendents,
   numLeafs(node: ITreeNode) {
-    return walkChildren(node, (child) => !child.children?.length).filter(Boolean).length
+    return walkDescendents(node, (child) => !child.children?.length).filter(Boolean).length
   },
   numChecks(node: ITreeNode, state: any) {
-    return walkChildren(node, (child) => is(state.checked, child)).filter(Boolean).length
+    return walkDescendents(node, (child) => is(state.checked, child)).filter(Boolean).length
   },
 }
 

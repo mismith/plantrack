@@ -47,7 +47,7 @@ export default defineComponent({
       hovered: [],
       selected: multiple ? [] : modelValue,
       checked: multiple ? modelValue : [],
-      disabled: multiple && ((node: ITreeNode) => node.type !== 'plant' && !tools.walkChildren(
+      disabled: multiple && ((node: ITreeNode) => node.type !== 'plant' && !tools.walkDescendents(
         node,
         (child) => child.type === 'plant',
       ).filter(Boolean).length),
