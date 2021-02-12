@@ -10,14 +10,14 @@ export interface Crop extends Entity {
 }
 export interface Entry extends Entity {
   eventId: string
-  at: string
+  at: number
   payload?: Record<string, any>
   node?: string
 }
 export interface Plant extends Entity {
   cropId: string
   bedId: string
-  entries?: Entry[]
+  entries?: Record<string, Entry>
 }
 export interface Bed extends Entity {
   plotId: string
@@ -39,7 +39,6 @@ export const events = [
   { id: 'cull' },
 ]
 
-
 export function usePlantDataTree() {
   const plants = useRtdbArray<Plant>(database.ref('/users/mismith/plants'))
   const beds = useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
@@ -51,10 +50,10 @@ export function usePlantDataTree() {
       type: 'bed',
       children: plants.value?.filter(({ bedId }) => bedId === bed.id).map((plant) => ({
         type: 'plant',
-        children: toKeyFieldArray(plant.entries || {}).map((entry) => ({
+        children: toKeyFieldArray<Entry>(plant.entries || {}).map((entry) => ({
           type: 'entry',
           ...entry,
-        })),
+        })).sort((a, b) => a.at - b.at),
         ...plant,
       })) || [],
       ...bed,

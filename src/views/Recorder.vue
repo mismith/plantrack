@@ -50,11 +50,10 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 
-import { events } from '../services/data'
+import { events, Entry } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
 import AddPlant from '../components/AddPlant.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
-import { Entry } from '../data'
 
 export default defineComponent({
   name: 'Recorder',
@@ -106,6 +105,8 @@ export default defineComponent({
         }))
         plantIds.value = []
         newBedIds.value = []
+        at.value = undefined
+        note.value = undefined
       },
     }
   },

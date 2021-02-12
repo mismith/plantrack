@@ -27,13 +27,13 @@ if (window.location.hostname === 'localhost') {
   database.useEmulator('localhost', 9000)
 }
 
-export function toKeyFieldArray(obj: object, theKeyField = keyField) {
+export function toKeyFieldArray<T extends object>(obj: Record<string, T>, theKeyField = keyField): T[] {
   return Object.entries(obj || {}).map(([key, value]) => ({
     [theKeyField]: key,
-    ...(value || {}),
+    ...(value || {}) as T,
   }))
 }
-export function useRtdbArray<T = any>(reference: firebase.database.Reference) {
+export function useRtdbArray<T extends object>(reference: firebase.database.Reference) {
   const arr = ref<T[]>()
   const handler = (snapshot: firebase.database.DataSnapshot) => {
     arr.value = toKeyFieldArray(snapshot.val())

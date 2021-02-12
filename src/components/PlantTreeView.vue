@@ -13,6 +13,7 @@
         </span>
         <template v-else>
           {{node.name || node.id}}
+          <small v-if="node.children?.length">({{node.children.length}})</small>
         </template>
       </span>
     </template>
@@ -27,7 +28,7 @@ import { database } from '../services/firebase'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
 
 export default defineComponent({
-  name: 'Recorder',
+  name: 'PlantTreeView',
   components: {
     TreeView,
   },
