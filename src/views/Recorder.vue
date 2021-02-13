@@ -103,8 +103,8 @@ export default defineComponent({
             createdAt: ServerValue.TIMESTAMP,
           } as Omit<Entry, 'id' | 'createdAt'>)
         }))
-        plantIds.value = []
-        newBedIds.value = []
+        plantIds.value.splice(0, plantIds.value.length)
+        newBedIds.value.splice(0, newBedIds.value.length)
         at.value = undefined
         note.value = undefined
       },
