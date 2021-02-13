@@ -27,6 +27,16 @@
         <label>Where To</label>
         <PlantTreeView v-model="newBedIds" />
       </fieldset>
+      <fieldset v-if="eventId === 'harvest'">
+        <label>How Much</label>
+        <input v-model="weight" type="number" min="1" step="0.01" />
+        <select v-model="weightUnit">
+          <option>g</option>
+          <option>kg</option>
+          <option>oz</option>
+          <option>lb</option>
+        </select>
+      </fieldset>
 
       <fieldset>
         <label>When</label>
@@ -69,6 +79,8 @@ export default defineComponent({
     const note = ref<string>()
 
     const newBedIds = ref<string[]>([])
+    const weight = ref<number>()
+    const weightUnit = ref<string>('g')
 
     return {
       isAdding,
@@ -79,6 +91,8 @@ export default defineComponent({
 
       events,
       newBedIds,
+      weight,
+      weightUnit,
 
       async handleSubmit() {
         await Promise.all(plantIds.value.map(async (plantId) => {
@@ -94,6 +108,17 @@ export default defineComponent({
                 oldBedId,
               }
               await bedIdRef.set(newBedId)
+              break
+            }
+            case 'harvest': {
+              if (weight) {
+                payload = {
+                  weight: {
+                    value: weight.value,
+                    unit: weightUnit.value,
+                  }
+                }
+              }
               break
             }
             case 'cull': {

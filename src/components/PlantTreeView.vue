@@ -12,6 +12,9 @@
           <small v-if="node.eventId === 'transplant' && node.payload?.oldBedId">
             (from {{beds.find(({ id }) => id === node.payload.oldBedId)?.name}})
           </small>
+          <small v-if="node.eventId === 'harvest' && node.payload?.weight">
+            ({{node.payload.weight.value}}{{node.payload.weight.unit}})
+          </small>
           <small v-if="node.note">({{node.note}})</small>
           @ {{formatAsDate(node.at)}}
           <button type="button" @click="handleRemoveEntry(node, parents)">&times;</button>
@@ -54,7 +57,7 @@ export default defineComponent({
       hovered: [],
       selected: multiple ? [] : modelValue,
       checked: multiple ? modelValue : [],
-      disabled: multiple && (
+      disabled: (
         (node: ITreeNode) => node.type !== 'plant' && !tools.walkDescendents(
           node,
           (child) => child.type === 'plant',
