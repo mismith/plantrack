@@ -8,7 +8,12 @@
     <template #node-name="{ node, parents }">
       <span class="TreeNodeName">
         <span v-if="node.type === 'entry'">
-          {{node.eventId}} @ {{new Date(node.at).toISOString()}}
+          {{node.eventId}}
+          <small v-if="node.eventId === 'transplant' && node.payload?.oldBedId">
+            (from {{beds.find(({ id }) => id === node.payload.oldBedId)?.name}})
+          </small>
+          <small v-if="node.note">({{node.note}})</small>
+          @ {{formatAsDate(node.at)}}
           <button type="button" @click="handleRemoveEntry(node, parents)">&times;</button>
         </span>
         <template v-else>
@@ -22,6 +27,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, reactive, watchEffect } from 'vue'
+import { format } from 'date-fns'
 
 import { usePlantDataTree, Entry, Plant } from '../services/data'
 import { database } from '../services/firebase'
@@ -48,10 +54,12 @@ export default defineComponent({
       hovered: [],
       selected: multiple ? [] : modelValue,
       checked: multiple ? modelValue : [],
-      disabled: multiple && ((node: ITreeNode) => node.type !== 'plant' && !tools.walkDescendents(
-        node,
-        (child) => child.type === 'plant',
-      ).filter(Boolean).length),
+      disabled: multiple && (
+        (node: ITreeNode) => node.type !== 'plant' && !tools.walkDescendents(
+          node,
+          (child) => child.type === 'plant',
+        ).filter(Boolean).length
+      ),
       renamed: [],
     })
     const treeOptions = reactive({
@@ -79,6 +87,13 @@ export default defineComponent({
       nodes,
       treeState,
       treeOptions,
+
+      plants,
+      beds,
+      formatAsDate(at: number) {
+        const date = new Date(at);
+        return format(date, 'yyyy-MM-dd HH:mma');
+      },
 
       async handleRemoveEntry(entry: Entry, parents: ITreeNode[] = []) {
         const plant = parents[parents.length - 1] as Plant

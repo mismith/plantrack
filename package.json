@@ -7,6 +7,7 @@
     "build": "vuedx-typecheck . && vite build"
   },
   "dependencies": {
+    "date-fns": "^2.17.0",
     "firebase": "^8.2.5",
     "vue": "^3.0.5",
     "vue-router": "^4.0.3"
