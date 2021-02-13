@@ -83,16 +83,24 @@ export default defineComponent({
       async handleSubmit() {
         await Promise.all(plantIds.value.map(async (plantId) => {
           let payload: Record<string, any> | null = null;
-          if (eventId.value === 'transplant') {
-            const newBedId = newBedIds.value?.[0]
-            if (!newBedId) return // @TODO
+          switch (eventId.value) {
+            case 'transplant': {
+              const newBedId = newBedIds.value?.[0]
+              if (!newBedId) return // @TODO
 
-            const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
-            const oldBedId = (await bedIdRef.once('value')).val()
-            payload = {
-              oldBedId,
+              const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
+              const oldBedId = (await bedIdRef.once('value')).val()
+              payload = {
+                oldBedId,
+              }
+              await bedIdRef.set(newBedId)
+              break
             }
-            await bedIdRef.set(newBedId)
+            case 'cull': {
+              const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
+              await bedIdRef.remove()
+              break
+            }
           }
 
           await database.ref(`/users/mismith/plants/${plantId}/entries`).push({

@@ -44,11 +44,19 @@ export function usePlantDataTree() {
   const beds = useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
   const plots = useRtdbArray<Plot>(database.ref('/users/mismith/plots'))
 
-  const nodes = computed(() => plots.value?.map((plot) => ({
+  const nodes = computed(() => [...plots.value || [], {
+    id: 'system',
+    name: 'System',
+    createdAt: Date.now(),
+  }].map((plot) => ({
     type: 'plot',
-    children: beds.value?.filter(({ plotId }) => plotId === plot.id).map((bed) => ({
+    children: [...beds.value || [], {
+      id: 'culled',
+      name: 'Culled',
+      plotId: 'system',
+    }].filter(({ plotId }) => plotId === plot.id).map((bed) => ({
       type: 'bed',
-      children: plants.value?.filter(({ bedId }) => bedId === bed.id).map((plant) => ({
+      children: plants.value?.filter(({ bedId }) => (!bedId && bed.id === 'culled') || bedId === bed.id).map((plant) => ({
         type: 'plant',
         children: toKeyFieldArray<Entry>(plant.entries || {}).map((entry) => ({
           type: 'entry',
