@@ -106,6 +106,7 @@ export default defineComponent({
               const oldBedId = (await bedIdRef.once('value')).val()
               payload = {
                 oldBedId,
+                newBedId,
               }
               await bedIdRef.set(newBedId)
               break
