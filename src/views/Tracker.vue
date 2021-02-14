@@ -2,15 +2,20 @@
   <div class="Tracker">
     <div v-for="crop in nodes" :key="crop.id">
       <div :title="crop.nickname">{{crop.name}}</div>
-
       <div>
-        <EntryTimeline
+        <template
           v-for="plant in crop.$plants"
           :key="plant.id"
-          :entries="Object.values(plant.entries)"
-          :start-date="startDate"
-          :end-date="endDate"
-        />
+        >
+          <div class="bed">
+            {{beds.find(({ id }) => id === plant.bedId)?.name || 'Culled'}}
+          </div>
+          <EntryTimeline
+            :entries="Object.values(plant.entries || {})"
+            :start-date="startDate"
+            :end-date="endDate"
+          />
+        </template>
       </div>
     </div>
   </div>
@@ -20,7 +25,7 @@
 import { differenceInDays } from 'date-fns'
 import { computed, defineComponent } from 'vue'
 
-import { Crop, Plant } from '../services/data'
+import { Bed, Crop, Plant } from '../services/data'
 import { database, useRtdbArray } from '../services/firebase'
 import EntryTimeline, { getEndDate, getStartDate } from '../components/EntryTimeline.vue'
 
@@ -30,6 +35,7 @@ export default defineComponent({
     EntryTimeline,
   },
   setup() {
+    const beds = useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
     const crops = useRtdbArray<Crop>(database.ref('/users/mismith/crops'))
     const plants = useRtdbArray<Plant>(database.ref('/users/mismith/plants'))
 
@@ -74,6 +80,7 @@ export default defineComponent({
 
     return {
       nodes,
+      beds,
       crops,
       plants,
 
@@ -108,13 +115,18 @@ $spacing: 8px;
 
     > * {
       display: table-cell;
+      font-size: 1vw;
       vertical-align: middle;
       border-bottom: solid 1px currentColor;
 
       &:first-child {
         width: 1%;
-        font-size: 1vw;
         padding: 0 $spacing;
+      }
+
+      .bed {
+        position: absolute;
+        // right: 0;
       }
 
       > .EntryTimeline:not(:last-child) {
