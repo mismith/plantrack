@@ -1,3 +1,4 @@
+import { differenceInDays, format } from 'date-fns'
 import { computed } from 'vue'
 import { database, toKeyFieldArray, useRtdbArray } from './firebase'
 
@@ -12,7 +13,7 @@ export interface Entry extends Entity {
   eventId: string
   at: number
   payload?: Record<string, any>
-  node?: string
+  note?: string
 }
 export interface Plant extends Entity {
   cropId: string
@@ -75,4 +76,24 @@ export function usePlantDataTree() {
     plots,
     nodes,
   }
+}
+
+export function formatAtAsDate(at: number) {
+  const date = new Date(at);
+  return format(date, 'yyyy-MM-dd HH:mma');
+}
+export function entryToString(node: Entry, { beds, relativeDate }: { beds: Bed[], relativeDate?: Date }) {
+  const relativeDays = relativeDate && differenceInDays(new Date(node.at), relativeDate)
+  return [
+    node.eventId,
+    node.eventId === 'transplant'
+      && node.payload?.oldBedId
+      && `from "${beds?.find(({ id }) => id === node.payload?.oldBedId)?.name}"`,
+    node.eventId === 'harvest'
+      && node.payload?.weight
+      && `[${node.payload.weight.value}${node.payload.weight.unit}]`,
+    node.note && `(${node.note})`,
+    `@ ${formatAtAsDate(node.at)}`,
+    relativeDays && `(+${relativeDays} day${relativeDays === 1 ? '' : 's'})`,
+  ].filter(Boolean).join(' ')
 }

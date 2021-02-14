@@ -8,20 +8,12 @@
     <template #node-name="{ node, parents }">
       <span class="TreeNodeName">
         <span v-if="node.type === 'entry'">
-          {{node.eventId}}
-          <small v-if="node.eventId === 'transplant' && node.payload?.oldBedId">
-            (from {{beds.find(({ id }) => id === node.payload.oldBedId)?.name}})
-          </small>
-          <small v-if="node.eventId === 'harvest' && node.payload?.weight">
-            ({{node.payload.weight.value}}{{node.payload.weight.unit}})
-          </small>
-          <small v-if="node.note">({{node.note}})</small>
-          @ {{formatAsDate(node.at)}}
+          {{entryToString(node, { beds })}}
           <button type="button" @click="handleRemoveEntry(node, parents)">&times;</button>
         </span>
         <template v-else>
           {{node.name || node.id}}
-          <small v-if="node.children?.length">({{node.children.length}})</small>
+          <small v-if="node.children?.length">{<span>{{node.children.length}}</span>}</small>
         </template>
       </span>
     </template>
@@ -30,9 +22,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType, reactive, watchEffect } from 'vue'
-import { format } from 'date-fns'
 
-import { usePlantDataTree, Entry, Plant } from '../services/data'
+import { usePlantDataTree, Entry, Plant, entryToString } from '../services/data'
 import { database } from '../services/firebase'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
 
@@ -93,10 +84,7 @@ export default defineComponent({
 
       plants,
       beds,
-      formatAsDate(at: number) {
-        const date = new Date(at);
-        return format(date, 'yyyy-MM-dd HH:mma');
-      },
+      entryToString,
 
       async handleRemoveEntry(entry: Entry, parents: ITreeNode[] = []) {
         const plant = parents[parents.length - 1] as Plant
