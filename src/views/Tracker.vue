@@ -1,21 +1,23 @@
 <template>
   <div class="Tracker">
-    <div v-for="crop in nodes" :key="crop.id">
-      <div :title="crop.nickname">{{crop.name}}</div>
-      <div>
-        <template
-          v-for="plant in crop.$plants"
-          :key="plant.id"
-        >
-          <div class="bed">
-            {{beds.find(({ id }) => id === plant.bedId)?.name || 'Culled'}}
-          </div>
-          <EntryTimeline
-            :entries="Object.values(plant.entries || {})"
-            :start-date="startDate"
-            :end-date="endDate"
-          />
-        </template>
+    <div class="table">
+      <div v-for="crop in nodes" :key="crop.id">
+        <div :title="crop.nickname">{{crop.name}}</div>
+        <div>
+          <template
+            v-for="plant in crop.$plants"
+            :key="plant.id"
+          >
+            <div class="bed">
+              {{plant.bedId ? beds.find(({ id }) => id === plant.bedId)?.name : 'Culled'}}
+            </div>
+            <EntryTimeline
+              :entries="Object.values(plant.entries || {})"
+              :startDate="startDate"
+              :endDate="endDate"
+            />
+          </template>
+        </div>
       </div>
     </div>
   </div>
@@ -108,29 +110,42 @@ export default defineComponent({
 $spacing: 8px;
 
 .Tracker {
-  display: table;
 
-  > * {
-    display: table-row;
+  .table {
+    display: table;
 
     > * {
-      display: table-cell;
-      font-size: 1vw;
-      vertical-align: middle;
-      border-bottom: solid 1px currentColor;
+      display: table-row;
 
-      &:first-child {
-        width: 1%;
-        padding: 0 $spacing;
-      }
+      > * {
+        display: table-cell;
+        font-size: 1vw;
+        vertical-align: middle;
+        border-bottom: solid 1px currentColor;
 
-      .bed {
-        position: absolute;
-        // right: 0;
-      }
+        &:first-child {
+          width: 1%;
+          padding: 0 $spacing;
+        }
 
-      > .EntryTimeline:not(:last-child) {
-        border-bottom: outset 0.5px currentColor;
+        .bed {
+          position: absolute;
+          // right: 0;
+          z-index: 2;
+        }
+
+        > .EntryTimeline {
+          > div {
+            border-left: inset 0.5px currentColor;
+
+            &.isFirstDayOfMonth {
+              border-left-style: solid;
+            }
+          }
+          &:not(:last-child) {
+            border-bottom: outset 0.5px currentColor;
+          }
+        }
       }
     }
   }

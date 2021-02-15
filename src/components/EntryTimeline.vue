@@ -134,7 +134,6 @@ $spacing: 8px;
     display: flex;
     flex: auto;
     position: relative;
-    border-left: inset 0.5px currentColor;
 
     .entries {
       position: absolute;
@@ -148,16 +147,16 @@ $spacing: 8px;
         flex: auto;
 
         &.seed {
-          background-color: blue;
+          background-color: rgb(255, 234, 116);
         }
         &.sprout {
-          background-color: goldenrod;
+          background-color: rgb(200, 255, 0);
         }
         &.transplant {
-          background-color: cyan;
+          background-color: rgb(167, 255, 255);
         }
         &.harvest {
-          background-color: lime;
+          background-color: rgb(0, 200, 0);
         }
         &.cull {
           background-color: red;
@@ -172,9 +171,6 @@ $spacing: 8px;
       vertical-align: middle;
       padding-top: calc(100% + 1px);
       pointer-events: none;
-    }
-    &.isFirstDayOfMonth {
-      border-color: black;
     }
     &.isToday {
       border-right: solid 3px blue;
