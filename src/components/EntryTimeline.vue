@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType, toRefs } from 'vue'
 import { differenceInDays, addDays, formatISO, isFirstDayOfMonth, isSameDay, isToday, addWeeks, subWeeks, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns'
 
 import { Bed, Entry, entryToString } from '../services/data'
@@ -60,8 +60,6 @@ export function getEndDate(entries: Entry[], snapToWeek = true) {
 
 export default defineComponent({
   name: 'EntryTimeline',
-  components: {
-  },
   props: {
     entries: {
       type: Array as PropType<Entry[]>,
@@ -74,19 +72,24 @@ export default defineComponent({
       type: Date as PropType<Date>,
     },
   },
-  setup({ entries, startDate: explicitStartDate, endDate: explicitEndDate }) {
+  setup(props) {
+    const { entries, startDate: explicitStartDate, endDate: explicitEndDate } = toRefs(props)
     const beds = useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
 
-    const startDate = explicitStartDate || getStartDate(entries)
-    const endDate = explicitEndDate || getEndDate(entries)
-    const seedEntry = getMinEntry(entries.filter(({ eventId }) => eventId === 'seed'))
-    const cullEntry = getMaxEntry(entries.filter(({ eventId }) => eventId === 'cull'))
+    const startDate = computed(() => explicitStartDate?.value || getStartDate(entries.value))
+    const endDate = computed(() => explicitEndDate?.value || getEndDate(entries.value))
+    const seedEntry = computed(
+      () => getMinEntry(entries.value.filter(({ eventId }) => eventId === 'seed'))
+    )
+    const cullEntry = computed(
+      () => getMaxEntry(entries.value.filter(({ eventId }) => eventId === 'cull'))
+    )
 
-    const days = new Array(differenceInDays(endDate, startDate))
+    const days = computed(() => new Array(differenceInDays(endDate.value, startDate.value))
       .fill(() => true)
       .map((_, index) => {
-        const date = addDays(startDate, index)
-        const dayEntries = entries.filter((entry) => isSameDay(new Date(entry.at), date))
+        const date = addDays(startDate.value, index)
+        const dayEntries = entries.value.filter((entry) => isSameDay(new Date(entry.at), date))
         const eventIds = dayEntries.reduce(
           (acc, entry) => {
             acc[entry.eventId] = true
@@ -104,11 +107,14 @@ export default defineComponent({
           classes: {
             isFirstDayOfMonth: isFirstDayOfMonth(date),
             isToday: isToday(date),
-            isInactive: (seedEntry && isBefore(startOfDay(date), startOfDay(new Date(seedEntry.at)))) || (cullEntry && isAfter(endOfDay(date), endOfDay(new Date(cullEntry.at)))),
+            isInactive: (
+              seedEntry && isBefore(startOfDay(date), startOfDay(new Date(seedEntry.value.at))))
+              || (cullEntry && isAfter(endOfDay(date), endOfDay(new Date(cullEntry.value.at)))
+            ),
             hasEntry: dayEntries.length,
           },
         }
-      })
+      }))
 
     return {
       days,

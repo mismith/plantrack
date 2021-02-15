@@ -1,5 +1,27 @@
 <template>
   <div class="Tracker">
+    <header>
+      <label>
+        Start Date
+        <input
+          type="date"
+          :value="format(startDate, 'yyyy-MM-dd')"
+          @input="e => explicitStartDate = parse(e.target.value, 'yyyy-MM-dd', new Date())"
+        />
+      </label>
+      <label>
+        End Date
+        <input
+          type="date"
+          :value="format(endDate, 'yyyy-MM-dd')"
+          @input="e => explicitEndDate = parse(e.target.value, 'yyyy-MM-dd', new Date())"
+        />
+      </label>
+      <label>
+        <input type="checkbox" v-model="showOnlyActive" />
+        Show Only Active Plants
+      </label>
+    </header>
     <div class="table">
       <div v-for="crop in nodes" :key="crop.id">
         <div :title="crop.nickname">{{crop.name}}</div>
@@ -18,14 +40,27 @@
             />
           </template>
         </div>
+        <!-- <dl v-for="(entries, eventId) in crop.$entryGroups" :key="eventId">
+          <dt>{{eventId}} <small>({{entries.length}})</small></dt>
+          <template v-if="eventId === 'seed'" />
+          <dd v-else-if="eventId === 'sprout'">
+            Average days to sprout:
+            {{averageDaysSinceSeed(crop, 'sprout')}}
+          </dd>
+          <dd v-else-if="eventId === 'harvest'">
+            Total harvested:
+            {{entries.reduce((acc, entry) => acc + entry.payload?.weight?.value || 0, 0)}}
+            {{entries[0]?.payload?.weight?.unit}}
+          </dd>
+        </dl> -->
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { differenceInDays } from 'date-fns'
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
+import { differenceInDays, format, parse } from 'date-fns'
 
 import { Bed, Crop, Plant } from '../services/data'
 import { database, useRtdbArray } from '../services/firebase'
@@ -41,44 +76,56 @@ export default defineComponent({
     const crops = useRtdbArray<Crop>(database.ref('/users/mismith/crops'))
     const plants = useRtdbArray<Plant>(database.ref('/users/mismith/plants'))
 
-    const nodes = computed(() => crops.value?.map((crop) => {
-      const cropPlants = plants.value
-        ?.filter(({ cropId }) => crop.id === cropId)
-        .map((plant) => {
-          const entryGroups = Object.values(plant.entries || {}).reduce(
-            (acc, entry) => {
-              acc[entry.eventId] = (acc[entry.eventId] || []).concat(entry)
+    const showOnlyActive = ref(false)
+  
+    const nodes = computed(
+      () => crops.value?.map((crop) => {
+        const cropPlants = (
+          plants.value
+            ?.filter(({ cropId }) => crop.id === cropId)
+            .map((plant) => {
+              const entryGroups = Object.values(plant.entries || {}).reduce(
+                (acc, entry) => {
+                  acc[entry.eventId] = (acc[entry.eventId] || []).concat(entry)
+                  return acc
+                },
+                {} as any,
+              )
+              return {
+                ...plant,
+                $entryGroups: entryGroups,
+              }
+            })
+            .filter((plant) => !showOnlyActive.value || plant.bedId)
+        ) || []
+        
+        return {
+          ...crop,
+          $plants: cropPlants,
+          $entryGroups: cropPlants.reduce(
+            (acc, cropPlant) => {
+              Object.entries(cropPlant.$entryGroups).forEach(([eventId, entries]) => {
+                acc[eventId] = (acc[eventId] || []).concat(entries)
+              })
               return acc
             },
             {} as any,
-          )
-          return {
-            ...plant,
-            $entryGroups: entryGroups,
-          }
-        }) || []
-      
-      return {
-        ...crop,
-        $plants: cropPlants,
-        $entryGroups: cropPlants.reduce(
-          (acc, cropPlant) => {
-            Object.entries(cropPlant.$entryGroups).forEach(([eventId, entries]) => {
-              acc[eventId] = (acc[eventId] || []).concat(entries)
-            })
-            return acc
-          },
-          {} as any,
-        ),
-      }
-    }))
+          ),
+        }
+      })
+        .filter((node) => !showOnlyActive.value || node.$plants.length)
+    )
 
     const allEntries = computed(() => nodes.value?.reduce(
       (acc, node) => acc.concat(...Object.values(node.$entryGroups) as any),
       [],
     ))
-    const startDate = computed(() => getStartDate(allEntries.value || []))
-    const endDate = computed(() => getEndDate(allEntries.value || []))
+    const explicitStartDate = ref<Date>()
+    const explicitEndDate = ref<Date>()
+    const defaultStartDate = computed(() => getStartDate(allEntries.value || []))
+    const defaultEndDate = computed(() => getEndDate(allEntries.value || []))
+    const startDate = computed(() => explicitStartDate.value || defaultStartDate.value)
+    const endDate = computed(() => explicitEndDate.value || defaultEndDate.value)
 
     return {
       nodes,
@@ -86,9 +133,14 @@ export default defineComponent({
       crops,
       plants,
 
+      showOnlyActive,
       startDate,
       endDate,
+      explicitStartDate,
+      explicitEndDate,
 
+      format,
+      parse,
       averageDaysSinceSeed(plant: Plant, eventId: string) {
         const entries = Object.values(plant.entries || {})
         const seedEntry = entries.find(entry => entry.eventId === 'seed')
@@ -110,6 +162,16 @@ export default defineComponent({
 $spacing: 8px;
 
 .Tracker {
+  > header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: solid 1px currentColor;
+
+    label {
+      display: inline-block;
+      margin: $spacing / 2;
+    }
+  }
 
   .table {
     display: table;
