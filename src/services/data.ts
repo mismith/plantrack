@@ -27,6 +27,7 @@ export interface Plot extends Entity {
 }
 
 export const events = [
+  { id: 'custom' },
   { id: 'seed' },
   { id: 'sprout' },
   { id: 'leaf' },
@@ -35,6 +36,9 @@ export const events = [
   { id: 'transplant' },
   { id: 'water' },
   { id: 'feed' },
+  { id: 'nutrient' },
+  { id: 'flush' },
+  { id: 'clean' },
   { id: 'prune' },
   { id: 'harvest' },
   { id: 'cull' },
