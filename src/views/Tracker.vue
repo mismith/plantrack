@@ -24,7 +24,9 @@
     </header>
     <div class="table">
       <div v-for="crop in nodes" :key="crop.id">
-        <div :title="crop.nickname">{{crop.name}}</div>
+        <div :title="`${crop.nickname}\n${getStatsStringForPlants(crop.$plants)}`">
+          {{crop.name}}
+        </div>
         <div>
           <template
             v-for="plant in crop.$plants"
@@ -40,19 +42,6 @@
             />
           </template>
         </div>
-        <!-- <dl v-for="(entries, eventId) in crop.$entryGroups" :key="eventId">
-          <dt>{{eventId}} <small>({{entries.length}})</small></dt>
-          <template v-if="eventId === 'seed'" />
-          <dd v-else-if="eventId === 'sprout'">
-            Average days to sprout:
-            {{averageDaysSinceSeed(crop, 'sprout')}}
-          </dd>
-          <dd v-else-if="eventId === 'harvest'">
-            Total harvested:
-            {{entries.reduce((acc, entry) => acc + entry.payload?.weight?.value || 0, 0)}}
-            {{entries[0]?.payload?.weight?.unit}}
-          </dd>
-        </dl> -->
       </div>
     </div>
   </div>
@@ -60,10 +49,11 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue'
-import { differenceInDays, format, parse } from 'date-fns'
+import { format, parse } from 'date-fns'
 
 import { Bed, Crop, Plant } from '../services/data'
 import { database, useRtdbArray } from '../services/firebase'
+import { getStatsStringForPlants } from '../services/stats'
 import EntryTimeline, { getEndDate, getStartDate } from '../components/EntryTimeline.vue'
 
 export default defineComponent({
@@ -138,21 +128,10 @@ export default defineComponent({
       endDate,
       explicitStartDate,
       explicitEndDate,
-
       format,
       parse,
-      averageDaysSinceSeed(plant: Plant, eventId: string) {
-        const entries = Object.values(plant.entries || {})
-        const seedEntry = entries.find(entry => entry.eventId === 'seed')
-        // const created = Object.values(plant.entries || {}).find(entry => entry.eventId === 'seed')
-        // console.log(seedEntry)
-        const startDate = new Date(seedEntry?.at || plant.createdAt)
 
-        const eventEntries = entries.filter(entry => entry.eventId === eventId)
-        const diffs = eventEntries.map(entry => differenceInDays(new Date(entry.at), startDate))
-
-        return diffs.length ? diffs.reduce((acc, diff) => acc + diff, 0) / diffs.length : 0
-      },
+      getStatsStringForPlants,
     }
   },
 })
@@ -209,14 +188,6 @@ $spacing: 8px;
           }
         }
       }
-    }
-  }
-
-  dl {
-    margin-left: $spacing * 2;
-    
-    dd {
-      margin-left: $spacing * 2;
     }
   }
 }
