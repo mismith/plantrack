@@ -27,6 +27,13 @@ import { usePlantDataTree, Entry, Plant, entryToString } from '../services/data'
 import { database } from '../services/firebase'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
 
+function isOrHasDescendent(type: string) {
+  return (node: ITreeNode) => node.type !== type && !tools.walkDescendents(
+    node,
+    (child) => child.type === type,
+  ).filter(Boolean).length
+}
+
 export default defineComponent({
   name: 'PlantTreeView',
   components: {
@@ -48,12 +55,7 @@ export default defineComponent({
       hovered: [],
       selected: multiple ? [] : modelValue,
       checked: multiple ? modelValue : [],
-      disabled: (
-        (node: ITreeNode) => node.type !== 'plant' && !tools.walkDescendents(
-          node,
-          (child) => child.type === 'plant',
-        ).filter(Boolean).length
-      ),
+      disabled: isOrHasDescendent(multiple ? 'plant' : 'bed'),
       renamed: [],
     })
     const treeOptions = reactive({
