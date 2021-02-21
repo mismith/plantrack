@@ -139,6 +139,8 @@ export default defineComponent({
         }))
         plantIds.value.splice(0, plantIds.value.length)
         newBedIds.value.splice(0, newBedIds.value.length)
+        weight.value = undefined
+        weightUnit.value = 'g'
         at.value = undefined
         note.value = undefined
       },
