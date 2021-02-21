@@ -13,6 +13,12 @@
         </span>
         <template v-else>
           {{node.name || node.id}}
+          <span
+            v-if="node.type === 'plant' && node.children?.length" 
+            class="eventId"
+            :title="getLatestEntryEvent(node)?.id"
+            :style="`background-color: ${getLatestEntryEvent(node)?.color || 'currentColor'}`"
+          />
           <small v-if="node.children?.length">{<span>{{node.children.length}}</span>}</small>
         </template>
       </span>
@@ -23,7 +29,7 @@
 <script lang="ts">
 import { defineComponent, PropType, reactive, watchEffect } from 'vue'
 
-import { usePlantDataTree, Entry, Plant, entryToString } from '../services/data'
+import { usePlantDataTree, Entry, events, Plant, entryToString } from '../services/data'
 import { database } from '../services/firebase'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
 
@@ -88,6 +94,11 @@ export default defineComponent({
       beds,
       entryToString,
 
+      events,
+      getLatestEntryEvent(node: ITreeNode) {
+        return events.find(({ id }) => id === node.children?.[node.children.length - 1]?.eventId)
+      },
+
       async handleRemoveEntry(entry: Entry, parents: ITreeNode[] = []) {
         const plant = parents[parents.length - 1] as Plant
         await database.ref(`/users/mismith/plants/${plant.id}/entries/${entry.id}`).remove()
@@ -101,5 +112,13 @@ export default defineComponent({
 $spacing: 8px;
 
 .PlantTreeView {
+  .eventId {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    border-radius: 1em;
+    margin-right: 0.25em;
+  }
 }
 </style>

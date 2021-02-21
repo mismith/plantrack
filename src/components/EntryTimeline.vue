@@ -18,6 +18,7 @@
             }))
           ).join('\n')"
           :class="{ entry: true, [eventId]: true}"
+          :style="`background-color: ${events.find(({ id }) => id === eventId)?.color}`"
         />
       </div>
     </div>
@@ -28,7 +29,7 @@
 import { computed, defineComponent, PropType, toRefs } from 'vue'
 import { differenceInDays, addDays, formatISO, isFirstDayOfMonth, isSameDay, isToday, addWeeks, subWeeks, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns'
 
-import { Bed, Entry, entryToString } from '../services/data'
+import { Bed, Entry, entryToString, events } from '../services/data'
 import { database, useRtdbArray } from '../services/firebase'
 
 export function getMinEntry(entries: Entry[], initial = {} as Pick<Entry, 'at'>) {
@@ -120,6 +121,7 @@ export default defineComponent({
       days,
       seedEntry,
       cullEntry,
+      events,
 
       beds,
       entryToString,
@@ -151,22 +153,6 @@ $spacing: 8px;
 
       .entry {
         flex: auto;
-
-        &.seed {
-          background-color: rgb(255, 234, 116);
-        }
-        &.sprout {
-          background-color: rgb(200, 255, 0);
-        }
-        &.transplant {
-          background-color: rgb(167, 255, 255);
-        }
-        &.harvest {
-          background-color: rgb(0, 200, 0);
-        }
-        &.cull {
-          background-color: red;
-        }
       }
     }
 

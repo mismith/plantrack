@@ -27,21 +27,66 @@ export interface Plot extends Entity {
 }
 
 export const events = [
-  { id: 'custom' },
-  { id: 'seed' },
-  { id: 'sprout' },
-  { id: 'leaf' },
-  { id: 'flower' },
-  { id: 'fruit' },
-  { id: 'transplant' },
-  { id: 'water' },
-  { id: 'feed' },
-  { id: 'nutrient' },
-  { id: 'flush' },
-  { id: 'clean' },
-  { id: 'prune' },
-  { id: 'harvest' },
-  { id: 'cull' },
+  {
+    id: 'custom',
+    color: '',
+  },
+  {
+    id: 'seed',
+    color: 'rgb(255, 234, 116)',
+  },
+  {
+    id: 'sprout',
+    color: 'rgb(200, 255, 0)',
+  },
+  {
+    id: 'leaf',
+    color: '',
+  },
+  {
+    id: 'flower',
+    color: '',
+  },
+  {
+    id: 'fruit',
+    color: '',
+  },
+  {
+    id: 'transplant',
+    color: 'rgb(167, 255, 255)',
+  },
+  {
+    id: 'water',
+    color: '',
+  },
+  {
+    id: 'feed',
+    color: '',
+  },
+  {
+    id: 'nutrient',
+    color: '',
+  },
+  {
+    id: 'flush',
+    color: '',
+  },
+  {
+    id: 'clean',
+    color: '',
+  },
+  {
+    id: 'prune',
+    color: '',
+  },
+  {
+    id: 'harvest',
+    color: 'rgb(0, 200, 0)',
+  },
+  {
+    id: 'cull',
+    color: 'red',
+  },
 ]
 
 export function usePlantDataTree() {
