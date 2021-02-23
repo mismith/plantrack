@@ -1,6 +1,6 @@
 import { onUnmounted, ref } from 'vue'
 import firebase from 'firebase/app'
-// import 'firebase/auth'
+import 'firebase/auth'
 import 'firebase/database'
 
 export const config = {
@@ -14,7 +14,7 @@ export const config = {
 }
 export const app = firebase.initializeApp(config)
 
-// export const auth = firebase.auth()
+export const auth = firebase.auth()
 
 export const { ServerValue } = firebase.database
 export const database = app.database()
@@ -23,8 +23,18 @@ export const keyField = 'id'
 export default firebase
 
 if (window.location.hostname === 'localhost') {
-  // auth.useEmulator('http://localhost:9099/')
+  auth.useEmulator('http://localhost:9099/')
   database.useEmulator('localhost', 9000)
+}
+
+export function useUser(auth: firebase.auth.Auth = firebase.auth()) {
+  const user = ref<firebase.User | null>(auth.currentUser)
+
+  auth.onIdTokenChanged(authUser => {
+    user.value = authUser
+  })
+
+  return user
 }
 
 export function toKeyFieldArray<T extends object>(obj: Record<string, T>, theKeyField = keyField): T[] {

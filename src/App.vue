@@ -1,5 +1,17 @@
 <template>
-  <router-view />
+  <header>
+    <template v-if="user">
+      {{user.email}}
+      <button @click="handleLogout">Logout</button>
+    </template>
+    <form v-else @submit.prevent="handleLogin">
+      <input type="email" v-model="email" placeholder="Email" />
+      <input type="password" v-model="password" placeholder="Password" />
+      <button type="submit">Login</button>
+    </form>
+  </header>
+
+  <router-view v-if="user" />
 
   <router-link
     v-for="route in routes.filter(({ path }) => path !== '/')"
@@ -11,14 +23,35 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 
 import { routes } from './router'
+import { auth, useUser } from './services/firebase'
 
 export default defineComponent({
   name: 'App',
   setup() {
+    const user = useUser()
+    const email = ref<string>()
+    const password = ref<string>()
+    async function handleLogin() {
+      if (email.value && password.value) {
+        await auth.signInWithEmailAndPassword(email.value, password.value)
+      } else {
+        console.warn('Missing email and/or password', email.value, password.value)
+      }
+    }
+    async function handleLogout() {
+      auth.signOut()
+    }
+
     return {
+      email,
+      password,
+      user,
+      handleLogin,
+      handleLogout,
+
       routes,
     }
   }
