@@ -129,7 +129,7 @@ export function usePlantDataTree() {
 
 export function formatAtAsDate(at: number) {
   const date = new Date(at);
-  return format(date, 'yyyy-MM-dd HH:mma');
+  return format(date, 'yyyy-MM-dd h:mma');
 }
 export function entryToString(node: Entry, { beds, relativeDate }: { beds: Bed[], relativeDate?: Date }) {
   const relativeDays = relativeDate && differenceInDays(new Date(node.at), relativeDate)
