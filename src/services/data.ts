@@ -94,12 +94,12 @@ export function usePlantDataTree() {
   }].map((plot) => ({
     type: 'plot',
     children: [...beds.value || [], {
-      id: 'culled',
-      name: 'Culled',
+      id: 'inactive',
+      name: 'Inactive',
       plotId: 'system',
     }].filter(({ plotId }) => plotId === plot.id).map((bed) => ({
       type: 'bed',
-      children: plants.value?.filter(({ bedId }) => (!bedId && bed.id === 'culled') || bedId === bed.id).map((plant) => ({
+      children: plants.value?.filter(({ bedId }) => (!bedId && bed.id === 'inactive') || bedId === bed.id).map((plant) => ({
         type: 'plant',
         children: toKeyFieldArray<Entry>(plant.entries || {}).map((entry) => ({
           type: 'entry',

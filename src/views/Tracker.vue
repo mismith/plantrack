@@ -33,7 +33,7 @@
             :key="plant.id"
           >
             <div class="bed">
-              {{plant.bedId ? beds.find(({ id }) => id === plant.bedId)?.name : 'Culled'}}
+              {{plant.bedId ? beds.find(({ id }) => id === plant.bedId)?.name : 'Inactive'}}
             </div>
             <EntryTimeline
               :entries="Object.values(plant.entries || {})"
