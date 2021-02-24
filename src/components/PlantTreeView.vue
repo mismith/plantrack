@@ -7,10 +7,16 @@
   >
     <template #node-name="{ node, parents }">
       <span class="TreeNodeName">
-        <span v-if="node.type === 'entry'">
-          {{entryToString(node, { beds })}}
-          <button type="button" @click="handleRemoveEntry(node, parents)">&times;</button>
-        </span>
+        <template v-if="node.type === 'entry'">
+          <span>{{entryToString(node, { beds })}}</span>
+
+          <button
+            type="button"
+            @click.stop="handleRemoveEntry(node, parents, $event.shiftKey)"
+          >
+            &times;
+          </button>
+        </template>
         <template v-else>
           {{node.name || node.id}}
           <span
@@ -20,6 +26,14 @@
             :style="`background-color: ${getLatestEntryEvent(node)?.color || 'currentColor'}`"
           />
           <small v-if="node.children?.length">{<span>{{node.children.length}}</span>}</small>
+
+          <button
+            v-if="node.type !== 'entry'"
+            type="button"
+            @click.stop="handleRemoveNode(node, $event.shiftKey)"
+          >
+            &times;
+          </button>
         </template>
       </span>
     </template>
@@ -62,7 +76,7 @@ export default defineComponent({
       selected: multiple ? [] : modelValue,
       checked: multiple ? modelValue : [],
       disabled: isOrHasDescendent(multiple ? 'plant' : 'bed'),
-      renamed: [],
+      // renamed: [],
     })
     const treeOptions = reactive({
       indentable: true,
@@ -72,6 +86,7 @@ export default defineComponent({
       checkable: multiple && ((node: ITreeNode) => node.type !== 'entry' && {
         recurse: true,
       }),
+      // renamable: multiple,
     })
 
     watchEffect(() => {
@@ -99,9 +114,16 @@ export default defineComponent({
         return events.find(({ id }) => id === node.children?.[node.children.length - 1]?.eventId)
       },
 
-      async handleRemoveEntry(entry: Entry, parents: ITreeNode[] = []) {
-        const plant = parents[parents.length - 1] as Plant
-        await database.ref(`/users/mismith/plants/${plant.id}/entries/${entry.id}`).remove()
+      async handleRemoveEntry(entry: Entry, parents: ITreeNode[] = [], skipConfirm = false) {
+        if (skipConfirm || window.confirm('Are you sure?')) {
+          const plant = parents[parents.length - 1] as Plant
+          await database.ref(`/users/mismith/plants/${plant.id}/entries/${entry.id}`).remove()
+        }
+      },
+      async handleRemoveNode(node: ITreeNode, skipConfirm = false) {
+        if (skipConfirm || window.confirm('Are you sure?')) {
+          await database.ref(`/users/mismith/${node.type}s/${node.id}`).remove()
+        }
       },
     }
   },
@@ -118,7 +140,17 @@ $spacing: 8px;
     height: 1em;
     vertical-align: middle;
     border-radius: 1em;
-    margin-right: 0.25em;
+    margin-right: 0.33em;
+  }
+  .TreeNodeName {
+    button {
+      margin-left: 0.33em;
+    }
+    &:not(:hover) {
+      button {
+        visibility: hidden;
+      }
+    }
   }
 }
 </style>
