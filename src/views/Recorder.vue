@@ -121,6 +121,10 @@ export default defineComponent({
           }
           case 'cull': {
             const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
+            const oldBedId = (await bedIdRef.once('value')).val()
+            payload = {
+              oldBedId,
+            }
             await bedIdRef.remove()
             break
           }
