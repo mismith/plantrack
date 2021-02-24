@@ -32,7 +32,7 @@
             v-for="plant in crop.$plants"
             :key="plant.id"
           >
-            <div class="bed">
+            <div :title="plant.name" class="bed">
               {{plant.bedId ? beds.find(({ id }) => id === plant.bedId)?.name : 'Inactive'}}
             </div>
             <EntryTimeline
