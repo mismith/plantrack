@@ -18,7 +18,8 @@
           </button>
         </template>
         <template v-else>
-          {{node.name || node.id}}
+          <span>{{node.name || node.id}}</span>
+
           <span
             v-if="node.type === 'plant' && node.children?.length" 
             class="eventId"
@@ -140,10 +141,12 @@ $spacing: 8px;
     height: 1em;
     vertical-align: middle;
     border-radius: 1em;
-    margin-right: 0.33em;
+    margin-left: 0.33em;
   }
   .TreeNodeName {
-    button {
+    > button,
+    > span,
+    > small {
       margin-left: 0.33em;
     }
     &:not(:hover) {
