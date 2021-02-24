@@ -28,64 +28,52 @@ export interface Plot extends Entity {
 
 export const events = [
   {
-    id: 'custom',
-    color: '',
-  },
-  {
     id: 'seed',
-    color: 'rgb(255, 234, 116)',
+    color: 'yellow',
   },
   {
     id: 'sprout',
-    color: 'rgb(200, 255, 0)',
+    color: 'greenyellow',
   },
   {
     id: 'leaf',
-    color: '',
+    color: 'lime',
   },
   {
     id: 'flower',
-    color: '',
+    color: 'forestgreen',
   },
   {
     id: 'fruit',
-    color: '',
+    color: 'purple',
   },
   {
     id: 'transplant',
-    color: 'rgb(167, 255, 255)',
+    color: 'lightgrey',
   },
   {
     id: 'water',
-    color: '',
+    color: 'cyan',
   },
   {
     id: 'feed',
-    color: '',
-  },
-  {
-    id: 'nutrient',
-    color: '',
-  },
-  {
-    id: 'flush',
-    color: '',
-  },
-  {
-    id: 'clean',
-    color: '',
+    color: 'blue',
   },
   {
     id: 'prune',
-    color: '',
+    color: 'pink',
   },
   {
     id: 'harvest',
-    color: 'rgb(0, 200, 0)',
+    color: 'magenta',
   },
   {
     id: 'cull',
     color: 'red',
+  },
+  {
+    id: 'other',
+    color: '',
   },
 ]
 
