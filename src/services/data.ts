@@ -77,10 +77,15 @@ export const events = [
   },
 ]
 
+export const usePlots = () => useRtdbArray<Plot>(database.ref('/users/mismith/plots'))
+export const useBeds = () => useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
+export const usePlants = () => useRtdbArray<Plant>(database.ref('/users/mismith/plants'))
+export const useCrops = () => useRtdbArray<Crop>(database.ref('/users/mismith/crops'))
+
 export function usePlantDataTree() {
-  const plants = useRtdbArray<Plant>(database.ref('/users/mismith/plants'))
-  const beds = useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
-  const plots = useRtdbArray<Plot>(database.ref('/users/mismith/plots'))
+  const plants = usePlants()
+  const beds = useBeds()
+  const plots = usePlots()
 
   const nodes = computed(() => [...plots.value || [], {
     id: 'system',

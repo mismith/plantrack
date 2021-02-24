@@ -51,8 +51,7 @@
 import { computed, defineComponent, ref } from 'vue'
 import { format, parse } from 'date-fns'
 
-import { Bed, Crop, Plant } from '../services/data'
-import { database, useRtdbArray } from '../services/firebase'
+import { useBeds, useCrops, usePlants } from '../services/data'
 import { getStatsStringForPlants } from '../services/stats'
 import EntryTimeline, { getEndDate, getStartDate } from '../components/EntryTimeline.vue'
 
@@ -62,9 +61,9 @@ export default defineComponent({
     EntryTimeline,
   },
   setup() {
-    const beds = useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
-    const crops = useRtdbArray<Crop>(database.ref('/users/mismith/crops'))
-    const plants = useRtdbArray<Plant>(database.ref('/users/mismith/plants'))
+    const beds = useBeds()
+    const plants = usePlants()
+    const crops = useCrops()
 
     const showOnlyActive = ref(false)
   

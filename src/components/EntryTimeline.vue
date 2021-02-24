@@ -29,8 +29,7 @@
 import { computed, defineComponent, PropType, toRefs } from 'vue'
 import { differenceInDays, addDays, formatISO, isFirstDayOfMonth, isSameDay, isToday, addWeeks, subWeeks, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns'
 
-import { Bed, Entry, entryToString, events } from '../services/data'
-import { database, useRtdbArray } from '../services/firebase'
+import { Entry, entryToString, events, useBeds } from '../services/data'
 
 export function getMinEntry(entries: Entry[], initial = {} as Pick<Entry, 'at'>) {
   const min = entries.reduce((acc, entry) => {
@@ -75,7 +74,7 @@ export default defineComponent({
   },
   setup(props) {
     const { entries, startDate: explicitStartDate, endDate: explicitEndDate } = toRefs(props)
-    const beds = useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
+    const beds = useBeds()
 
     const startDate = computed(() => explicitStartDate?.value || getStartDate(entries.value))
     const endDate = computed(() => explicitEndDate?.value || getEndDate(entries.value))
