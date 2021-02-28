@@ -1,7 +1,12 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="AddPlant">
+  <AddCrop v-if="isAddingCrop" style="margin: 32px;" />
+  <form @submit.prevent="handleSubmit" v-bind="$attrs" class="AddPlant">
     <fieldset>
-      <label>Crop</label>
+      <label>
+        Crop
+        <button type="button" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
+      </label>
+
       <select v-model="cropId">
         <option
           v-for="crop in crops"
@@ -38,14 +43,18 @@ import { computed, defineComponent, reactive, ref, watch } from 'vue'
 
 import { useCrops, usePlantDataTree } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
-import TreeView, { ITreeNode } from '../components/TreeView.vue'
+import TreeView, { ITreeNode } from './TreeView.vue'
+import AddCrop from './AddCrop.vue'
 
 export default defineComponent({
   name: 'AddPlant',
   components: {
+    AddCrop,
     TreeView,
   },
   setup() {
+    const isAddingCrop = ref(false)
+
     const { nodes, beds, plants } = usePlantDataTree()
     const crops = useCrops()
     const cropId = ref(crops.value?.[0]?.id)
@@ -80,6 +89,7 @@ export default defineComponent({
       treeState,
       treeOptions,
 
+      isAddingCrop,
       crops,
       cropId,
       bedId,

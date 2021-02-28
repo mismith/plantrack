@@ -1,11 +1,11 @@
 <template>
   <div class="Recorder">
-    <AddPlant v-if="isAdding" style="margin: 32px;" />
+    <AddPlant v-if="isAddingPlant" style="margin: 32px;" />
     <form @submit.prevent="handleSubmit">
       <fieldset>
         <label>
           Plant(s)
-          <button type="button" @click="isAdding = !isAdding">Add Plant</button>
+          <button type="button" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
           <button type="reset" @click="handleReset">Reset</button>
         </label>
         <PlantTreeView multiple v-model="plantIds" />
@@ -73,7 +73,7 @@ export default defineComponent({
     PlantTreeView,
   },
   setup() {
-    const isAdding = ref(false)
+    const isAddingPlant = ref(false)
     const plantIds = ref<string[]>([])
     const eventId = ref<string>()
     const at = ref<string>()
@@ -143,7 +143,7 @@ export default defineComponent({
     }
 
     return {
-      isAdding,
+      isAddingPlant,
       plantIds,
       eventId,
       at,
