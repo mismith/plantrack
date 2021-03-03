@@ -41,7 +41,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, watch } from 'vue'
 
-import { useCrops, usePlantDataTree } from '../services/data'
+import { NewEntity, Plant, useCrops, usePlantDataTree } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
 import TreeView, { ITreeNode } from './TreeView.vue'
 import AddCrop from './AddCrop.vue'
@@ -97,12 +97,16 @@ export default defineComponent({
       placeholder,
 
       handleSubmit() {
-        database.ref('/users/mismith/plants').push({
+        if (!cropId.value || !bedId.value) return
+
+        const newPlant: NewEntity<Plant> = {
+          name: name.value || placeholder.value,
           cropId: cropId.value,
           bedId: bedId.value,
-          name: name.value || placeholder.value,
           createdAt: ServerValue.TIMESTAMP,
-        })
+          entries: null, // @TODO: this shouldn't be necessary
+        }
+        database.ref('/users/mismith/plants').push(newPlant)
       },
     }
   },

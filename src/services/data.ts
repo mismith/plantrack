@@ -1,29 +1,47 @@
 import { differenceInDays, format } from 'date-fns'
 import { computed } from 'vue'
-import { database, toKeyFieldArray, useRtdbArray } from './firebase'
+import firebase, { database, toKeyFieldArray, useRtdbArray } from './firebase'
 
+export type Timestamp = number
 export interface Entity {
   id: string
-  name?: string
-  createdAt: number
+  createdAt: Timestamp
 }
+export type OptionalToNullable<O> = {
+  [K in keyof O]-?: undefined extends O[K]
+    ? NonNullable<O[K]> | null
+    : (
+      Timestamp extends O[K]
+        ? typeof firebase.database.ServerValue.TIMESTAMP
+        : O[K]
+    )
+}
+export type NewEntity<T> = Omit<OptionalToNullable<T>, 'id' | 'createdAt'> & {
+  createdAt: typeof firebase.database.ServerValue.TIMESTAMP
+}
+
 export interface Crop extends Entity {
+  name: string
+  nickname?: string
 }
 export interface Entry extends Entity {
   eventId: string
-  at: number
+  at: Timestamp
   payload?: Record<string, any>
   note?: string
 }
 export interface Plant extends Entity {
+  name: string
   cropId: string
   bedId: string
   entries?: Record<string, Entry>
 }
 export interface Bed extends Entity {
+  name: string
   plotId: string
 }
 export interface Plot extends Entity {
+  name: string
 }
 
 export const events = [

@@ -19,27 +19,31 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 
+import { Crop, NewEntity } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
 
 export default defineComponent({
   name: 'AddCrop',
   setup() {
-    const name = ref()
-    const nickname = ref()
+    const name = ref<string>()
+    const nickname = ref<string>()
 
     return {
       name,
       nickname,
 
       async handleSubmit() {
-        await database.ref('/users/mismith/crops').push({
+        if (!name.value) return
+
+        const newCrop: NewEntity<Crop> = {
           name: name.value,
           nickname: nickname.value || null,
           createdAt: ServerValue.TIMESTAMP,
-        })
+        }
+        await database.ref('/users/mismith/crops').push(newCrop)
 
-        name.value = null
-        nickname.value = null
+        name.value = undefined
+        nickname.value = undefined
       },
     }
   },

@@ -61,8 +61,8 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 
-import { events, Entry } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
+import { events, Entry, NewEntity } from '../services/data'
 import AddPlant from '../components/AddPlant.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 
@@ -93,7 +93,8 @@ export default defineComponent({
     }
     async function handleSubmit() {
       await Promise.all(plantIds.value.map(async (plantId) => {
-        let payload: Record<string, any> | null = null;
+        let payload: Entry['payload'];
+        if (!eventId.value) return
         switch (eventId.value) {
           case 'transplant': {
             const newBedId = newBedIds.value?.[0]
@@ -130,13 +131,14 @@ export default defineComponent({
           }
         }
 
-        await database.ref(`/users/mismith/plants/${plantId}/entries`).push({
+        const newEntry: NewEntity<Entry> = {
           eventId: eventId.value,
           at: at.value ? new Date(at.value).valueOf() : ServerValue.TIMESTAMP,
-          payload,
+          payload: payload || null,
           note: note.value || null,
           createdAt: ServerValue.TIMESTAMP,
-        } as Omit<Entry, 'id'>)
+        }
+        await database.ref(`/users/mismith/plants/${plantId}/entries`).push(newEntry)
       }))
       
       handleReset()
