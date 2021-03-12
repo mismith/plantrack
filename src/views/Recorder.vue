@@ -50,6 +50,11 @@
       </fieldset>
 
       <fieldset>
+        <label>Attachment(s)</label>
+        <input type="file" multiple @change="files = $event.target.files" />
+      </fieldset>
+
+      <fieldset>
         <button type="submit" :disabled="!plantIds.length || !eventId">Add Entry</button>
       </fieldset>
     </form>
@@ -61,8 +66,8 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 
-import { database, ServerValue } from '../services/firebase'
-import { events, Entry, NewEntity } from '../services/data'
+import { events, Entry, NewEntity, Attachment } from '../services/data'
+import { database, ServerValue, storage } from '../services/firebase'
 import AddPlant from '../components/AddPlant.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 
@@ -78,6 +83,7 @@ export default defineComponent({
     const eventId = ref<string>()
     const at = ref<string>()
     const note = ref<string>()
+    const files = ref<FileList>()
 
     const newBedIds = ref<string[]>([])
     const weight = ref<number>()
@@ -90,6 +96,7 @@ export default defineComponent({
       weightUnit.value = 'g'
       at.value = undefined
       note.value = undefined
+      files.value = undefined
     }
     async function handleSubmit() {
       await Promise.all(plantIds.value.map(async (plantId) => {
@@ -131,10 +138,31 @@ export default defineComponent({
           }
         }
 
+        const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+        const attachments = await Promise.all(Array.from(files.value || []).map(async (file) => {
+          if (file.size > MAX_FILE_SIZE) {
+            throw new Error(`Attachment must be under 10MB (${file.name})`)
+          }
+          // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
+          const fileKey = database.ref().push().key
+          const ref = storage.ref(`/users/mismith/attachments/${fileKey}`)
+          await ref.put(file)
+
+          const attachment: Attachment = {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            url: ref.fullPath,
+            at: Date.now(),
+          }
+          return attachment
+        }))
+
         const newEntry: NewEntity<Entry> = {
           eventId: eventId.value,
           at: at.value ? new Date(at.value).valueOf() : ServerValue.TIMESTAMP,
           payload: payload || null,
+          attachments,
           note: note.value || null,
           createdAt: ServerValue.TIMESTAMP,
         }
@@ -150,6 +178,7 @@ export default defineComponent({
       eventId,
       at,
       note,
+      files,
 
       events,
       newBedIds,

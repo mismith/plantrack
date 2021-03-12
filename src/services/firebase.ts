@@ -2,6 +2,7 @@ import { onUnmounted, ref } from 'vue'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/database'
+import 'firebase/storage'
 
 export const config = {
   apiKey: 'AIzaSyDvmckvDo8aydVkAXLJ5kkoyLiCmQGot34',
@@ -19,6 +20,8 @@ export const auth = firebase.auth()
 export const { ServerValue } = firebase.database
 export const database = app.database()
 export const keyField = 'id'
+
+export const storage = firebase.storage()
 
 export default firebase
 

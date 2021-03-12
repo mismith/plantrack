@@ -20,6 +20,13 @@ export type NewEntity<T> = Omit<OptionalToNullable<T>, 'id' | 'createdAt'> & {
   createdAt: typeof firebase.database.ServerValue.TIMESTAMP
 }
 
+export interface Attachment {
+  name: string
+  size: number
+  type: string
+  url: string
+  at: Timestamp
+}
 export interface Crop extends Entity {
   name: string
   nickname?: string
@@ -28,6 +35,7 @@ export interface Entry extends Entity {
   eventId: string
   at: Timestamp
   payload?: Record<string, any>
+  attachments?: Attachment[]
   note?: string
 }
 export interface Plant extends Entity {
