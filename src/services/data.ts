@@ -160,6 +160,9 @@ export function entryToString(node: Entry, { beds, relativeDate }: { beds: Bed[]
     node.eventId === 'transplant'
       && node.payload?.oldBedId
       && `from "${beds?.find(({ id }) => id === node.payload?.oldBedId)?.name}"`,
+    node.eventId === 'transplant'
+      && node.payload?.newBedId
+      && `to "${beds?.find(({ id }) => id === node.payload?.newBedId)?.name}"`,
     node.eventId === 'harvest'
       && node.payload?.weight
       && `[${node.payload.weight.value}${node.payload.weight.unit}]`,
