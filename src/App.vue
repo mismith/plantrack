@@ -73,6 +73,12 @@ body,
   font-family: sans-serif;
 }
 
+button {
+  &.active {
+    background-color: Highlight;
+  }
+}
+
 .TreeView {
   display: flex;
   flex-direction: column;

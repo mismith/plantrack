@@ -4,7 +4,7 @@
     <fieldset>
       <label>
         Crop
-        <button type="button" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
+        <button type="button" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
       </label>
 
       <select v-model="cropId" required>

@@ -6,8 +6,8 @@
       <fieldset>
         <label>
           Plant(s)
-          <button type="button" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
-          <button type="button" @click="isAddingBed = !isAddingBed">Add Bed</button>
+          <button type="button" :class="{ active: isAddingPlant }" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
+          <button type="button" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
           <button type="reset" @click="handleReset">Reset</button>
         </label>
         <PlantTreeView multiple v-model="plantIds" />

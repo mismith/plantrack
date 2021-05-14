@@ -9,7 +9,7 @@
     <fieldset>
       <label>
         Plot
-        <button type="button" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
+        <button type="button" :class="{ active: isAddingPlot }" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
       </label>
 
       <select v-model="plotId" required>
