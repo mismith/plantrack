@@ -86,6 +86,96 @@ import AddBed from '../components/AddBed.vue'
 import AddPlant from '../components/AddPlant.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+async function uploadAttachment(file: File): Promise<Attachment> {
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`Attachment must be under 10MB (${file.name})`)
+  }
+  // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
+  const fileKey = database.ref().push().key
+  const ref = storage.ref(`/users/mismith/attachments/${fileKey}`)
+  await ref.put(file)
+
+  const attachment: Attachment = {
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    url: ref.fullPath,
+    at: Date.now(),
+  }
+  return attachment
+}
+async function addPlantEntry({
+  plantId,
+  eventId,
+  newBedIds,
+  weight,
+  weightUnit,
+  files,
+  at,
+  note,
+}: {
+  plantId: string,
+  eventId?: string,
+  newBedIds?: string[],
+  weight?: number,
+  weightUnit?: string,
+  files?: FileList,
+  at?: string,
+  note?: string,
+}) {
+  if (!plantId || !eventId) return
+
+  let payload: Entry['payload'];
+  switch (eventId) {
+    case 'transplant': {
+      const newBedId = newBedIds?.[0]
+      if (!newBedId) return // @TODO
+
+      const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
+      const oldBedId = (await bedIdRef.once('value')).val()
+      payload = {
+        oldBedId,
+        newBedId,
+      }
+      await bedIdRef.set(newBedId)
+      break
+    }
+    case 'harvest': {
+      if (weight) {
+        payload = {
+          weight: {
+            value: weight,
+            unit: weightUnit,
+          }
+        }
+      }
+      break
+    }
+    case 'cull': {
+      const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
+      const oldBedId = (await bedIdRef.once('value')).val()
+      payload = {
+        oldBedId,
+      }
+      await bedIdRef.remove()
+      break
+    }
+  }
+
+  const attachments = await Promise.all(Array.from(files || []).map(uploadAttachment))
+
+  const newEntry: NewEntity<Entry> = {
+    eventId,
+    at: at ? new Date(at).valueOf() : ServerValue.TIMESTAMP,
+    payload: payload || null,
+    attachments,
+    note: note || null,
+    createdAt: ServerValue.TIMESTAMP,
+  }
+  await database.ref(`/users/mismith/plants/${plantId}/entries`).push(newEntry)
+}
+
 export default defineComponent({
   name: 'Recorder',
   components: {
@@ -117,73 +207,16 @@ export default defineComponent({
     }
     async function handleSubmit() {
       await Promise.all(plantIds.value.map(async (plantId) => {
-        let payload: Entry['payload'];
-        if (!eventId.value) return
-        switch (eventId.value) {
-          case 'transplant': {
-            const newBedId = newBedIds.value?.[0]
-            if (!newBedId) return // @TODO
-
-            const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
-            const oldBedId = (await bedIdRef.once('value')).val()
-            payload = {
-              oldBedId,
-              newBedId,
-            }
-            await bedIdRef.set(newBedId)
-            break
-          }
-          case 'harvest': {
-            if (weight) {
-              payload = {
-                weight: {
-                  value: weight.value,
-                  unit: weightUnit.value,
-                }
-              }
-            }
-            break
-          }
-          case 'cull': {
-            const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
-            const oldBedId = (await bedIdRef.once('value')).val()
-            payload = {
-              oldBedId,
-            }
-            await bedIdRef.remove()
-            break
-          }
-        }
-
-        const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-        const attachments = await Promise.all(Array.from(files.value || []).map(async (file) => {
-          if (file.size > MAX_FILE_SIZE) {
-            throw new Error(`Attachment must be under 10MB (${file.name})`)
-          }
-          // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
-          const fileKey = database.ref().push().key
-          const ref = storage.ref(`/users/mismith/attachments/${fileKey}`)
-          await ref.put(file)
-
-          const attachment: Attachment = {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            url: ref.fullPath,
-            at: Date.now(),
-          }
-          return attachment
-        }))
-
-        const newEntry: NewEntity<Entry> = {
+        await addPlantEntry({
+          plantId,
           eventId: eventId.value,
-          at: at.value ? new Date(at.value).valueOf() : ServerValue.TIMESTAMP,
-          payload: payload || null,
-          attachments,
-          note: note.value || null,
-          createdAt: ServerValue.TIMESTAMP,
-        }
-        await database.ref(`/users/mismith/plants/${plantId}/entries`).push(newEntry)
+          newBedIds: newBedIds.value,
+          weight: weight.value,
+          weightUnit: weightUnit.value,
+          files: files.value,
+          at: at.value,
+          note: note.value,
+        })
       }))
       
       handleReset()
