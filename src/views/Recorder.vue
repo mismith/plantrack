@@ -54,6 +54,10 @@
           <option>lb</option>
         </select>
       </fieldset>
+      <fieldset v-if="eventId === 'harvest'">
+        <label>Cull Too</label>
+        <input v-model="cullToo" type="checkbox" />
+      </fieldset>
 
       <fieldset>
         <label>When</label>
@@ -197,6 +201,7 @@ export default defineComponent({
     const newBedIds = ref<string[]>([])
     const weight = ref<number>()
     const weightUnit = ref<string>('g')
+    const cullToo = ref(false)
 
     const isValid = computed(() => {
       const requireds = plantIds.value.length && eventId.value
@@ -216,13 +221,14 @@ export default defineComponent({
       newBedIds.value = []
       weight.value = undefined
       weightUnit.value = 'g'
+      cullToo.value = false
       at.value = undefined
       note.value = undefined
       files.value = undefined
     }
     async function handleSubmit() {
       await Promise.all(plantIds.value.map(async (plantId) => {
-        await addPlantEntry({
+        const params = {
           plantId,
           eventId: eventId.value,
           newBedIds: newBedIds.value,
@@ -231,7 +237,16 @@ export default defineComponent({
           files: files.value,
           at: at.value,
           note: note.value,
-        })
+        }
+        await addPlantEntry(params)
+
+        if (cullToo.value) {
+          await addPlantEntry({
+            ...params,
+            eventId: 'cull',
+            files: {} as FileList, // don't re-upload attachments
+          })
+        }
       }))
       
       handleReset()
@@ -251,6 +266,7 @@ export default defineComponent({
       newBedIds,
       weight,
       weightUnit,
+      cullToo,
 
       isValid,
 
