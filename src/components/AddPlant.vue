@@ -41,7 +41,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, ref, watch } from 'vue'
 
-import { NewEntity, Plant, useCrops, usePlantDataTree } from '../services/data'
+import { getSuggestedPlantName, NewEntity, Plant, useCrops, usePlantDataTree } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
 import TreeView, { ITreeNode } from './TreeView.vue'
 import AddCrop from './AddCrop.vue'
@@ -60,11 +60,7 @@ export default defineComponent({
     const cropId = ref(crops.value?.[0]?.id)
     const bedId = ref(beds.value?.[0]?.id)
     const name = ref()
-    const placeholder = computed(() => {
-      const crop = crops.value?.find((crop) => crop.id === cropId.value)
-      const cropPlants = plants.value?.filter((plant) => plant.cropId === cropId.value)
-      return `${crop?.name || 'Plant'}.${(cropPlants?.length || 0) + 1}`
-    })
+    const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
 
     const treeState = reactive({
       expanded: [],

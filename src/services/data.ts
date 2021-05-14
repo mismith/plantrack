@@ -176,3 +176,9 @@ export function entryToString(node: Entry, { beds, relativeDate }: { beds: Bed[]
     relativeDays && `(+${relativeDays} day${relativeDays === 1 ? '' : 's'})`,
   ].filter(Boolean).join(' ')
 }
+
+export function getSuggestedPlantName(cropId?: string, crops?: Crop[], plants?: Plant[]) {
+  const crop = crops?.find((crop) => crop.id === cropId)
+  const cropPlants = plants?.filter((plant) => plant.cropId === cropId)
+  return `${crop?.name || 'Plant'}.${(cropPlants?.length || 0) + 1}`
+}
