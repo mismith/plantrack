@@ -70,7 +70,7 @@
       </fieldset>
 
       <fieldset>
-        <button type="submit" :disabled="!plantIds.length || !eventId">Add Entry</button>
+        <button type="submit" :disabled="!isValid">Add Entry</button>
       </fieldset>
     </form>
     <pre>{{newBedIds}}</pre>
@@ -79,7 +79,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 
 import { events, Entry, NewEntity, Attachment } from '../services/data'
 import { database, ServerValue, storage } from '../services/firebase'
@@ -197,6 +197,18 @@ export default defineComponent({
     const weight = ref<number>()
     const weightUnit = ref<string>('g')
 
+    const isValid = computed(() => {
+      const requireds = plantIds.value.length && eventId.value
+      const conditionals = (() => {
+        switch (eventId.value) {
+          case 'transplant': return newBedIds.value.length
+          case 'harvest': return weight.value || 0 > 0 && weightUnit.value
+          default: return true
+        }
+      })()
+      return Boolean(requireds && conditionals)
+    })
+
     function handleReset() {
       plantIds.value = []
       newBedIds.value = []
@@ -237,6 +249,8 @@ export default defineComponent({
       newBedIds,
       weight,
       weightUnit,
+
+      isValid,
 
       handleReset,
       handleSubmit,
