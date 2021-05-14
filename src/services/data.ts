@@ -81,6 +81,10 @@ export const events = [
     featured: true,
   },
   {
+    id: 'splice',
+    color: 'grey',
+  },
+  {
     id: 'water',
     color: 'cyan',
   },
@@ -158,16 +162,19 @@ export function formatAtAsDate(at: number) {
   const date = new Date(at);
   return format(date, 'yyyy-MM-dd h:mma');
 }
-export function entryToString(node: Entry, { beds, relativeDate }: { beds: Bed[], relativeDate?: Date }) {
+export function entryToString(node: Entry, { beds, plants, relativeDate }: { beds: Bed[], plants: Plant[], relativeDate?: Date }) {
   const relativeDays = relativeDate && differenceInDays(new Date(node.at), relativeDate)
   return [
     node.eventId,
-    node.eventId === 'transplant'
+    (node.eventId === 'transplant' || node.eventId === 'splice')
       && node.payload?.oldBedId
       && `from "${beds?.find(({ id }) => id === node.payload?.oldBedId)?.name}"`,
-    node.eventId === 'transplant'
+    (node.eventId === 'transplant' || node.eventId === 'splice')
       && node.payload?.newBedId
       && `to "${beds?.find(({ id }) => id === node.payload?.newBedId)?.name}"`,
+    node.eventId === 'splice'
+      && node.payload?.newPlantId
+      && `as "${plants?.find(({ id }) => id === node.payload?.newPlantId)?.name}"`,
     node.eventId === 'harvest'
       && node.payload?.weight
       && `[${node.payload.weight.value}${node.payload.weight.unit}]`,

@@ -8,7 +8,7 @@
     <template #node-name="{ node, parents }">
       <span class="TreeNodeName">
         <template v-if="node.type === 'entry'">
-          <span>{{entryToString(node, { beds })}}</span>
+          <span>{{entryToString(node, { beds, plants })}}</span>
 
           <button
             type="button"

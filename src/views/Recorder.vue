@@ -40,9 +40,13 @@
         </div>
       </fieldset>
 
-      <fieldset v-if="eventId === 'transplant'">
+      <fieldset v-if="eventId === 'transplant' || eventId === 'splice'">
         <label>Where To</label>
         <PlantTreeView v-model="newBedIds" />
+      </fieldset>
+      <fieldset v-if="eventId === 'splice'">
+        <label>New Name</label>
+        <input v-model="newName" :placeholder="newNamePlaceholder" />
       </fieldset>
       <fieldset v-if="eventId === 'harvest'">
         <label>How Much</label>
@@ -86,7 +90,7 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue'
 
-import { events, Entry, NewEntity, Attachment } from '../services/data'
+import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops } from '../services/data'
 import { database, ServerValue, storage } from '../services/firebase'
 import AddBed from '../components/AddBed.vue'
 import AddPlant from '../components/AddPlant.vue'
@@ -114,7 +118,8 @@ async function uploadAttachment(file: File): Promise<Attachment> {
 async function addPlantEntry({
   plantId,
   eventId,
-  newBedIds,
+  newBedId,
+  newName,
   weight,
   weightUnit,
   files,
@@ -123,7 +128,8 @@ async function addPlantEntry({
 }: {
   plantId: string,
   eventId?: string,
-  newBedIds?: string[],
+  newBedId?: string,
+  newName?: string,
   weight?: number,
   weightUnit?: string,
   files?: FileList,
@@ -131,20 +137,39 @@ async function addPlantEntry({
   note?: string,
 }) {
   if (!plantId || !eventId) return
+  const plantsRef = database.ref('/users/mismith/plants')
+  const plantRef = plantsRef.child(plantId)
 
-  let payload: Entry['payload'];
+  let payload: Entry['payload']
+  const transplant = async () => {
+    if (!newBedId) throw new Error('no bed specified')
+
+    const bedIdRef = plantRef.child('bedId')
+    const oldBedId = (await bedIdRef.once('value')).val()
+    return {
+      bedIdRef,
+      oldBedId,
+    }
+  }
   switch (eventId) {
     case 'transplant': {
-      const newBedId = newBedIds?.[0]
-      if (!newBedId) return // @TODO
-
-      const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
-      const oldBedId = (await bedIdRef.once('value')).val()
+      const { bedIdRef, oldBedId } = await transplant()
       payload = {
         oldBedId,
         newBedId,
       }
       await bedIdRef.set(newBedId)
+      break
+    }
+    case 'splice': {
+      const { oldBedId } = await transplant()
+      const newPlantId = database.ref().push().key
+      payload = {
+        oldBedId,
+        newBedId,
+        oldPlantId: plantId,
+        newPlantId,
+      }
       break
     }
     case 'harvest': {
@@ -159,7 +184,7 @@ async function addPlantEntry({
       break
     }
     case 'cull': {
-      const bedIdRef = database.ref(`/users/mismith/plants/${plantId}/bedId`)
+      const bedIdRef = plantRef.child('bedId')
       const oldBedId = (await bedIdRef.once('value')).val()
       payload = {
         oldBedId,
@@ -179,7 +204,17 @@ async function addPlantEntry({
     note: note || null,
     createdAt: ServerValue.TIMESTAMP,
   }
-  await database.ref(`/users/mismith/plants/${plantId}/entries`).push(newEntry)
+  await plantRef.child('entries').push(newEntry)
+
+  if (eventId === 'splice' && payload) {
+    const oldPlant = (await plantRef.once('value')).val()
+    const newPlant = {
+      ...oldPlant,
+      bedId: payload.newBedId,
+      name: newName,
+    }
+    await plantsRef.child(payload.newPlantId).set(newPlant)
+  }
 }
 
 export default defineComponent({
@@ -199,6 +234,12 @@ export default defineComponent({
     const files = ref<FileList>()
 
     const newBedIds = ref<string[]>([])
+    const newName = ref<string>()
+    const plants = usePlants();
+    const crops = useCrops();
+    const cropId = computed(() => plants.value?.find(({ id }) => id === plantIds.value?.[0])?.cropId)
+    const newNamePlaceholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
+
     const weight = ref<number>()
     const weightUnit = ref<string>('g')
     const cullToo = ref(false)
@@ -208,7 +249,8 @@ export default defineComponent({
       const conditionals = (() => {
         switch (eventId.value) {
           case 'transplant': return newBedIds.value.length
-          case 'harvest': return weight.value || 0 > 0 && weightUnit.value
+          case 'splice': return newBedIds.value.length === 1 && plantIds.value.length === 1
+          case 'harvest': return weight.value && weightUnit.value
           default: return true
         }
       })()
@@ -231,7 +273,8 @@ export default defineComponent({
         const params = {
           plantId,
           eventId: eventId.value,
-          newBedIds: newBedIds.value,
+          newBedId: newBedIds.value?.[0],
+          newName: newName.value || newNamePlaceholder.value,
           weight: weight.value,
           weightUnit: weightUnit.value,
           files: files.value,
@@ -264,6 +307,8 @@ export default defineComponent({
       events,
       featuredEvents: events.filter(({ featured }) => featured),
       newBedIds,
+      newName,
+      newNamePlaceholder,
       weight,
       weightUnit,
       cullToo,

@@ -14,6 +14,7 @@
             .filter((entry) => entry.eventId === eventId)
             .map(entry => entryToString(entry, {
               beds,
+              plants,
               relativeDate: seedEntry && new Date(seedEntry.at),
             }))
           ).join('\n')"
@@ -29,7 +30,7 @@
 import { computed, defineComponent, PropType, toRefs } from 'vue'
 import { differenceInDays, addDays, formatISO, isFirstDayOfMonth, isSameDay, isToday, addWeeks, subWeeks, startOfWeek, endOfWeek, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns'
 
-import { Entry, entryToString, events, useBeds } from '../services/data'
+import { Entry, entryToString, events, useBeds, usePlants } from '../services/data'
 
 export function getMinEntry(entries: Entry[], initial = {} as Pick<Entry, 'at'>) {
   const min = entries.reduce((acc, entry) => {
@@ -75,6 +76,7 @@ export default defineComponent({
   setup(props) {
     const { entries, startDate: explicitStartDate, endDate: explicitEndDate } = toRefs(props)
     const beds = useBeds()
+    const plants = usePlants()
 
     const startDate = computed(() => explicitStartDate?.value || getStartDate(entries.value))
     const endDate = computed(() => explicitEndDate?.value || getEndDate(entries.value))
@@ -123,6 +125,7 @@ export default defineComponent({
       events,
 
       beds,
+      plants,
       entryToString,
     }
   },
