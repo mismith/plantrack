@@ -1,12 +1,12 @@
 <template>
   <form @submit.prevent="handleSubmit" class="AddCrop">
     <fieldset>
-      <label>Name</label>
+      <label>Code</label>
       <input type="text" v-model="name" required />
     </fieldset>
 
     <fieldset>
-      <label>Nickname</label>
+      <label>Name</label>
       <input type="text" v-model="nickname" />
     </fieldset>
 
