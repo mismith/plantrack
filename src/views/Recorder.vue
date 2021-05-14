@@ -16,6 +16,7 @@
       <fieldset>
         <label>Event</label>
         <select v-model="eventId">
+          <option></option>
           <option
             v-for="event in events"
             :key="event.id"
@@ -211,6 +212,7 @@ export default defineComponent({
 
     function handleReset() {
       plantIds.value = []
+      eventId.value = undefined
       newBedIds.value = []
       weight.value = undefined
       weightUnit.value = 'g'
