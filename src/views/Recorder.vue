@@ -1,11 +1,13 @@
 <template>
   <div class="Recorder">
     <AddPlant v-if="isAddingPlant" style="margin: 32px;" />
+    <AddBed v-if="isAddingBed" style="margin: 32px;" />
     <form @submit.prevent="handleSubmit">
       <fieldset>
         <label>
           Plant(s)
           <button type="button" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
+          <button type="button" @click="isAddingBed = !isAddingBed">Add Bed</button>
           <button type="reset" @click="handleReset">Reset</button>
         </label>
         <PlantTreeView multiple v-model="plantIds" />
@@ -68,16 +70,19 @@ import { defineComponent, ref } from 'vue'
 
 import { events, Entry, NewEntity, Attachment } from '../services/data'
 import { database, ServerValue, storage } from '../services/firebase'
+import AddBed from '../components/AddBed.vue'
 import AddPlant from '../components/AddPlant.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 
 export default defineComponent({
   name: 'Recorder',
   components: {
+    AddBed,
     AddPlant,
     PlantTreeView,
   },
   setup() {
+    const isAddingBed = ref(false)
     const isAddingPlant = ref(false)
     const plantIds = ref<string[]>([])
     const eventId = ref<string>()
@@ -173,6 +178,7 @@ export default defineComponent({
     }
 
     return {
+      isAddingBed,
       isAddingPlant,
       plantIds,
       eventId,

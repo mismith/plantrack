@@ -7,7 +7,7 @@
         <button type="button" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
       </label>
 
-      <select v-model="cropId">
+      <select v-model="cropId" required>
         <option
           v-for="crop in crops"
           :key="crop.id"
