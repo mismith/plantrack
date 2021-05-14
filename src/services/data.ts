@@ -56,10 +56,12 @@ export const events = [
   {
     id: 'seed',
     color: 'yellow',
+    featured: true,
   },
   {
     id: 'sprout',
     color: 'greenyellow',
+    featured: true,
   },
   {
     id: 'leaf',
@@ -76,6 +78,7 @@ export const events = [
   {
     id: 'transplant',
     color: 'lightgrey',
+    featured: true,
   },
   {
     id: 'water',
@@ -92,10 +95,12 @@ export const events = [
   {
     id: 'harvest',
     color: 'magenta',
+    featured: true,
   },
   {
     id: 'cull',
     color: 'red',
+    featured: true,
   },
   {
     id: 'other',

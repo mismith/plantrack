@@ -24,6 +24,18 @@
             {{event.id}}
           </option>
         </select>
+        <div style="display: flex;">
+          <button
+            v-for="event in featuredEvents"
+            :key="event.id"
+            @click="eventId = event.id"
+            style="flex: auto;"
+            :class="{ active: eventId === event.id }"
+          >
+            <span :style="`display: inline-block; width: 1em; height: 1em; background-color: ${event.color}; vertical-align: middle; border: solid 1px currentColor; border-radius: 1em;`" />
+            {{event.id}}
+          </button>
+        </div>
       </fieldset>
 
       <fieldset v-if="eventId === 'transplant'">
@@ -187,6 +199,7 @@ export default defineComponent({
       files,
 
       events,
+      featuredEvents: events.filter(({ featured }) => featured),
       newBedIds,
       weight,
       weightUnit,
