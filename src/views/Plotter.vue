@@ -4,10 +4,13 @@
       <nav>
         <button>&slarr;</button>
         <div>
-          <h1>Entity Name</h1>
-          <h2>Description or top-tier info about entity</h2>
+          <h1>{{ selectedBed?.name }}</h1>
+          <h2>{{ selectedBedPlot?.name }}</h2>
         </div>
-        <input type="range" min="1" max="100" v-model="scale" />
+        <aside>
+          <input type="range" min="1" max="100" v-model="scale" />
+          <input type="number" min="1" max="100" v-model="scale" />
+        </aside>
         <button>&#8505;</button>
       </nav>
     </header>
@@ -68,26 +71,51 @@
         height="100%"
         fill="url(#majorGridlines)"
         :style="{ cursor: panning ? 'grabbing' : 'grab' }"
-        @mousedown="handleStart"
+        @mousedown="handleGridDragStart"
+        @click="selectedBed = null"
         ref="gridlinesRef"
       />
 
       <svg
         :x="pan.x"
         :y="pan.y"
+        style="overflow: visible;"
       >
         <g
           :transform="`scale(${scale})`"
         >
-          <rect
-            v-for="(plot, index) in plots"
-            :key="index"
-            :x="plot.x"
-            :y="plot.y"
-            :width="plot.width"
-            :height="plot.height"
-            fill="gray"
-          />
+          <g
+            v-for="bed in beds"
+            :key="bed.id"
+            :transform="`translate(${bed.x || 0}, ${bed.y || 0})`"
+            class="bed"
+            :class="{ selected: bed.id === selectedBed?.id }"
+            @click="e => handleBedClick(e, bed)"
+          >
+            <rect
+              :width="Math.max(MIN_WIDTH, bed.width || 0)"
+              :height="Math.max(MIN_HEIGHT, bed.height || 0)"
+              fill="gray"
+            />
+            <text :x="0" :y="1">{{ bed.name }}</text>
+            <circle
+              :transform="`translate(${Math.max(MIN_WIDTH, bed.width || 0)}, ${Math.max(MIN_HEIGHT, bed.height || 0)})`"
+              :r="1/2"
+              class="resize-handle"
+            />
+          </g>
+
+          <g
+            v-if="selectedBed"
+            :transform="`translate(${selectedBedPlotBounds.min.x - 0.5}, ${selectedBedPlotBounds.min.y - 0.5})`"
+            class="plot"
+          >
+            <rect
+              :width="selectedBedPlotBounds.max.x - selectedBedPlotBounds.min.x + 1"
+              :height="selectedBedPlotBounds.max.y - selectedBedPlotBounds.min.y + 1"
+            />
+            <text :x="0" :y="1">{{ selectedBedPlot.name }}</text>
+          </g>
         </g>
       </svg>
     </svg>
@@ -105,12 +133,25 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, watchEffect } from 'vue'
+import { computed, defineComponent, nextTick, reactive, ref, watch, watchEffect } from 'vue'
+import { gsap } from 'gsap'
+import { Draggable } from 'gsap/Draggable'
+import { Bed, useBeds, usePlots } from '../services/data'
+import { database } from '../services/firebase';
+
+gsap.registerPlugin(Draggable);
+const ls = {
+  get: (key: string, defaultValue?: any) => window.localStorage.getItem(key) === null ? defaultValue : JSON.parse(window.localStorage.getItem(key) as string),
+  set: (key: string, value: any) => window.localStorage.setItem(key, JSON.stringify(value)),
+}
+const MIN_WIDTH = 1;
+const MIN_HEIGHT = 1;
 
 export default defineComponent({
   name: 'Plotter',
   setup() {
-    const scale = ref(10)
+    const scale = ref(ls.get('scale', 10))
+    watch(scale, v => ls.set('scale', v))
     const gridlineSettings = reactive({
       minor: {
         spacing: computed(() => 1 * scale.value),
@@ -127,10 +168,11 @@ export default defineComponent({
     })
     const gridlinesRef = ref()
 
-    const pan = reactive({
+    const pan = reactive(ls.get('pan', {
       x: 0,
       y: 0,
-    })
+    }))
+    watch(pan, v => ls.set('pan', v))
     const panning = ref(false)
     // watch(() => scale.value, (value, previous) => {
     //   // const diff = (Number(value) - Number(previous)) / Number(value)
@@ -143,65 +185,149 @@ export default defineComponent({
     //   // pan.y = diff * pan.y
     //   console.log(1, oldDeltaX, oldDeltaY, newDeltaX, newDeltaY)
     // })
-    const center = reactive({
-      x: 0,
-      y: 0,
-    })
-    watchEffect(() => {
-      const { width = 0, height = 0 } = gridlinesRef.value?.getBoundingClientRect() || {}
-      center.x = width / 2 - pan.x
-      center.y = height / 2 - pan.y
-      // console.log(2, center)
-    })
+    // const center = reactive({
+    //   x: 0,
+    //   y: 0,
+    // })
+    // watchEffect(() => {
+    //   const { width = 0, height = 0 } = gridlinesRef.value?.getBoundingClientRect() || {}
+    //   center.x = width / 2 - pan.x
+    //   center.y = height / 2 - pan.y
+    //   // console.log(2, center)
+    // })
+    const handleGridDragStart = ({ clientX: startX, clientY: startY }: MouseEvent) => {
+      const { x: initialX, y: initialY } = pan
+      panning.value = true
+      const handleMove = ({ clientX, clientY }: MouseEvent) => {
+        pan.x = initialX + clientX - startX
+        pan.y = initialY + clientY - startY
+      }
+      const handleEnd = (e: MouseEvent) => {
+        panning.value = false
+        handleMove(e)
+        document.removeEventListener('mousemove', handleMove)
+        document.removeEventListener('mouseup', handleEnd)
+      }
+      document.addEventListener('mousemove', handleMove)
+      document.addEventListener('mouseup', handleEnd)
+    }
 
-    const plots = reactive([
-      {
-        x: 10,
-        y: 10,
-        width: 7,
-        height: 3,
-      },
-      {
-        x: 50,
-        y: 25,
-        width: 6,
-        height: 14,
-      },
-    ])
+    const plots = usePlots()
+    const beds = useBeds()
+    const selectedBed = ref<Bed>()
+    const selectedBedPlot = computed(() => plots.value?.find(({ id }) => id === selectedBed.value?.plotId))
+    const selectedBedPlotBounds = computed(
+      () => {
+        const bedsInPlot = beds.value?.filter(({ plotId }) => plotId === selectedBed.value?.plotId) as Bed[]
+        return bedsInPlot.reduce(
+          ({ min, max }, { x = 0, y = 0, width = 0, height = 0 }) => {
+            if (min.x === undefined || x < min.x) min.x = x;
+            if (min.y === undefined || y < min.y) min.y = y;
+            if (max.x === undefined || max.x < x + width) max.x = x + width
+            if (max.y === undefined || max.y < y + height) max.y = y + height
+
+            return { min, max };
+          },
+          { min: {}, max: {} } as { min: { x?: number, y?: number }, max: { x?: number, y?: number }},
+        )
+      }
+    )
+    const handleBedMove = (bed: Bed, position: { x: number, y: number }) => {
+      database.ref('/users/mismith/beds').child(bed.id).update(position)
+    }
+    const handleBedResize = (bed: Bed, dimensions: { width: number, height: number }) => {
+      database.ref('/users/mismith/beds').child(bed.id).update(dimensions)
+    }
+    const handleBedClick = (e: MouseEvent, bed: Bed) => {
+      selectedBed.value = bed
+    }
+    watchEffect(async () => {
+      if (beds.value) {
+        await nextTick(); // await for g's to render before selecting them
+
+        Draggable.create('g.bed', {
+          cursor: 'move',
+          liveSnap: {
+            x: v => Math.round(v),
+            y: v => Math.round(v),
+          },
+          minimumMovement: 1,
+          onDrag: function () {
+            const { x, y, target } = this
+            const index = [...target.parentElement.children].indexOf(target)
+            const bed = beds.value?.[index]
+            if (bed) {
+              bed.x = x
+              bed.y = y
+            }
+          },
+          onDragEnd: function () {
+            const { x, y, target } = this
+            const index = [...target.parentElement.children].indexOf(target)
+            const bed = beds.value?.[index]
+            if (bed) {
+              handleBedMove(bed, { x, y })
+            }
+          },
+        })
+        Draggable.create('g.bed .resize-handle', {
+          cursor: 'nwse-resize',
+          liveSnap:  {
+            // @TODO: prevent handle from being dragged above/left of top left min size
+            x: v => Math.round(v),
+            y: v => Math.round(v),
+          },
+          minimumMovement: 1,
+          onPress: function (e) {
+            e.stopPropagation()
+          },
+          onDrag: function () {
+            const { x, y, target } = this
+            const index = [...target.parentElement.parentElement.children].indexOf(target.parentElement)
+            const bed = beds.value?.[index]
+            if (bed) {
+              bed.width = x
+              bed.height = y
+            }
+          },
+          onDragEnd: function () {
+            const { x, y, target } = this
+            const index = [...target.parentElement.parentElement.children].indexOf(target.parentElement)
+            const bed = beds.value?.[index]
+            if (bed) {
+              handleBedResize(bed, { width: x, height: y })
+            }
+          }
+        })
+      }
+    })
 
     return {
+      MIN_WIDTH,
+      MIN_HEIGHT,
+
       scale,
       gridlineSettings,
       gridlinesRef,
 
       pan,
       panning,
-      center,
-      handleStart({ clientX: startX, clientY: startY }: MouseEvent) {
-        const { x: initialX, y: initialY } = pan
-        panning.value = true
-        const handleMove = ({ clientX, clientY }: MouseEvent) => {
-          pan.x = initialX + clientX - startX
-          pan.y = initialY + clientY - startY
-        }
-        const handleEnd = (e: MouseEvent) => {
-          panning.value = false
-          handleMove(e)
-          document.removeEventListener('mousemove', handleMove)
-          document.removeEventListener('mouseup', handleEnd)
-        }
-        document.addEventListener('mousemove', handleMove)
-        document.addEventListener('mouseup', handleEnd)
-      },
+      // center,
+      handleGridDragStart,
 
-      plots,
+      beds,
+      selectedBed,
+      selectedBedPlot,
+      selectedBedPlotBounds,
+      handleBedClick,
+
       handleAddSubplot() {
-        plots.push({
-          x: Math.round(center.x / scale.value),
-          y: Math.round(center.y / scale.value),
-          width: Math.round(Math.random() * 9) + 1,
-          height: Math.round(Math.random() * 9) + 1,
-        })
+        // plots.push({
+        //   x: Math.round(center.x / scale.value),
+        //   y: Math.round(center.y / scale.value),
+        //   width: Math.round(Math.random() * 9) + 1,
+        //   height: Math.round(Math.random() * 9) + 1,
+        // })
       },
     }
   },
@@ -250,6 +376,7 @@ $spacing: 8px;
 
     > nav {
       display: flex;
+      align-items: center;
       width: 100%;
       background: rgba(0, 0, 0, 0.33);
       color: rgba(255, 255, 255, 1);
@@ -294,6 +421,58 @@ $spacing: 8px;
         width: $spacing * 8;
         height: $spacing * 8;
         margin: $spacing;
+      }
+    }
+  }
+
+  svg {
+    text {
+      fill: currentColor;
+      font-size: calc(10px / 10);
+    }
+    .bed {
+      .resize-handle {
+        fill: #2D77F6;
+
+        &:hover,
+        &:focus,
+        &:active {
+          fill: #225EC1;
+        }
+      }
+      &:hover {
+        rect {
+          stroke: #2D77F6;
+          stroke-width: calc(1px / 10);
+        }
+      }
+      &:not(:hover):not(.selected) {
+        .resize-handle:not(:active) {
+          display: none;
+        }
+      }
+      &.selected {
+        rect {
+          stroke: #2D77F6;
+          stroke-width: calc(2px / 10);
+          // stroke-dasharray: calc(4px / 10);
+        }
+        &:hover {
+          rect {
+            stroke: #225EC1;
+          }
+        }
+      }
+    }
+    .plot {
+      color: #2D77F6;
+      pointer-events: none;
+
+      rect {
+          fill: none;
+          stroke: #2D77F6;
+          stroke-width: calc(1px / 10);
+          stroke-dasharray: calc(1px / 10);
       }
     }
   }
