@@ -2,7 +2,7 @@
   "name": "plantrack",
   "version": "0.0.0",
   "scripts": {
-    "emulate": "npx firebase emulators:start",
+    "emulate": "npx firebase emulators:start --import=./.firebase/emulator-data --export-on-exit",
     "dev": "npm run emulate & vite",
     "build": "vuedx-typecheck . && vite build"
   },
