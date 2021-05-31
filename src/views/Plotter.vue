@@ -140,7 +140,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, defineComponent, nextTick, onMounted, onUnmounted, reactive, ref, watch, watchEffect } from 'vue'
 import { gsap } from 'gsap'
 import { Draggable } from 'gsap/Draggable'
 import { Bed, useBeds, usePlots } from '../services/data'
@@ -270,10 +270,10 @@ export default defineComponent({
       }))
     }
 
-    const handleBedMove = async (bed: Bed, position: { x: number, y: number }) => {
+    const handleBedMove = async (bed: Bed, position: { x?: number, y?: number }) => {
       await bedsRef.child(bed.id).update(position)
     }
-    const handleBedResize = async (bed: Bed, dimensions: { width: number, height: number }) => {
+    const handleBedResize = async (bed: Bed, dimensions: { width?: number, height?: number }) => {
       await bedsRef.child(bed.id).update(dimensions)
     }
     const handleBedClick = (e: MouseEvent, bed: Bed) => {
@@ -355,6 +355,32 @@ export default defineComponent({
           }
         })
       }
+    })
+
+    const handleKeypress = async (e: KeyboardEvent) => {
+      if (selectedBed.value) {
+        const adjustment = e.shiftKey ? 10 : 1
+        const position = (() => {
+          const { x = 0, y = 0 } = selectedBed.value
+          switch (e.key) {
+            case 'ArrowLeft': return { x: x - adjustment }
+            case 'ArrowRight': return { x: x + adjustment }
+            case 'ArrowUp': return { y: y - adjustment }
+            case 'ArrowDown': return { y: y + adjustment }
+          }
+          return {}
+        })()
+        if (Object.keys(position).length) {
+          Object.assign(selectedBed.value, position)
+          handleBedMove(selectedBed.value, position)
+        }
+      }
+    }
+    onMounted(() => {
+      document.addEventListener('keydown', handleKeypress)
+    })
+    onUnmounted(() => {
+      document.removeEventListener('keydown', handleKeypress)
     })
 
     return {
