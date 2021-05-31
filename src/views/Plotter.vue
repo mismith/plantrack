@@ -130,7 +130,7 @@
 
     <footer>
       <nav class="PlotterActions">
-        <button @click="handleAddSubplot">Add Subplot</button>
+        <button>Add Subplot</button>
         <button>Add Bed</button>
         <button>Add Crop</button>
         <button>Open</button>
@@ -248,6 +248,7 @@ export default defineComponent({
         )
       }
     )
+    const bedsRef = database.ref('/users/mismith/beds')
     const groupedBeds = ref<Bed[]>([])
     const isGrouped = computed(() => groupedBeds.value?.length > 1)
     const handleGroupAlignLeft = async () => {
@@ -256,7 +257,7 @@ export default defineComponent({
       const minX = bedAccumulator(groupedBeds.value, 'x', Math.min)
 
       await Promise.all(groupedBeds.value.map(async (bed) => {
-        await database.ref('/users/mismith/beds').child(bed.id).update({ x: minX })
+        await bedsRef.child(bed.id).update({ x: minX })
       }))
     }
     const handleGroupAlignTop = async () => {
@@ -265,15 +266,15 @@ export default defineComponent({
       const minY = bedAccumulator(groupedBeds.value, 'y', Math.min)
 
       await Promise.all(groupedBeds.value.map(async (bed) => {
-        await database.ref('/users/mismith/beds').child(bed.id).update({ y: minY })
+        await bedsRef.child(bed.id).update({ y: minY })
       }))
     }
 
     const handleBedMove = async (bed: Bed, position: { x: number, y: number }) => {
-      await database.ref('/users/mismith/beds').child(bed.id).update(position)
+      await bedsRef.child(bed.id).update(position)
     }
     const handleBedResize = async (bed: Bed, dimensions: { width: number, height: number }) => {
-      await database.ref('/users/mismith/beds').child(bed.id).update(dimensions)
+      await bedsRef.child(bed.id).update(dimensions)
     }
     const handleBedClick = (e: MouseEvent, bed: Bed) => {
       if (e.shiftKey && bed && selectedBed.value) {
@@ -378,15 +379,6 @@ export default defineComponent({
       handleGroupAlignLeft,
       handleGroupAlignTop,
       handleBedClick,
-
-      handleAddSubplot() {
-        // plots.push({
-        //   x: Math.round(center.x / scale.value),
-        //   y: Math.round(center.y / scale.value),
-        //   width: Math.round(Math.random() * 9) + 1,
-        //   height: Math.round(Math.random() * 9) + 1,
-        // })
-      },
     }
   },
 })
