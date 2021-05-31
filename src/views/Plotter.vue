@@ -4,7 +4,10 @@
       <nav>
         <button>&slarr;</button>
         <div>
-          <h1>{{ selectedBed?.name }}</h1>
+          <h1>
+            <template v-if="isGrouped">{{ groupedBeds.map(({ name }) => name).join(', ') }}</template>
+            <template v-else>{{ selectedBed?.name }}</template>
+          </h1>
           <h2>{{ selectedBedPlot?.name }}</h2>
         </div>
         <aside>
@@ -72,7 +75,7 @@
         fill="url(#majorGridlines)"
         :style="{ cursor: panning ? 'grabbing' : 'grab' }"
         @mousedown="handleGridDragStart"
-        @click="selectedBed = null"
+        @click="e => handleBedClick(e, null)"
         ref="gridlinesRef"
       />
 
@@ -89,7 +92,7 @@
             :key="bed.id"
             :transform="`translate(${bed.x || 0}, ${bed.y || 0})`"
             class="bed"
-            :class="{ selected: bed.id === selectedBed?.id }"
+            :class="{ selected: bed.id === selectedBed?.id, grouped: isGrouped && groupedBeds.find(({ id }) => id === bed.id) }"
             @click="e => handleBedClick(e, bed)"
           >
             <rect
@@ -232,14 +235,33 @@ export default defineComponent({
         )
       }
     )
-    const handleBedMove = (bed: Bed, position: { x: number, y: number }) => {
-      database.ref('/users/mismith/beds').child(bed.id).update(position)
+    const groupedBeds = ref<Bed[]>([])
+    const isGrouped = computed(() => groupedBeds.value?.length > 1)
+    const handleBedMove = async (bed: Bed, position: { x: number, y: number }) => {
+      await database.ref('/users/mismith/beds').child(bed.id).update(position)
     }
-    const handleBedResize = (bed: Bed, dimensions: { width: number, height: number }) => {
-      database.ref('/users/mismith/beds').child(bed.id).update(dimensions)
+    const handleBedResize = async (bed: Bed, dimensions: { width: number, height: number }) => {
+      await database.ref('/users/mismith/beds').child(bed.id).update(dimensions)
     }
     const handleBedClick = (e: MouseEvent, bed: Bed) => {
-      selectedBed.value = bed
+      if (e.shiftKey && bed && selectedBed.value) {
+        if (bed.id !== selectedBed.value?.id) {
+          if (groupedBeds.value.find(({ id }) => id === bed.id)) {
+            // remove it
+            groupedBeds.value = groupedBeds.value.filter(({ id }) => id !== bed.id)
+          } else {
+            // add it
+            groupedBeds.value = groupedBeds.value.concat(bed)
+          }
+        }
+      } else {
+        if (bed) {
+          groupedBeds.value = [bed]
+        } else {
+          groupedBeds.value = []
+        }
+        selectedBed.value = bed
+      }
     }
     watchEffect(async () => {
       if (beds.value) {
@@ -319,6 +341,8 @@ export default defineComponent({
       selectedBed,
       selectedBedPlot,
       selectedBedPlotBounds,
+      groupedBeds,
+      isGrouped,
       handleBedClick,
 
       handleAddSubplot() {
@@ -460,6 +484,18 @@ $spacing: 8px;
         &:hover {
           rect {
             stroke: #225EC1;
+          }
+        }
+      }
+      &.grouped {
+        rect {
+          stroke: red;
+          stroke-width: calc(2px / 10);
+          stroke-dasharray: calc(2px / 10);
+        }
+        &:hover {
+          rect {
+            stroke: red;
           }
         }
       }
