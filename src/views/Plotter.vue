@@ -3,6 +3,10 @@
     <header>
       <nav>
         <button>&slarr;</button>
+        <aside>
+          <button @click.prevent="handleGroupAlignTop">Top</button>
+          <button @click.prevent="handleGroupAlignLeft">Left</button>
+        </aside>
         <div>
           <h1>
             <template v-if="isGrouped">{{ groupedBeds.map(({ name }) => name).join(', ') }}</template>
@@ -149,6 +153,15 @@ const ls = {
 }
 const MIN_WIDTH = 1;
 const MIN_HEIGHT = 1;
+const bedAccumulator = (beds: Bed[], prop: keyof Bed, fn: (a: any, b: any) => any) => {
+  const output = beds.reduce((acc, bed) => {
+    if (acc === undefined) return bed[prop];
+    if (bed[prop] === undefined) return acc;
+    return fn(acc, bed[prop])
+  }, undefined as keyof Bed | undefined)
+  if (output === undefined) throw new Error(`No "${prop}" values to accumulate`)
+  return output
+}
 
 export default defineComponent({
   name: 'Plotter',
@@ -237,6 +250,25 @@ export default defineComponent({
     )
     const groupedBeds = ref<Bed[]>([])
     const isGrouped = computed(() => groupedBeds.value?.length > 1)
+    const handleGroupAlignLeft = async () => {
+      if (!isGrouped.value) return
+
+      const minX = bedAccumulator(groupedBeds.value, 'x', Math.min)
+
+      await Promise.all(groupedBeds.value.map(async (bed) => {
+        await database.ref('/users/mismith/beds').child(bed.id).update({ x: minX })
+      }))
+    }
+    const handleGroupAlignTop = async () => {
+      if (!isGrouped.value) return
+
+      const minY = bedAccumulator(groupedBeds.value, 'y', Math.min)
+
+      await Promise.all(groupedBeds.value.map(async (bed) => {
+        await database.ref('/users/mismith/beds').child(bed.id).update({ y: minY })
+      }))
+    }
+
     const handleBedMove = async (bed: Bed, position: { x: number, y: number }) => {
       await database.ref('/users/mismith/beds').child(bed.id).update(position)
     }
@@ -343,6 +375,8 @@ export default defineComponent({
       selectedBedPlotBounds,
       groupedBeds,
       isGrouped,
+      handleGroupAlignLeft,
+      handleGroupAlignTop,
       handleBedClick,
 
       handleAddSubplot() {
