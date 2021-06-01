@@ -18,7 +18,10 @@
           </button>
         </template>
         <template v-else>
-          <span>{{node.name || node.id}}</span>
+          <div style="display: inline-flex; flex-direction: column;">
+            <span>{{node.name || node.id}}</span>
+            <small v-if="node.cropId" style="font-size: 0.5em;">{{crops?.find(({ id }) => id === node.cropId)?.nickname}}</small>
+          </div>
 
           <span
             v-if="node.type === 'plant' && node.children?.length" 
@@ -44,7 +47,7 @@
 <script lang="ts">
 import { defineComponent, PropType, reactive, watchEffect } from 'vue'
 
-import { usePlantDataTree, Entry, events, Plant, entryToString } from '../services/data'
+import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops } from '../services/data'
 import { database } from '../services/firebase'
 import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
 
@@ -89,6 +92,7 @@ export default defineComponent({
       }),
       // renamable: multiple,
     })
+    const crops = useCrops()
 
     watchEffect(() => {
       emit('update:modelValue', multiple
@@ -109,6 +113,7 @@ export default defineComponent({
       plants,
       beds,
       entryToString,
+      crops,
 
       events,
       getLatestEntryEvent(node: ITreeNode) {
