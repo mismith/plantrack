@@ -298,8 +298,13 @@ export default defineComponent({
     }
     watchEffect(async () => {
       if (beds.value) {
-        await nextTick(); // await for g's to render before selecting them
+        await nextTick(); // await for <g>s to render before selecting them
 
+        const getBedFromElement = (el: any) => {
+          const index = [...el.parentElement.children].indexOf(el)
+          const bed = beds.value?.[index]
+          return bed
+        }
         Draggable.create('g.bed', {
           cursor: 'move',
           liveSnap: {
@@ -309,8 +314,7 @@ export default defineComponent({
           minimumMovement: 1,
           onDrag: function () {
             const { x, y, target } = this
-            const index = [...target.parentElement.children].indexOf(target)
-            const bed = beds.value?.[index]
+            const bed = getBedFromElement(target)
             if (bed) {
               bed.x = x
               bed.y = y
@@ -318,8 +322,7 @@ export default defineComponent({
           },
           onDragEnd: function () {
             const { x, y, target } = this
-            const index = [...target.parentElement.children].indexOf(target)
-            const bed = beds.value?.[index]
+            const bed = getBedFromElement(target)
             if (bed) {
               handleBedMove(bed, { x, y })
             }
@@ -338,8 +341,7 @@ export default defineComponent({
           },
           onDrag: function () {
             const { x, y, target } = this
-            const index = [...target.parentElement.parentElement.children].indexOf(target.parentElement)
-            const bed = beds.value?.[index]
+            const bed = getBedFromElement(target.parentElement)
             if (bed) {
               bed.width = x
               bed.height = y
@@ -347,8 +349,7 @@ export default defineComponent({
           },
           onDragEnd: function () {
             const { x, y, target } = this
-            const index = [...target.parentElement.parentElement.children].indexOf(target.parentElement)
-            const bed = beds.value?.[index]
+            const bed = getBedFromElement(target.parentElement)
             if (bed) {
               handleBedResize(bed, { width: x, height: y })
             }
@@ -357,23 +358,34 @@ export default defineComponent({
       }
     })
 
-    const handleKeypress = async (e: KeyboardEvent) => {
-      if (selectedBed.value) {
-        const adjustment = e.shiftKey ? 10 : 1
-        const position = (() => {
-          const { x = 0, y = 0 } = selectedBed.value
-          switch (e.key) {
-            case 'ArrowLeft': return { x: x - adjustment }
-            case 'ArrowRight': return { x: x + adjustment }
-            case 'ArrowUp': return { y: y - adjustment }
-            case 'ArrowDown': return { y: y + adjustment }
-          }
-          return {}
-        })()
-        if (Object.keys(position).length) {
-          Object.assign(selectedBed.value, position)
-          handleBedMove(selectedBed.value, position)
+    const adjustBedPosition = (bed: Bed, { key, adjustment = 1 }: { key: string, adjustment: number }) => {
+      const position = (() => {
+        const { x = 0, y = 0 } = bed
+        switch (key) {
+          case 'ArrowLeft': return { x: x - adjustment }
+          case 'ArrowRight': return { x: x + adjustment }
+          case 'ArrowUp': return { y: y - adjustment }
+          case 'ArrowDown': return { y: y + adjustment }
         }
+      })()
+      if (!position) return
+
+      Object.assign(bed, position)
+      handleBedMove(bed, position)
+    }
+    const handleKeypress = async (e: KeyboardEvent) => {
+      if (!selectedBed.value) return
+
+      const params = {
+        key: e.key,
+        adjustment: e.shiftKey ? 10 : 1
+      }
+      if (isGrouped.value) {
+        groupedBeds.value.forEach((bed) => {
+          adjustBedPosition(bed, params)
+        })
+      } else {
+        adjustBedPosition(selectedBed.value, params)
       }
     }
     onMounted(() => {
