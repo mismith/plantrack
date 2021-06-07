@@ -1,9 +1,10 @@
 <template>
-  <header>
-    <template v-if="user">
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 8px;">
+    <img :src="logo" alt="plantrack" style="max-height: 1.5em;" />
+    <div v-if="user">
       {{user.email}}
       <button @click="handleLogout">Logout</button>
-    </template>
+    </div>
     <form v-else @submit.prevent="handleLogin">
       <input type="email" v-model="email" placeholder="Email" />
       <input type="password" v-model="password" placeholder="Password" />
@@ -27,6 +28,7 @@ import { defineComponent, ref } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
+import logo from './logo.svg'
 
 export default defineComponent({
   name: 'App',
@@ -52,6 +54,7 @@ export default defineComponent({
       handleLogin,
       handleLogout,
 
+      logo,
       routes,
     }
   }
