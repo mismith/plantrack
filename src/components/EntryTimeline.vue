@@ -18,7 +18,7 @@
               relativeDate: seedEntry && new Date(seedEntry.at),
             }))
           ).join('\n')"
-          :class="{ entry: true, [eventId]: true}"
+          :class="{ entry: true, [eventId]: true }"
           :style="`background-color: ${events.find(({ id }) => id === eventId)?.color}`"
         />
       </div>
