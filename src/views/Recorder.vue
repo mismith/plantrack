@@ -56,6 +56,7 @@
           <option>kg</option>
           <option>oz</option>
           <option>lb</option>
+          <option>items</option>
         </select>
       </fieldset>
       <fieldset v-if="eventId === 'harvest'">
