@@ -50,7 +50,7 @@
       </fieldset>
       <fieldset v-if="eventId === 'harvest'">
         <label>How Much</label>
-        <input v-model="weight" type="number" min="1" step="0.01" />
+        <input v-model="weight" min="1" step="0.01" inputmode="decimal" />
         <select v-model="weightUnit">
           <option>g</option>
           <option>kg</option>
@@ -217,6 +217,13 @@ async function addPlantEntry({
     await plantsRef.child(payload.newPlantId).set(newPlant)
   }
 }
+function parseNumericFormula(formula: string | undefined): number {
+  let [, expression] = formula?.match(/^=([\d-+*/.]+)$/) || [, formula];
+  if (expression) {
+    expression = eval(expression);
+  }
+  return Number.parseFloat(Number.parseFloat(expression || '').toFixed(2));
+}
 
 export default defineComponent({
   name: 'Recorder',
@@ -241,7 +248,7 @@ export default defineComponent({
     const cropId = computed(() => plants.value?.find(({ id }) => id === plantIds.value?.[0])?.cropId)
     const newNamePlaceholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
 
-    const weight = ref<number>()
+    const weight = ref<string>()
     const weightUnit = ref<string>('g')
     const cullToo = ref(false)
 
@@ -276,7 +283,7 @@ export default defineComponent({
           eventId: eventId.value,
           newBedId: newBedIds.value?.[0],
           newName: newName.value || newNamePlaceholder.value,
-          weight: weight.value,
+          weight: parseNumericFormula(weight.value),
           weightUnit: weightUnit.value,
           files: files.value,
           at: at.value,
