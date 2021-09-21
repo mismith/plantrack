@@ -124,6 +124,7 @@ export const useCrops = () => {
   return computed(() => raw.value?.sort((a, b) => a.name.localeCompare(b.name)))
 }
 
+export const INACTIVE = 'inactive';
 export function usePlantDataTree() {
   const plants = usePlants()
   const beds = useBeds()
@@ -136,19 +137,23 @@ export function usePlantDataTree() {
   }].map((plot) => ({
     type: 'plot',
     children: [...beds.value || [], {
-      id: 'inactive',
+      id: INACTIVE,
       name: 'Inactive',
       plotId: 'system',
     }].filter(({ plotId }) => plotId === plot.id).map((bed) => ({
       type: 'bed',
-      children: plants.value?.filter(({ bedId }) => (!bedId && bed.id === 'inactive') || bedId === bed.id).map((plant) => ({
+      children: (plants.value?.filter(({ bedId }) => (!bedId && bed.id === INACTIVE) || bedId === bed.id).map((plant) => ({
         type: 'plant',
         children: toKeyFieldArray<Entry>(plant.entries || {}).map((entry) => ({
           type: 'entry',
           ...entry,
         })).sort((a, b) => a.at - b.at),
         ...plant,
-      })) || [],
+      })) || []).sort(
+        bed.id === INACTIVE
+          ? (a, b) => (a.children[a.children.length - 1]?.at || 0) - (b.children[b.children.length - 1]?.at || 0)
+          : () => 0,
+      ),
       ...bed,
     })) || [],
     ...plot,
