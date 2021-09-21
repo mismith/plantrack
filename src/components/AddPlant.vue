@@ -1,5 +1,5 @@
 <template>
-  <AddCrop v-if="isAddingCrop" style="margin: 32px;" />
+  <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
   <form @submit.prevent="handleSubmit" v-bind="$attrs" class="AddPlant">
     <fieldset>
       <label>
@@ -43,12 +43,14 @@ import { computed, defineComponent, reactive, ref, watch } from 'vue'
 
 import { getSuggestedPlantName, NewEntity, Plant, useCrops, usePlantDataTree } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
-import TreeView, { ITreeNode } from './TreeView.vue'
+import Dialog from './Dialog.vue'
 import AddCrop from './AddCrop.vue'
+import TreeView, { ITreeNode } from './TreeView.vue'
 
 export default defineComponent({
   name: 'AddPlant',
   components: {
+    Dialog,
     AddCrop,
     TreeView,
   },

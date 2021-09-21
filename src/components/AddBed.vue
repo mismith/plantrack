@@ -1,5 +1,5 @@
 <template>
-  <AddPlot v-if="isAddingPlot" style="margin: 32px;" />
+  <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
   <form @submit.prevent="handleSubmit" v-bind="$attrs" class="AddBed">
     <fieldset>
       <label>Name</label>
@@ -34,11 +34,13 @@ import { defineComponent, ref } from 'vue'
 
 import { Bed, NewEntity, usePlots } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
+import Dialog from './Dialog.vue'
 import AddPlot from './AddPlot.vue'
 
 export default defineComponent({
   name: 'AddBed',
   components: {
+    Dialog,
     AddPlot,
   },
   setup() {

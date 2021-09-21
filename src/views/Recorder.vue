@@ -1,7 +1,7 @@
 <template>
   <div class="Recorder">
-    <AddPlant v-if="isAddingPlant" style="margin: 32px;" />
-    <AddBed v-if="isAddingBed" style="margin: 32px;" />
+    <Dialog v-model="isAddingPlant"><AddPlant /></Dialog>
+    <Dialog v-model="isAddingBed"><AddBed /></Dialog>
     <form @submit.prevent="handleSubmit">
       <fieldset>
         <label>
@@ -93,6 +93,7 @@ import { computed, defineComponent, ref } from 'vue'
 
 import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops } from '../services/data'
 import { database, ServerValue, storage } from '../services/firebase'
+import Dialog from '../components/Dialog.vue'
 import AddBed from '../components/AddBed.vue'
 import AddPlant from '../components/AddPlant.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
@@ -228,6 +229,7 @@ function parseNumericFormula(formula: string | undefined): number {
 export default defineComponent({
   name: 'Recorder',
   components: {
+    Dialog,
     AddBed,
     AddPlant,
     PlantTreeView,
