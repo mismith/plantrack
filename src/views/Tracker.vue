@@ -147,7 +147,7 @@ $spacing: 8px;
 
     label {
       display: inline-block;
-      margin: $spacing / 2;
+      margin: $spacing * 0.5;
     }
   }
 
