@@ -56,7 +56,12 @@ export interface Plot extends Entity {
   name: string
 }
 
-export const events = [
+export interface Event {
+  id: string;
+  color: string;
+  featured?: boolean;
+}
+export const events: Event[] = [
   {
     id: 'seed',
     color: 'yellow',
