@@ -31,21 +31,22 @@ export default defineComponent({
   props: {
     nodes: {
       type: Array as PropType<ITreeNode[]>,
-      required: true,
     },
     parents: {
       type: Array as PropType<ITreeNode[]>,
-      required: false,
       default: [],
     },
     state: {
       type: Object as PropType<Record<string, any>>,
+      default: () => ({}),
     },
     options: {
       type: Object as PropType<Record<string, any>>,
+      default: () => ({}),
     },
     tools: {
       type: Object as PropType<Record<string, any>>,
+      default: () => ({}),
     },
   },
 })
