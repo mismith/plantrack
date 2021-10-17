@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Plotter from './views/Plotter.vue'
 import Recorder from './views/Recorder.vue'
 import Tracker from './views/Tracker.vue'
+import Exporter from './views/Exporter.vue'
 
 export const routes = [
   {
@@ -20,6 +21,10 @@ export const routes = [
   {
     path: '/tracker',
     component: Tracker,
+  },
+  {
+    path: '/exporter',
+    component: Exporter,
   },
 ]
 

@@ -55,8 +55,8 @@ export function useRtdbArray<T extends object>(reference: firebase.database.Refe
   onUnmounted(() => reference.off('value', handler))
   return arr
 }
-export function useRtdbObject<T = any>(reference: firebase.database.Reference) {
-  const obj = ref<T[]>()
+export function useRtdbObject<T extends Object>(reference: firebase.database.Reference) {
+  const obj = ref<T>()
   const handler = (snapshot: firebase.database.DataSnapshot) => {
     obj.value = snapshot.val()
   }
