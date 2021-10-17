@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "emulate": "npx firebase emulators:start --import=./.firebase/emulator-data --export-on-exit",
-    "dev": "npm run emulate & vite",
+    "dev": "npm run emulate & vite --host",
     "build": "vuedx-typecheck . && vite build"
   },
   "dependencies": {
