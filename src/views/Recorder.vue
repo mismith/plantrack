@@ -50,14 +50,19 @@
       </fieldset>
       <fieldset v-if="eventId === 'harvest'">
         <label>How Much</label>
-        <input v-model="weight" min="1" step="0.01" inputmode="decimal" />
-        <select v-model="weightUnit">
-          <option>g</option>
-          <option>kg</option>
-          <option>oz</option>
-          <option>lb</option>
-          <option>items</option>
-        </select>
+        <div style="display: flex">
+          <input v-model="weight" min="1" step="0.01" inputmode="decimal" style="flex: auto;" />
+          <select v-model="weightUnit">
+            <option>g</option>
+            <option>kg</option>
+            <option>oz</option>
+            <option>lb</option>
+            <option>items</option>
+          </select>
+          <select v-if="plantIds.length > 1" v-model="weightSplit">
+            <option v-for="key in WEIGHT_SPLIT" :key="key">{{key}}</option>
+          </select>
+        </div>
       </fieldset>
       <fieldset v-if="eventId === 'harvest'">
         <label>Cull Too</label>
@@ -98,6 +103,15 @@ import AddBed from '../components/AddBed.vue'
 import AddPlant from '../components/AddPlant.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 
+const WEIGHT_SPLIT = {
+  ALL: 'total',
+  EACH: 'each',
+}
+function round(number: number, numDecimals: number = 2) {
+  const multiplier = 10 ** numDecimals;
+  return Math.round(number * multiplier + Number.EPSILON) / multiplier;
+}
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 async function uploadAttachment(file: File): Promise<Attachment> {
   if (file.size > MAX_FILE_SIZE) {
@@ -117,6 +131,7 @@ async function uploadAttachment(file: File): Promise<Attachment> {
   }
   return attachment
 }
+
 async function addPlantEntry({
   plantId,
   eventId,
@@ -218,13 +233,6 @@ async function addPlantEntry({
     await plantsRef.child(payload.newPlantId).set(newPlant)
   }
 }
-function parseNumericFormula(formula: string | undefined): number {
-  let [, expression] = formula?.match(/^=([\d-+*/.]+)$/) || [, formula];
-  if (expression) {
-    expression = eval(expression);
-  }
-  return Number.parseFloat(Number.parseFloat(expression || '').toFixed(2));
-}
 
 export default defineComponent({
   name: 'Recorder',
@@ -252,6 +260,7 @@ export default defineComponent({
 
     const weight = ref<string>()
     const weightUnit = ref<string>('g')
+    const weightSplit = ref<string>(WEIGHT_SPLIT.ALL)
     const cullToo = ref(false)
 
     const isValid = computed(() => {
@@ -260,7 +269,6 @@ export default defineComponent({
         switch (eventId.value) {
           case 'transplant': return newBedIds.value.length
           case 'splice': return newBedIds.value.length === 1 && plantIds.value.length === 1
-          case 'harvest': return weight.value && weightUnit.value
           default: return true
         }
       })()
@@ -273,19 +281,27 @@ export default defineComponent({
       newBedIds.value = []
       weight.value = undefined
       weightUnit.value = 'g'
+      weightSplit.value = WEIGHT_SPLIT.ALL
       cullToo.value = false
       at.value = undefined
       note.value = undefined
       files.value = undefined
     }
     async function handleSubmit() {
+      const individualWeight = weight.value
+        ? (
+          weightSplit.value === WEIGHT_SPLIT.ALL
+            ? round(Number.parseFloat(weight.value) / plantIds.value.length)
+            : Number.parseFloat(weight.value)
+        )
+        : undefined;
       await Promise.all(plantIds.value.map(async (plantId) => {
         const params = {
           plantId,
           eventId: eventId.value,
           newBedId: newBedIds.value?.[0],
           newName: newName.value || newNamePlaceholder.value,
-          weight: parseNumericFormula(weight.value),
+          weight: individualWeight,
           weightUnit: weightUnit.value,
           files: files.value,
           at: at.value,
@@ -306,6 +322,8 @@ export default defineComponent({
     }
 
     return {
+      WEIGHT_SPLIT,
+
       isAddingBed,
       isAddingPlant,
       plantIds,
@@ -321,6 +339,7 @@ export default defineComponent({
       newNamePlaceholder,
       weight,
       weightUnit,
+      weightSplit,
       cullToo,
 
       isValid,
