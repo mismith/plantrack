@@ -5,22 +5,25 @@
       {{user.email}}
       <button @click="handleLogout">Logout</button>
     </div>
-    <form v-else @submit.prevent="handleLogin">
-      <input type="email" v-model="email" placeholder="Email" />
-      <input type="password" v-model="password" placeholder="Password" />
-      <button type="submit">Login</button>
-    </form>
   </header>
 
-  <router-view v-if="user" />
+  <template v-if="user">
+    <router-view />
 
-  <router-link
-    v-for="route in routes.filter(({ path }) => path !== '/')"
-    :key="route.path"
-    :to="route.path"
-  >
-    {{route.path}}
-  </router-link>
+    <router-link
+      v-for="route in routes.filter(({ path }) => path !== '/')"
+      :key="route.path"
+      :to="route.path"
+    >
+      {{route.path}}
+    </router-link>
+  </template>
+
+  <form v-else style="margin: auto;" @submit.prevent="handleLogin">
+    <input type="email" v-model="email" placeholder="Email" />
+    <input type="password" v-model="password" placeholder="Password" />
+    <button type="submit">Login</button>
+  </form>
 </template>
 
 <script lang="ts">
