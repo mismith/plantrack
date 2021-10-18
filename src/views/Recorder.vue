@@ -10,7 +10,7 @@
           <button type="button" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
           <button type="reset" @click="handleReset">Reset</button>
         </label>
-        <PlantTreeView multiple v-model="plantIds" />
+        <PlantTreeView v-if="!isLoading" multiple v-model="plantIds" />
       </fieldset>
 
       <fieldset>
@@ -85,7 +85,8 @@
       </fieldset>
 
       <fieldset>
-        <button type="submit" :disabled="!isValid">Add Entry</button>
+        <button type="submit" :disabled="!isValid || isLoading">Add Entry</button>
+        <progress v-if="isLoading" style="width: 100%;" />
       </fieldset>
     </form>
     <pre>{{newBedIds}}</pre>
@@ -274,6 +275,7 @@ export default defineComponent({
       })()
       return Boolean(requireds && conditionals)
     })
+    const isLoading = ref(false);
 
     function handleReset() {
       plantIds.value = []
@@ -288,6 +290,7 @@ export default defineComponent({
       files.value = undefined
     }
     async function handleSubmit() {
+      isLoading.value = true;
       const individualWeight = weight.value
         ? (
           weightSplit.value === WEIGHT_SPLIT.ALL
@@ -319,6 +322,7 @@ export default defineComponent({
       }))
       
       handleReset()
+      isLoading.value = false;
     }
 
     return {
@@ -343,6 +347,7 @@ export default defineComponent({
       cullToo,
 
       isValid,
+      isLoading,
 
       handleReset,
       handleSubmit,
