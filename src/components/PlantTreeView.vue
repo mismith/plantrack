@@ -4,6 +4,7 @@
     :state="treeState"
     :options="treeOptions"
     class="PlantTreeView"
+    @change="handleChange"
   >
     <template #node-name="{ node, parents }">
       <span class="TreeNodeName">
@@ -45,17 +46,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, watchEffect } from 'vue'
+import { defineComponent, PropType, reactive } from 'vue'
 
 import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops } from '../services/data'
 import { database } from '../services/firebase'
-import TreeView, { ITreeNode, tools } from '../components/TreeView.vue'
+import { ITreeNode, tools } from './TreeView'
+import TreeView from './TreeView/TreeView.vue'
 
 function isOrHasDescendent(type: string) {
   return (node: ITreeNode) => node.type !== type && !tools.walkDescendents(
     node,
     (child) => child.type === type,
-  ).filter(Boolean).length
+  ).some(Boolean)
 }
 
 export default defineComponent({
@@ -94,17 +96,6 @@ export default defineComponent({
     })
     const crops = useCrops()
 
-    watchEffect(() => {
-      emit('update:modelValue', multiple
-        ? treeState.checked.filter(
-          id => plants.value?.map(({ id }) => id).includes(id)
-        )
-        : treeState.selected.filter(
-          id => beds.value?.map(({ id }) => id).includes(id)
-        )
-      )
-    })
-
     return {
       nodes,
       treeState,
@@ -131,6 +122,24 @@ export default defineComponent({
           await database.ref(`/users/mismith/${node.type}s/${node.id}`).remove()
         }
       },
+
+      handleChange(changes: Record<string, any>) {
+        Object.assign(treeState, changes);
+        // @TODO: fix/use?
+        let value;
+        if (multiple && changes.checked) {
+          value = treeState.checked.filter(
+            id => plants.value?.map(({ id }) => id).includes(id)
+          )
+        } else if (!multiple && changes.selected) {
+          value = treeState.selected.filter(
+            id => beds.value?.map(({ id }) => id).includes(id)
+          )
+        }
+        if (value) {
+          emit('update:modelValue', value)
+        }
+      }
     }
   },
 })

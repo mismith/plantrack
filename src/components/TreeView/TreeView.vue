@@ -7,6 +7,8 @@
       :parents="parents"
       :state="state"
       :options="options"
+      :tools="tools"
+      @change="handleChange"
     >
       <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
         <slot :name="slot" v-bind="scope" />
@@ -18,10 +20,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 
-import TreeNode, { ITreeNode, tools } from './TreeNode.vue'
-
-export type { ITreeNode }
-export { tools }
+import TreeNode from './TreeNode.vue'
+import { ITreeNode, tools as treeTools } from '.'
 
 export default defineComponent({
   name: 'TreeView',
@@ -45,10 +45,17 @@ export default defineComponent({
       default: () => ({}),
     },
     tools: {
-      type: Object as PropType<Record<string, any>>,
-      default: () => ({}),
+      type: Object as PropType<Record<string, any> & typeof treeTools>,
+      default: () => treeTools,
     },
   },
+  setup({}, { emit }) {
+    return {
+      handleChange(changes: Record<string, any>) {
+        emit('change', changes)
+      }
+    }
+  }
 })
 </script>
 

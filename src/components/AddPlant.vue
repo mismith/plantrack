@@ -24,6 +24,7 @@
         :nodes="nodes"
         :state="treeState"
         :options="treeOptions"
+        @change="handleChange"
       />
     </fieldset>
 
@@ -39,13 +40,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, watch } from 'vue'
+import { computed, defineComponent, reactive, ref } from 'vue'
 
 import { getSuggestedPlantName, NewEntity, Plant, useCrops, usePlantDataTree } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
 import Dialog from './Dialog.vue'
 import AddCrop from './AddCrop.vue'
-import TreeView, { ITreeNode } from './TreeView.vue'
+import TreeView from './TreeView/TreeView.vue'
+import { ITreeNode } from './TreeView'
 
 export default defineComponent({
   name: 'AddPlant',
@@ -74,13 +76,11 @@ export default defineComponent({
     const treeOptions = reactive({
       indentable: true,
       expandable: true,
-      // hoverable: true,
+      hoverable: true,
       selectable: (node: ITreeNode) => node.type === 'bed',
       // checkable: true,
       // renamable: true,
     })
-
-    watch(treeState.selected, () => bedId.value = treeState.selected[0])
 
     return {
       nodes,
@@ -105,6 +105,13 @@ export default defineComponent({
           entries: null, // @TODO: this shouldn't be necessary
         }
         database.ref('/users/mismith/plants').push(newPlant)
+      },
+      handleChange(changes: Record<string, any>) {
+        Object.assign(treeState, changes);
+
+        if (changes.selected) {
+          bedId.value = treeState.selected[0];
+        }
       },
     }
   },
