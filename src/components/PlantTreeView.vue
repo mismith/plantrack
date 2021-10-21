@@ -46,11 +46,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive } from 'vue'
+import { computed, defineComponent, PropType, reactive, watch } from 'vue'
 
 import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops } from '../services/data'
 import { database } from '../services/firebase'
-import { ITreeNode, tools } from './TreeView'
+import { Booleanable, ITreeNode, tools } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
 
 function isOrHasDescendent(type: string) {
@@ -74,27 +74,75 @@ export default defineComponent({
       type: Boolean,
     },
   },
-  setup({ modelValue = [], multiple }, { emit }) {
+  setup(props, { emit }) {
     const { nodes, plants, beds } = usePlantDataTree()
-    const treeState = reactive({
+    const crops = useCrops()
+
+    const treeState = reactive<Record<string, Booleanable>>({
       expanded: [],
       hovered: [],
-      selected: multiple ? [] : modelValue,
-      checked: multiple ? modelValue : [],
-      disabled: isOrHasDescendent(multiple ? 'plant' : 'bed'),
+      selected: [],
+      checked: [],
+      disabled: [],
       // renamed: [],
     })
-    const treeOptions = reactive({
+    const treeOptions = computed(() => ({
       indentable: true,
       expandable: true,
       hoverable: true,
-      selectable: !multiple && ((node: ITreeNode) => node.type === 'bed'),
-      checkable: multiple && ((node: ITreeNode) => node.type !== 'entry' && {
+      selectable: !props.multiple && ((node: ITreeNode) => node.type === 'bed'),
+      checkable: props.multiple && ((node: ITreeNode) => node.type !== 'entry' && {
         recurse: true,
       }),
       // renamable: multiple,
-    })
-    const crops = useCrops()
+    }))
+    watch(() => props.modelValue, () => {
+      if (props.multiple) {
+        treeState.checked = props.modelValue
+      } else {
+        treeState.selected = props.modelValue
+      }
+    }, { immediate: true })
+    watch(() => props.multiple, () => {
+      if (props.multiple) {
+        treeState.selected = []
+        treeState.checked = props.modelValue
+        treeState.disabled = isOrHasDescendent('plant')
+      } else {
+        treeState.selected = props.modelValue
+        treeState.checked = []
+        treeState.disabled = isOrHasDescendent('bed')
+      }
+    }, { immediate: true })
+
+    async function handleRemoveEntry(entry: Entry, parents: ITreeNode[] = [], skipConfirm = false) {
+      if (skipConfirm || window.confirm('Are you sure?')) {
+        const plant = parents[parents.length - 1] as Plant
+        await database.ref(`/users/mismith/plants/${plant.id}/entries/${entry.id}`).remove()
+      }
+    }
+    async function handleRemoveNode(node: ITreeNode, skipConfirm = false) {
+      if (skipConfirm || window.confirm('Are you sure?')) {
+        await database.ref(`/users/mismith/${node.type}s/${node.id}`).remove()
+      }
+    }
+    function handleChange(changes: Record<string, any>) {
+      Object.assign(treeState, changes);
+
+      let value;
+      if (props.multiple && changes.checked && Array.isArray(treeState.checked)) {
+        value = treeState.checked.filter(
+          id => plants.value?.map(({ id }) => id).includes(id)
+        )
+      } else if (!props.multiple && changes.selected && Array.isArray(treeState.selected)) {
+        value = treeState.selected.filter(
+          id => beds.value?.map(({ id }) => id).includes(id)
+        )
+      }
+      if (value) {
+        emit('update:modelValue', value)
+      }
+    }
 
     return {
       nodes,
@@ -111,35 +159,9 @@ export default defineComponent({
         return events.find(({ id }) => id === node.children?.[node.children.length - 1]?.eventId)
       },
 
-      async handleRemoveEntry(entry: Entry, parents: ITreeNode[] = [], skipConfirm = false) {
-        if (skipConfirm || window.confirm('Are you sure?')) {
-          const plant = parents[parents.length - 1] as Plant
-          await database.ref(`/users/mismith/plants/${plant.id}/entries/${entry.id}`).remove()
-        }
-      },
-      async handleRemoveNode(node: ITreeNode, skipConfirm = false) {
-        if (skipConfirm || window.confirm('Are you sure?')) {
-          await database.ref(`/users/mismith/${node.type}s/${node.id}`).remove()
-        }
-      },
-
-      handleChange(changes: Record<string, any>) {
-        Object.assign(treeState, changes);
-        // @TODO: fix/use?
-        let value;
-        if (multiple && changes.checked) {
-          value = treeState.checked.filter(
-            id => plants.value?.map(({ id }) => id).includes(id)
-          )
-        } else if (!multiple && changes.selected) {
-          value = treeState.selected.filter(
-            id => beds.value?.map(({ id }) => id).includes(id)
-          )
-        }
-        if (value) {
-          emit('update:modelValue', value)
-        }
-      }
+      handleRemoveEntry,
+      handleRemoveNode,
+      handleChange,
     }
   },
 })
