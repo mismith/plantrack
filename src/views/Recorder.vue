@@ -140,7 +140,6 @@ async function addPlantEntry({
   newName,
   weight,
   weightUnit,
-  files,
   at,
   note,
 }: {
@@ -150,10 +149,9 @@ async function addPlantEntry({
   newName?: string,
   weight?: number,
   weightUnit?: string,
-  files?: FileList,
   at?: string,
   note?: string,
-}) {
+}, attachments?: Entry['attachments']) {
   if (!plantId || !eventId) return
   const plantsRef = database.ref('/users/mismith/plants')
   const plantRef = plantsRef.child(plantId)
@@ -212,13 +210,11 @@ async function addPlantEntry({
     }
   }
 
-  const attachments = await Promise.all(Array.from(files || []).map(uploadAttachment))
-
   const newEntry: NewEntity<Entry> = {
     eventId,
     at: at ? new Date(at).valueOf() : ServerValue.TIMESTAMP,
     payload: payload || null,
-    attachments,
+    attachments: attachments || null,
     note: note || null,
     createdAt: ServerValue.TIMESTAMP,
   }
@@ -298,6 +294,8 @@ export default defineComponent({
             : Number.parseFloat(weight.value)
         )
         : undefined;
+
+      const attachments = await Promise.all(Array.from(files.value || []).map(uploadAttachment))
       await Promise.all(plantIds.value.map(async (plantId) => {
         const params = {
           plantId,
@@ -306,21 +304,19 @@ export default defineComponent({
           newName: newName.value || newNamePlaceholder.value,
           weight: individualWeight,
           weightUnit: weightUnit.value,
-          files: files.value,
           at: at.value,
           note: note.value,
         }
-        await addPlantEntry(params)
+        await addPlantEntry(params, attachments)
 
         if (cullToo.value) {
           await addPlantEntry({
             ...params,
             eventId: 'cull',
-            files: {} as FileList, // don't re-upload attachments
           })
         }
       }))
-      
+
       handleReset()
       isLoading.value = false;
     }
