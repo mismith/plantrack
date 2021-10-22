@@ -2,7 +2,7 @@
   <div class="Recorder">
     <Dialog v-model="isAddingPlant"><AddPlant /></Dialog>
     <Dialog v-model="isAddingBed"><AddBed /></Dialog>
-    <form @submit.prevent="handleSubmit">
+    <form ref="formRef" @submit.prevent="handleSubmit">
       <fieldset>
         <label>
           Plant(s)
@@ -247,6 +247,7 @@ export default defineComponent({
     const at = ref<string>()
     const note = ref<string>()
     const files = ref<FileList>()
+    const formRef = ref<HTMLFormElement>()
 
     const newBedIds = ref<string[]>([])
     const newName = ref<string>()
@@ -284,6 +285,7 @@ export default defineComponent({
       at.value = undefined
       note.value = undefined
       files.value = undefined
+      formRef.value?.reset()
     }
     async function handleSubmit() {
       isLoading.value = true;
@@ -331,6 +333,7 @@ export default defineComponent({
       at,
       note,
       files,
+      formRef,
 
       events,
       featuredEvents: events.filter(({ featured }) => featured),
