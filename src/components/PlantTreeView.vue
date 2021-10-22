@@ -10,7 +10,15 @@
       <span class="TreeNodeName">
         <template v-if="node.type === 'entry'">
           <span>{{entryToString(node, { beds, plants })}}</span>
-
+          <a
+            v-for="attachment in node.attachments"
+            :key="attachment.url"
+            href="#"
+            target="_blank"
+            :title="attachment.name"
+            style="text-decoration: none;"
+            @click.stop="handleAttachmentClick($event, attachment)"
+          >📷</a>
           <button
             type="button"
             @click.stop="handleRemoveEntry(node, parents, $event.shiftKey)"
@@ -48,8 +56,8 @@
 <script lang="ts">
 import { computed, defineComponent, PropType, reactive, watch } from 'vue'
 
-import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops } from '../services/data'
-import { database } from '../services/firebase'
+import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops, Attachment } from '../services/data'
+import { database, storage } from '../services/firebase'
 import { Booleanable, ITreeNode, tools } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
 
@@ -126,6 +134,15 @@ export default defineComponent({
         await database.ref(`/users/mismith/${node.type}s/${node.id}`).remove()
       }
     }
+    async function handleAttachmentClick(event: any, attachment: Attachment) {
+      event.preventDefault()
+      const ref = storage.ref(`/${attachment.url}`)
+      const href = await ref.getDownloadURL()
+      const a = document.createElement("a")
+      a.target = event.target.target
+      a.href = href
+      a.click()
+    }
     function handleChange(changes: Record<string, any>) {
       Object.assign(treeState, changes);
 
@@ -161,6 +178,7 @@ export default defineComponent({
 
       handleRemoveEntry,
       handleRemoveNode,
+      handleAttachmentClick,
       handleChange,
     }
   },
@@ -180,6 +198,7 @@ $spacing: 8px;
     margin-left: 0.33em;
   }
   .TreeNodeName {
+    > a,
     > button,
     > span,
     > small {
