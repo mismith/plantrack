@@ -28,6 +28,7 @@ export default firebase
 if (window.location.hostname === 'localhost') {
   auth.useEmulator('http://localhost:9099/')
   database.useEmulator('localhost', 9000)
+  storage.useEmulator("localhost", 9199)
 }
 
 export function useUser(auth: firebase.auth.Auth = firebase.auth()) {
