@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineAsyncComponent, defineComponent, PropType } from 'vue'
+import { defineAsyncComponent, defineComponent, PropType } from 'vue'
 
 import TransitionExpand from './TransitionExpand.vue'
 import { ITreeNode, tools as treeTools } from '.'

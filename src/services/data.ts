@@ -47,19 +47,19 @@ export interface Plant extends Entity {
 export interface Bed extends Entity {
   name: string
   plotId: string
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
+  x?: number
+  y?: number
+  width?: number
+  height?: number
 }
 export interface Plot extends Entity {
   name: string
 }
 
 export interface Event {
-  id: string;
-  color: string;
-  featured?: boolean;
+  id: string
+  color: string
+  featured?: boolean
 }
 export const events: Event[] = [
   {
