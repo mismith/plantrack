@@ -70,6 +70,8 @@ export default defineComponent({
           await database.ref('/users/mismith/crops').push(newCrop)
         }
       }))
+
+      window.alert('Import successful')
     },
 
       async handleSubmit() {
