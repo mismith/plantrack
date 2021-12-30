@@ -109,11 +109,13 @@ button {
         display: inline-block;
         width: 0.6em;
         align-self: stretch;
+        flex-shrink: 0;
         // border-right: solid 1px ButtonFace;
       }
 
       .TreeNodeExpand {
         appearance: none;
+        flex-shrink: 0;
         display: inline-block;
         position: relative;
         width: 1.5em;
