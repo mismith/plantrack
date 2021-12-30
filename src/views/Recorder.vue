@@ -5,7 +5,7 @@
     <form ref="formRef" @submit.prevent="handleSubmit">
       <fieldset>
         <label>
-          Plant(s)
+          {{plantIds.length || ''}} Plant(s)
           <button type="button" :class="{ active: isAddingPlant }" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
           <button type="button" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
           <button type="reset" @click="handleReset">Reset</button>
@@ -89,8 +89,6 @@
         <progress v-if="isLoading" style="width: 100%;" />
       </fieldset>
     </form>
-    <pre>{{newBedIds}}</pre>
-    <pre>{{plantIds}}</pre>
   </div>
 </template>
 
