@@ -22,9 +22,8 @@
       <label>Bed</label>
       <TreeView
         :nodes="nodes"
-        :state="treeState"
-        :options="treeOptions"
-        @change="handleChange"
+        v-bind="treeView.bind"
+        v-on="treeView.on"
       />
     </fieldset>
 
@@ -40,9 +39,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 
-import { getSuggestedPlantName, NewEntity, Plant, useCrops, usePlantDataTree } from '../services/data'
+import { getSuggestedPlantName, NewEntity, Plant, useCrops, usePlantDataTree, useTreeViewPicker } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
 import Dialog from './Dialog.vue'
 import AddCrop from './AddCrop.vue'
@@ -66,26 +65,11 @@ export default defineComponent({
     const name = ref()
     const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
 
-    const treeState = reactive({
-      expanded: [],
-      hovered: [],
-      selected: [bedId.value],
-      checked: [],
-      renamed: [],
-    })
-    const treeOptions = reactive({
-      indentable: true,
-      expandable: true,
-      hoverable: true,
-      selectable: (node: ITreeNode) => node.type === 'bed',
-      // checkable: true,
-      // renamable: true,
-    })
+    const treeView = useTreeViewPicker(bedId, { selectable: (node: ITreeNode) => node.type === 'bed' })
 
     return {
       nodes,
-      treeState,
-      treeOptions,
+      treeView,
 
       isAddingCrop,
       crops,
@@ -105,13 +89,6 @@ export default defineComponent({
           entries: null, // @TODO: this shouldn't be necessary
         }
         database.ref('/users/mismith/plants').push(newPlant)
-      },
-      handleChange(changes: Record<string, any>) {
-        Object.assign(treeState, changes)
-
-        if (changes.selected) {
-          bedId.value = treeState.selected[0]
-        }
       },
     }
   },

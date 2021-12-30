@@ -1,5 +1,7 @@
+import { computed, reactive, Ref, watch } from 'vue'
 import { differenceInDays, format } from 'date-fns'
-import { computed } from 'vue'
+
+import { Booleanable } from '../components/TreeView'
 import firebase, { database, toKeyFieldArray, useRtdbArray } from './firebase'
 
 export type Timestamp = number
@@ -30,6 +32,10 @@ export interface Attachment {
 export interface Crop extends Entity {
   name: string
   nickname?: string
+  daysToHarvest?: number | string
+  germinationPercentage?: number
+  cost?: number
+  numSeeds?: number
 }
 export interface Entry extends Entity {
   eventId: string
@@ -202,4 +208,50 @@ export function getSuggestedPlantName(cropId?: string, crops?: Crop[], plants?: 
   const crop = crops?.find((crop) => crop.id === cropId)
   const cropPlants = plants?.filter((plant) => plant.cropId === cropId)
   return `${crop?.name || 'Plant'}.${(cropPlants?.length || 0) + 1}`
+}
+
+export function useTreeViewPicker(
+  ref: Ref,
+  config: { selectable?: Booleanable, checkable?: Booleanable } = { selectable: true },
+  predicate: (value: any, index: number, obj: any[]) => unknown = Boolean,
+) {
+  const state = reactive({
+    expanded: [],
+    hovered: [],
+    selected: [] as any[],
+    checked: [] as any[],
+  })
+  const options = reactive({
+    indentable: true,
+    expandable: true,
+    hoverable: true,
+    ...config,
+  })
+  watch(ref, () => {
+    if (config.checkable) {
+      state.checked = [...ref.value]
+    } else {
+      state.selected = [ref.value]
+    }
+  }, { immediate: true })
+
+  function change(changes: Record<string, any>) {
+    Object.assign(state, changes)
+
+    if (changes.selected) {
+      ref.value = state.selected.find(predicate)
+    }
+    if (changes.checked) {
+      ref.value = state.checked.filter(predicate)
+    }
+  }
+  return {
+    bind: {
+      state,
+      options,
+    },
+    on: {
+      change,
+    },
+  }
 }
