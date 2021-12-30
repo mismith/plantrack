@@ -8,15 +8,18 @@
   </header>
 
   <template v-if="user">
-    <router-view />
+    <router-view style="flex: auto;" />
 
-    <router-link
-      v-for="route in routes.filter(({ path }) => path !== '/')"
-      :key="route.path"
-      :to="route.path"
-    >
-      {{route.path}}
-    </router-link>
+    <div style="display: flex;">
+      <router-link
+        v-for="route in routes.filter(({ path, meta }) => path !== '/' && !meta?.hidden)"
+        :key="route.path"
+        :to="route.path"
+        style="flex: auto; font-variant: small-caps; text-align: center; padding: 8px;"
+      >
+        {{route.path.replace(/\//, '')}}
+      </router-link>
+    </div>
   </template>
 
   <form v-else style="margin: auto;" @submit.prevent="handleLogin">

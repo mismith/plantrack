@@ -21,6 +21,9 @@ export const routes = [
   {
     path: '/tracker',
     component: Tracker,
+    meta: {
+      hidden: true,
+    },
   },
   {
     path: '/exporter',
