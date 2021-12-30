@@ -214,4 +214,27 @@ button {
     overflow-y: auto;
   }
 }
+
+form {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // @HACK: AddPlant <select> is too wide
+
+  fieldset {
+    display: flex;
+    flex-direction: column;
+
+    .TreeView,
+    input:not([type="file"]),
+    select,
+    textarea,
+    [type="submit"] {
+      font-size: 16px;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+  }
+}
 </style>
