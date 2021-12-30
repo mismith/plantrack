@@ -144,9 +144,9 @@ export default defineComponent({
       a.click()
     }
     function handleChange(changes: Record<string, any>) {
-      Object.assign(treeState, changes);
+      Object.assign(treeState, changes)
 
-      let value;
+      let value
       if (props.multiple && changes.checked && Array.isArray(treeState.checked)) {
         value = treeState.checked.filter(
           id => plants.value?.map(({ id }) => id).includes(id)

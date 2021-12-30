@@ -129,7 +129,7 @@ export const useCrops = () => {
   return computed(() => raw.value?.sort((a, b) => a.name.localeCompare(b.name)))
 }
 
-export const INACTIVE = 'inactive';
+export const INACTIVE = 'inactive'
 export function usePlantDataTree() {
   const plants = usePlants()
   const beds = useBeds()
@@ -173,8 +173,8 @@ export function usePlantDataTree() {
 }
 
 export function formatAtAsDate(at: number) {
-  const date = new Date(at);
-  return format(date, 'yyyy-MM-dd h:mma');
+  const date = new Date(at)
+  return format(date, 'yyyy-MM-dd h:mma')
 }
 export function entryToString(node: Entry, { beds, plants, relativeDate }: { beds: Bed[], plants: Plant[], relativeDate?: Date }) {
   const relativeDays = relativeDate && differenceInDays(new Date(node.at), relativeDate)

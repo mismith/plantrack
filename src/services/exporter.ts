@@ -1,5 +1,5 @@
 function writeToString(rows: any[][]) {
-  return rows.map(row => `"${row.join('","')}"`).join('\n');
+  return rows.map(row => `"${row.join('","')}"`).join('\n')
 }
 
 export async function downloadCSVRowsAsFile(csvRows: any[][]) {

@@ -30,7 +30,7 @@ export default defineComponent({
         $plot: plots.value?.[bed.plotId],
         ...bed,
       }
-      return acc;
+      return acc
     }, {} as Record<string, any>))
     const plantsWithBedAndCrop = computed(() => Object.entries(plants.value || {}).reduce((acc, [plantId, plant]) => {
       acc[plantId] = {
@@ -38,7 +38,7 @@ export default defineComponent({
         $crop: crops.value?.[plant.cropId],
         ...plant,
       }
-      return acc;
+      return acc
     }, {} as Record<string, any>))
     const entries = computed(() => Object.entries(plantsWithBedAndCrop.value || {}).flatMap(([plantId, { entries, ...plant }]) => Object.entries(entries || {}).map(([entryId, entry]) => ({
       $plant: plant,

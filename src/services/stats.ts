@@ -6,7 +6,7 @@ export function getStartDateForPlant(plant: Plant): Date {
   const plantEntries = Object.values(plant.entries || {})
   const seedEntry = plantEntries.find(entry => entry.eventId === 'seed')
   const startDate = new Date(seedEntry?.at || plant.createdAt)
-  return startDate;
+  return startDate
 }
 export function getElapsedForEntry(entry: Entry, startDate: Date): number {
   const elapsed = Math.max(0, differenceInMilliseconds(new Date(entry.at), startDate))
@@ -33,7 +33,7 @@ export function getStatsForPlants(plants: Plant[]): Record<string, Stat> {
 
     const plantEntries = Object.values(plant.entries || {})
     plantEntries.forEach((entry) => {
-      if (entry.eventId === 'seed') return;
+      if (entry.eventId === 'seed') return
 
       const elapsed = getElapsedForEntry(entry, startDate)
 

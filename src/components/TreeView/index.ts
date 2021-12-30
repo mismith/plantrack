@@ -30,7 +30,7 @@ export function set(
     return set(value(node), node, on)
   }
 
-  let newValue = value;
+  let newValue = value
   if (Array.isArray(value)) {
     const index = value.indexOf(node.id)
     if (index >= 0 && !on) {
@@ -54,7 +54,7 @@ export function toggle(
     return toggle(value(node), node, options)
   }
 
-  let newValue = value;
+  let newValue = value
   if (Array.isArray(value)) {
     if (options?.clear) {
       newValue = []

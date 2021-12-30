@@ -107,10 +107,10 @@ export default defineComponent({
         database.ref('/users/mismith/plants').push(newPlant)
       },
       handleChange(changes: Record<string, any>) {
-        Object.assign(treeState, changes);
+        Object.assign(treeState, changes)
 
         if (changes.selected) {
-          bedId.value = treeState.selected[0];
+          bedId.value = treeState.selected[0]
         }
       },
     }

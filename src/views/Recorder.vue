@@ -107,8 +107,8 @@ const WEIGHT_SPLIT = {
   EACH: 'each',
 }
 function round(number: number, numDecimals: number = 2) {
-  const multiplier = 10 ** numDecimals;
-  return Math.round(number * multiplier + Number.EPSILON) / multiplier;
+  const multiplier = 10 ** numDecimals
+  return Math.round(number * multiplier + Number.EPSILON) / multiplier
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -249,8 +249,8 @@ export default defineComponent({
 
     const newBedIds = ref<string[]>([])
     const newName = ref<string>()
-    const plants = usePlants();
-    const crops = useCrops();
+    const plants = usePlants()
+    const crops = useCrops()
     const cropId = computed(() => plants.value?.find(({ id }) => id === plantIds.value?.[0])?.cropId)
     const newNamePlaceholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
 
@@ -270,7 +270,7 @@ export default defineComponent({
       })()
       return Boolean(requireds && conditionals)
     })
-    const isLoading = ref(false);
+    const isLoading = ref(false)
 
     function handleReset() {
       plantIds.value = []
@@ -286,14 +286,14 @@ export default defineComponent({
       formRef.value?.reset()
     }
     async function handleSubmit() {
-      isLoading.value = true;
+      isLoading.value = true
       const individualWeight = weight.value
         ? (
           weightSplit.value === WEIGHT_SPLIT.ALL
             ? round(Number.parseFloat(weight.value) / plantIds.value.length)
             : Number.parseFloat(weight.value)
         )
-        : undefined;
+        : undefined
 
       const attachments = await Promise.all(Array.from(files.value || []).map(uploadAttachment))
       await Promise.all(plantIds.value.map(async (plantId) => {
@@ -318,7 +318,7 @@ export default defineComponent({
       }))
 
       handleReset()
-      isLoading.value = false;
+      isLoading.value = false
     }
 
     return {

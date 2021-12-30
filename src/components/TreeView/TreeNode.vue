@@ -125,12 +125,12 @@ export default defineComponent({
       emit('change', changes)
     }
     function handleNodeClick(event: MouseEvent) {
-      const { node, state, options, tools } = props;
+      const { node, state, options, tools } = props
 
       if (tools.is(options.selectable, node) && !tools.is(state.disabled, node)) {
         handleChange({
           selected: tools.toggle(state.selected, node, { clear: (tools.get(options.selectable, node) as any)?.multiple ? !event.metaKey : true }),
-        });
+        })
       } else if (node.children?.length) {
         if (tools.is(options.expandable, node)) {
           handleChange({
@@ -146,7 +146,7 @@ export default defineComponent({
       }
     }
     function handleExpandToggle(to?: boolean, recurse = false) {
-      const { node, state, options, tools } = props;
+      const { node, state, options, tools } = props
       const on = to || !tools.is(state.expanded, node)
       let expanded = tools.set(state.expanded, node, on)
 
@@ -158,7 +158,7 @@ export default defineComponent({
         })
       }
 
-      handleChange({ expanded });
+      handleChange({ expanded })
     }
     function handleCheckToggle(to?: boolean, recurse = false) {
       const { node, state, options, tools } = props

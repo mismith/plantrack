@@ -144,19 +144,19 @@ import { computed, defineComponent, nextTick, onMounted, onUnmounted, reactive, 
 import { gsap } from 'gsap'
 import { Draggable } from 'gsap/Draggable'
 import { Bed, useBeds, usePlots } from '../services/data'
-import { database } from '../services/firebase';
+import { database } from '../services/firebase'
 
-gsap.registerPlugin(Draggable);
+gsap.registerPlugin(Draggable)
 const ls = {
   get: (key: string, defaultValue?: any) => window.localStorage.getItem(key) === null ? defaultValue : JSON.parse(window.localStorage.getItem(key) as string),
   set: (key: string, value: any) => window.localStorage.setItem(key, JSON.stringify(value)),
 }
-const MIN_WIDTH = 1;
-const MIN_HEIGHT = 1;
+const MIN_WIDTH = 1
+const MIN_HEIGHT = 1
 const bedAccumulator = (beds: Bed[], prop: keyof Bed, fn: (a: any, b: any) => any) => {
   const output = beds.reduce((acc, bed) => {
-    if (acc === undefined) return bed[prop];
-    if (bed[prop] === undefined) return acc;
+    if (acc === undefined) return bed[prop]
+    if (bed[prop] === undefined) return acc
     return fn(acc, bed[prop])
   }, undefined as keyof Bed | undefined)
   if (output === undefined) throw new Error(`No "${prop}" values to accumulate`)
@@ -237,12 +237,12 @@ export default defineComponent({
         const bedsInPlot = beds.value?.filter(({ plotId }) => plotId === selectedBed.value?.plotId) as Bed[]
         return bedsInPlot.reduce(
           ({ min, max }, { x = 0, y = 0, width = 0, height = 0 }) => {
-            if (min.x === undefined || x < min.x) min.x = x;
-            if (min.y === undefined || y < min.y) min.y = y;
+            if (min.x === undefined || x < min.x) min.x = x
+            if (min.y === undefined || y < min.y) min.y = y
             if (max.x === undefined || max.x < x + width) max.x = x + width
             if (max.y === undefined || max.y < y + height) max.y = y + height
 
-            return { min, max };
+            return { min, max }
           },
           { min: {}, max: {} } as { min: { x?: number, y?: number }, max: { x?: number, y?: number }},
         )
