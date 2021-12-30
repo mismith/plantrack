@@ -7,7 +7,7 @@
     @change="handleChange"
   >
     <template #node-name="{ node, parents }">
-      <span class="TreeNodeName">
+      <div class="TreeNodeName">
         <template v-if="node.type === 'entry'">
           <span>{{entryToString(node, { beds, plants })}}</span>
           <a
@@ -48,7 +48,7 @@
             &times;
           </button>
         </template>
-      </span>
+      </div>
     </template>
   </TreeView>
 </template>
