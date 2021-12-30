@@ -52,7 +52,7 @@ import { computed, defineComponent, ref } from 'vue'
 import { format, parse } from 'date-fns'
 
 import { useBeds, useCrops, usePlants } from '../services/data'
-import { getStatsStringForPlants } from '../services/stats'
+import { getEventGroupsForPlants, getPlantsForCropId, getStatsStringForPlants } from '../services/stats'
 import EntryTimeline, { getEndDate, getStartDate } from '../components/EntryTimeline.vue'
 
 export default defineComponent({
@@ -69,44 +69,20 @@ export default defineComponent({
   
     const nodes = computed(
       () => crops.value?.map((crop) => {
-        const cropPlants = (
-          plants.value
-            ?.filter(({ cropId }) => crop.id === cropId)
-            .map((plant) => {
-              const entryGroups = Object.values(plant.entries || {}).reduce(
-                (acc, entry) => {
-                  acc[entry.eventId] = (acc[entry.eventId] || []).concat(entry)
-                  return acc
-                },
-                {} as any,
-              )
-              return {
-                ...plant,
-                $entryGroups: entryGroups,
-              }
-            })
-            .filter((plant) => !showOnlyActive.value || plant.bedId)
-        ) || []
+        const cropPlants = getPlantsForCropId(crop.id, plants.value || [])
+          .filter((plant) => !showOnlyActive.value || plant.bedId)
         
         return {
           ...crop,
           $plants: cropPlants,
-          $entryGroups: cropPlants.reduce(
-            (acc, cropPlant) => {
-              Object.entries(cropPlant.$entryGroups).forEach(([eventId, entries]) => {
-                acc[eventId] = (acc[eventId] || []).concat(entries)
-              })
-              return acc
-            },
-            {} as any,
-          ),
+          $eventGroups: getEventGroupsForPlants(cropPlants),
         }
       })
         .filter((node) => !showOnlyActive.value || node.$plants.length)
     )
 
     const allEntries = computed(() => nodes.value?.reduce(
-      (acc, node) => acc.concat(...Object.values(node.$entryGroups) as any),
+      (acc, node) => acc.concat(...Object.values(node.$eventGroups) as any),
       [],
     ))
     const explicitStartDate = ref<Date>()
