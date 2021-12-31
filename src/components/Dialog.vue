@@ -36,17 +36,25 @@ $spacing: 8px;
 .Dialog {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.67);
   padding: $spacing * 2;
   z-index: 2;
 
   > div {
     background-color: white;
+    border: 1px solid #999;
   }
+
   button {
     position: absolute;
     top: $spacing;
     right: $spacing;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    > div {
+      background-color: black;
+    }
   }
 }
 </style>

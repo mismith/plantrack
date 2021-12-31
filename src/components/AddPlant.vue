@@ -1,10 +1,10 @@
 <template>
   <form @submit.prevent="handleSubmit" v-bind="$attrs" class="AddPlant">
     <fieldset>
-      <label>
-        Crop
+      <header>
+        <label>Crop</label>
         <button type="button" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
-      </label>
+      </header>
 
       <select v-model="cropId" required>
         <option

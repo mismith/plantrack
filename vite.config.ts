@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import svgLoader from 'vite-svg-loader'
 
 export default defineConfig({
   optimizeDeps: {
@@ -10,5 +11,23 @@ export default defineConfig({
       'firebase/storage',
     ],
   },
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    svgLoader({
+      svgoConfig: {
+        plugins: [
+          {
+            name: 'preset-default',
+            params: {
+              overrides: {
+                // viewBox is required to resize SVGs with CSS.
+                // @see https://github.com/svg/svgo/issues/1128
+                removeViewBox: false,
+              },
+            },
+          },
+        ],
+      }
+    }),
+  ],
 })

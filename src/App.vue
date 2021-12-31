@@ -1,6 +1,6 @@
 <template>
   <header style="display: flex; justify-content: space-between; align-items: center; padding: 8px;">
-    <img :src="logo" alt="plantrack" style="max-height: 1.5em;" />
+    <Logo class="logo" />
     <div v-if="user">
       {{user.email}}
       <button @click="handleLogout">Logout</button>
@@ -10,12 +10,11 @@
   <template v-if="user">
     <router-view style="flex: auto;" />
 
-    <div style="display: flex;">
+    <div class="pages">
       <router-link
         v-for="route in routes.filter(({ path, meta }) => path !== '/' && !meta?.hidden)"
         :key="route.path"
         :to="route.path"
-        style="flex: auto; font-variant: small-caps; text-align: center; padding: 8px;"
       >
         {{route.path.replace(/\//, '')}}
       </router-link>
@@ -35,12 +34,13 @@
 </template>
 
 <script lang="ts">
+/// <reference types="vite-svg-loader" />
 import { defineComponent, provide, ref } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
-import logo from './logo.svg'
 
+import Logo from './logo.svg?component'
 import Dialog from './components/Dialog.vue'
 import AddPlant from './components/AddPlant.vue'
 import AddCrop from './components/AddCrop.vue'
@@ -50,6 +50,7 @@ import AddPlot from './components/AddPlot.vue'
 export default defineComponent({
   name: 'App',
   components: {
+    Logo,
     Dialog,
     AddPlant,
     AddCrop,
@@ -90,7 +91,6 @@ export default defineComponent({
       handleLogin,
       handleLogout,
 
-      logo,
       routes,
 
       isAddingPlant,
@@ -104,6 +104,45 @@ export default defineComponent({
 
 <style lang="scss">
 $spacing: 8px;
+
+.logo {
+  width: auto;
+  height: 1.5em;
+
+  path[fill="#000"] {
+    fill: currentColor;
+  }
+}
+
+.pages {
+  display: flex;
+  gap: $spacing;
+  padding: $spacing;
+
+  a {
+    flex: auto;
+    color: inherit;
+    font-variant: small-caps;
+    text-align: center;
+    text-decoration: none;
+    padding: $spacing;
+    border: 1px solid #999;
+    border-radius: 3px;
+
+    &:hover {
+      background-color: #7777;
+    }
+    &.router-link-active {
+      background-color: #9999;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
 
 html,
 body,
@@ -245,7 +284,7 @@ button {
     justify-content: initial;
     max-height: 400px;
     border: solid 1px rgb(118, 118, 118);
-    border-radius: 2px;
+    border-radius: 3px;
     overflow-y: auto;
   }
 }
@@ -253,15 +292,28 @@ button {
 form {
   display: flex;
   flex-direction: column;
-  padding: calc($spacing / 2);
-  gap: calc($spacing / 2);
+  padding: $spacing;
+  gap: $spacing;
   overflow: hidden; // @HACK: AddPlant <select> is too wide
 
   fieldset {
     display: flex;
     flex-direction: column;
+    gap: $spacing;
     padding: $spacing;
+    border: 0;
     margin: 0;
+
+    label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    > header {
+      display: flex;
+      align-items: center;
+      column-gap: calc($spacing / 2);
+    }
 
     .TreeView,
     input:not([type="file"]),

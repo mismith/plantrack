@@ -6,10 +6,10 @@
     </fieldset>
 
     <fieldset>
-      <label>
-        Plot
+      <header>
+        <label>Plot</label>
         <button type="button" :class="{ active: isAddingPlot }" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
-      </label>
+      </header>
 
       <select v-model="plotId" required>
         <option

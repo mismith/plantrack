@@ -58,10 +58,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-$spacing: 8px;
-
-.TreeView {
-}
-</style>

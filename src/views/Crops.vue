@@ -2,11 +2,11 @@
   <div class="Crops">
     <form @submit.prevent>
       <fieldset>
-        <label>
-          {{cropIds?.length || crops?.length || ''}} {{cropIds.length ? 'selected' : '' }} crop(s)
+        <header>
+          <label>{{cropIds?.length || crops?.length || ''}} {{cropIds.length ? 'selected' : '' }} crop(s)</label>
           <button type="button" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
           <button type="reset" @click="handleReset">Reset</button>
-        </label>
+        </header>
         <TreeView
           :nodes="nodes"
           v-bind="treeView.bind"

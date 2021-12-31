@@ -2,12 +2,12 @@
   <div class="Recorder">
     <form ref="formRef" @submit.prevent="handleSubmit">
       <fieldset>
-        <label>
-          {{plantIds.length || ''}} Plant(s)
+        <header>
+          <label>{{plantIds.length || ''}} Plant(s)</label>
           <button type="button" :class="{ active: isAddingPlant }" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
           <button type="button" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
           <button type="reset" @click="handleReset">Reset</button>
-        </label>
+        </header>
         <PlantTreeView v-if="!isLoading" multiple v-model="plantIds" />
       </fieldset>
 
@@ -23,7 +23,7 @@
             {{event.id}}
           </option>
         </select>
-        <div style="display: flex;">
+        <div style="display: flex; column-gap: 4px;">
           <button
             v-for="event in featuredEvents"
             :key="event.id"
