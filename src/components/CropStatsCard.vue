@@ -8,6 +8,7 @@
           {{daysFromElapsed(stat.min)}} &lt;
           {{daysFromElapsed(stat.avg)}}±{{daysFromElapsed(stat.std)}}
           &lt; {{daysFromElapsed(stat.max)}}
+          <small>(n={{stat.records.length}})</small>
         </span>
         <output :style="{ left: getElapsedPercentage(stat.min, stats)+'%', width: getElapsedPercentage(stat.max, stats)-getElapsedPercentage(stat.min, stats)+'%', opacity: 0.25 }" />
         <output :style="{ left: getElapsedPercentage(stat.avg, stats)+'%' }" />
