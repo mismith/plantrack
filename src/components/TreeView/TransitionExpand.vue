@@ -1,19 +1,32 @@
 <!-- Adapted from: https://github.com/maoberlehner/transition-to-height-auto-with-vue/blob/master/src/components/TransitionExpand.vue -->
 
 <template>
-  <transition
+  <component
+    :is="group ? 'transition-group' : 'transition'"
     name="expand"
     @enter="onEnter"
     @after-enter="onAfterEnter"
     @leave="onLeave"
   >
     <slot />
-  </transition>
+  </component>
 </template>
 
 <script>
+import { Transition, TransitionGroup } from 'vue';
+
 export default {
   name: 'TransitionExpand',
+  components: {
+    Transition,
+    TransitionGroup,
+  },
+  props: {
+    group: {
+      type: Boolean,
+      default: false,
+    },
+  },
   setup() {
     return {
       onAfterEnter(element) {

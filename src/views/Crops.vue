@@ -21,7 +21,9 @@
         </TreeView>
       </fieldset>
 
-      <CropStatsCard v-for="cropId in cropIds" :key="cropId" :crop-id="cropId" />
+      <TransitionExpand group>
+        <CropStatsCard v-for="cropId in cropIds" :key="cropId" :crop-id="cropId" />
+      </TransitionExpand>
 
       <fieldset>
         <label>Import</label>
@@ -37,6 +39,7 @@ import set from 'lodash.set'
 
 import { useCrops, useTreeViewPicker } from '../services/data'
 import { database, toKeyFieldArray } from '../services/firebase'
+import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 import TreeView from '../components/TreeView/TreeView.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
 import { ITreeNode } from '../components/TreeView'
@@ -44,6 +47,7 @@ import { ITreeNode } from '../components/TreeView'
 export default defineComponent({
   name: 'Crops',
   components: {
+    TransitionExpand,
     TreeView,
     CropStatsCard,
   },

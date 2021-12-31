@@ -38,34 +38,42 @@
         </div>
       </fieldset>
 
-      <fieldset v-if="eventId === 'transplant' || eventId === 'splice'">
-        <label>Where To</label>
-        <PlantTreeView v-model="newBedIds" />
-      </fieldset>
-      <fieldset v-if="eventId === 'splice'">
-        <label>New Name</label>
-        <input v-model="newName" :placeholder="newNamePlaceholder" />
-      </fieldset>
-      <fieldset v-if="eventId === 'harvest'">
-        <label>How Much</label>
-        <div style="display: flex">
-          <input v-model="weight" min="1" step="0.01" inputmode="decimal" style="flex: auto;" />
-          <select v-model="weightUnit">
-            <option>g</option>
-            <option>kg</option>
-            <option>oz</option>
-            <option>lb</option>
-            <option>items</option>
-          </select>
-          <select v-if="plantIds.length > 1" v-model="weightSplit">
-            <option v-for="key in WEIGHT_SPLIT" :key="key">{{key}}</option>
-          </select>
-        </div>
-      </fieldset>
-      <fieldset v-if="eventId === 'harvest'">
-        <label>Cull Too</label>
-        <input v-model="cullToo" type="checkbox" />
-      </fieldset>
+      <TransitionExpand>
+        <fieldset v-if="eventId === 'transplant' || eventId === 'splice'">
+          <label>Where To</label>
+          <PlantTreeView v-model="newBedIds" />
+        </fieldset>
+      </TransitionExpand>
+      <TransitionExpand>
+        <fieldset v-if="eventId === 'splice'">
+          <label>New Name</label>
+          <input v-model="newName" :placeholder="newNamePlaceholder" />
+        </fieldset>
+      </TransitionExpand>
+      <TransitionExpand>
+        <fieldset v-if="eventId === 'harvest'">
+          <label>How Much</label>
+          <div style="display: flex">
+            <input v-model="weight" min="1" step="0.01" inputmode="decimal" style="flex: auto;" />
+            <select v-model="weightUnit">
+              <option>g</option>
+              <option>kg</option>
+              <option>oz</option>
+              <option>lb</option>
+              <option>items</option>
+            </select>
+            <select v-if="plantIds.length > 1" v-model="weightSplit">
+              <option v-for="key in WEIGHT_SPLIT" :key="key">{{key}}</option>
+            </select>
+          </div>
+        </fieldset>
+      </TransitionExpand>
+      <TransitionExpand>
+        <fieldset v-if="eventId === 'harvest'">
+          <label>Cull Too</label>
+          <input v-model="cullToo" type="checkbox" />
+        </fieldset>
+      </TransitionExpand>
 
       <fieldset>
         <label>When</label>
@@ -96,6 +104,7 @@ import { computed, defineComponent, inject, ref } from 'vue'
 import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops } from '../services/data'
 import { database, ServerValue, storage } from '../services/firebase'
 import PlantTreeView from '../components/PlantTreeView.vue'
+import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 
 const WEIGHT_SPLIT = {
   ALL: 'total',
@@ -228,6 +237,7 @@ export default defineComponent({
   name: 'Recorder',
   components: {
     PlantTreeView,
+    TransitionExpand,
   },
   setup() {
     const plantIds = ref<string[]>([])
