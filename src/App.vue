@@ -271,6 +271,9 @@ form {
       font-size: 16px;
     }
 
+    select {
+      width: 100%;
+    }
     textarea {
       resize: vertical;
     }
