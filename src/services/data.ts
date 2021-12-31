@@ -18,7 +18,7 @@ export type OptionalToNullable<O> = {
         : O[K]
     )
 }
-export type NewEntity<T> = Omit<OptionalToNullable<T>, 'id' | 'createdAt'> & {
+export type NewEntity<T> = (Omit<T, 'id' | 'createdAt'> | Omit<OptionalToNullable<T>, 'id' | 'createdAt'>) & {
   createdAt: typeof firebase.database.ServerValue.TIMESTAMP
 }
 
