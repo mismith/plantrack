@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, reactive, watch } from 'vue'
+import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue'
 
 import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops, Attachment } from '../services/data'
 import { database, storage } from '../services/firebase'
@@ -97,7 +97,7 @@ export default defineComponent({
     const treeOptions = computed(() => ({
       indentable: true,
       expandable: true,
-      hoverable: true,
+      hoverable: !inject('isTouchDevice'),
       selectable: !props.multiple && ((node: ITreeNode) => node.type === 'bed'),
       checkable: props.multiple && ((node: ITreeNode) => node.type !== 'entry' && {
         recurse: true,

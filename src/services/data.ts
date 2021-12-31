@@ -1,4 +1,4 @@
-import { computed, reactive, Ref, watch } from 'vue'
+import { computed, inject, reactive, Ref, watch } from 'vue'
 import { differenceInDays, format } from 'date-fns'
 
 import { Booleanable } from '../components/TreeView'
@@ -224,7 +224,7 @@ export function useTreeViewPicker(
   const options = reactive({
     indentable: true,
     expandable: true,
-    hoverable: true,
+    hoverable: !inject('isTouchDevice'),
     ...config,
   })
   watch(ref, () => {

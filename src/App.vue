@@ -80,6 +80,9 @@ export default defineComponent({
     provide('isAddingCrop', isAddingCrop)
     provide('isAddingPlant', isAddingPlant)
 
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches
+    provide('isTouchDevice', isTouchDevice)
+
     return {
       email,
       password,
