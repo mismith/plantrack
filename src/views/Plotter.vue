@@ -2,11 +2,9 @@
   <div class="Plotter">
     <header>
       <nav>
-        <button>&slarr;</button>
-        <aside>
-          <button @click.prevent="handleGroupAlignTop">Top</button>
-          <button @click.prevent="handleGroupAlignLeft">Left</button>
-        </aside>
+        <!-- <button>&slarr;</button> -->
+        <button @click.prevent="handleGroupAlignTop" :disabled="!isGrouped">Align Top</button>
+        <button @click.prevent="handleGroupAlignLeft" :disabled="!isGrouped">Align Left</button>
         <div>
           <h1>
             <template v-if="isGrouped">{{ groupedBeds.map(({ name }) => name).join(', ') }}</template>
@@ -14,11 +12,9 @@
           </h1>
           <h2>{{ selectedBedPlot?.name }}</h2>
         </div>
-        <aside>
-          <input type="range" min="1" max="100" v-model="scale" />
-          <input type="number" min="1" max="100" v-model="scale" />
-        </aside>
-        <button>&#8505;</button>
+        <input type="range" min="1" max="100" v-model="scale" />
+        <input type="number" min="1" max="100" v-model="scale" />
+        <!-- <button :disabled="!selectedBedPlot">&#8505;</button> -->
       </nav>
     </header>
 
@@ -130,17 +126,17 @@
 
     <footer>
       <nav class="PlotterActions">
-        <button>Add Subplot</button>
-        <button>Add Bed</button>
-        <button>Add Crop</button>
-        <button>Open</button>
+        <button @click="isAddingPlot = !isAddingPlot">Add Plot</button>
+        <button @click="isAddingBed = !isAddingBed">Add Bed</button>
+        <button @click="isAddingCrop = !isAddingCrop">Add Crop</button>
+        <!-- <button>Open</button> -->
       </nav>
     </footer>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, onMounted, onUnmounted, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, defineComponent, inject, nextTick, onMounted, onUnmounted, reactive, ref, watch, watchEffect } from 'vue'
 import { gsap } from 'gsap'
 import { Draggable } from 'gsap/Draggable'
 import { Bed, useBeds, usePlots } from '../services/data'
@@ -398,6 +394,9 @@ export default defineComponent({
     return {
       MIN_WIDTH,
       MIN_HEIGHT,
+      isAddingPlot: inject('isAddingPlot'),
+      isAddingBed: inject('isAddingBed'),
+      isAddingCrop: inject('isAddingCrop'),
 
       scale,
       gridlineSettings,
@@ -457,6 +456,10 @@ $spacing: 8px;
       border-color: currentColor;
       outline: none;
     }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 
   > header {
@@ -465,10 +468,12 @@ $spacing: 8px;
     > nav {
       display: flex;
       align-items: center;
+      gap: $spacing;
       width: 100%;
       background: rgba(0, 0, 0, 0.33);
       color: rgba(255, 255, 255, 1);
       border-radius: $spacing;
+      padding: $spacing;
 
       button {
         width: $spacing * 6;
@@ -501,14 +506,15 @@ $spacing: 8px;
 
     > nav {
       display: flex;
+      gap: $spacing;
       background: rgba(0, 0, 0, 0.33);
       border-radius: $spacing * 2;
       pointer-events: all;
+      padding: $spacing;
 
       button {
         width: $spacing * 8;
         height: $spacing * 8;
-        margin: $spacing;
       }
     }
   }
