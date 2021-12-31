@@ -1,5 +1,4 @@
 <template>
-  <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
   <form @submit.prevent="handleSubmit" v-bind="$attrs" class="AddBed">
     <fieldset>
       <label>Name</label>
@@ -30,28 +29,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, inject, ref } from 'vue'
 
 import { Bed, NewEntity, usePlots } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
-import Dialog from './Dialog.vue'
-import AddPlot from './AddPlot.vue'
 
 export default defineComponent({
   name: 'AddBed',
-  components: {
-    Dialog,
-    AddPlot,
-  },
   setup() {
-    const isAddingPlot = ref(false)
-
     const plots = usePlots()
     const plotId = ref(plots.value?.[0]?.id)
     const name = ref()
 
     return {
-      isAddingPlot,
+      isAddingPlot: inject('isAddingPlot'),
       name,
       plots,
       plotId,

@@ -1,5 +1,4 @@
 <template>
-  <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
   <form @submit.prevent="handleSubmit" v-bind="$attrs" class="AddPlant">
     <fieldset>
       <label>
@@ -39,25 +38,19 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, inject, ref } from 'vue'
 
 import { getSuggestedPlantName, NewEntity, Plant, useCrops, usePlantDataTree, useTreeViewPicker } from '../services/data'
 import { database, ServerValue } from '../services/firebase'
-import Dialog from './Dialog.vue'
-import AddCrop from './AddCrop.vue'
 import TreeView from './TreeView/TreeView.vue'
 import { ITreeNode } from './TreeView'
 
 export default defineComponent({
   name: 'AddPlant',
   components: {
-    Dialog,
-    AddCrop,
     TreeView,
   },
   setup() {
-    const isAddingCrop = ref(false)
-
     const { nodes, beds, plants } = usePlantDataTree()
     const crops = useCrops()
     const cropId = ref(crops.value?.[0]?.id)
@@ -71,7 +64,7 @@ export default defineComponent({
       nodes,
       treeView,
 
-      isAddingCrop,
+      isAddingCrop: inject('isAddingCrop'),
       crops,
       cropId,
       bedId,

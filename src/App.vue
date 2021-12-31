@@ -27,17 +27,35 @@
     <input type="password" v-model="password" placeholder="Password" />
     <button type="submit">Login</button>
   </form>
+
+  <Dialog v-model="isAddingPlant"><AddPlant /></Dialog>
+  <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
+  <Dialog v-model="isAddingBed"><AddBed /></Dialog>
+  <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, provide, ref } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
 import logo from './logo.svg'
 
+import Dialog from './components/Dialog.vue'
+import AddPlant from './components/AddPlant.vue'
+import AddCrop from './components/AddCrop.vue'
+import AddBed from './components/AddBed.vue'
+import AddPlot from './components/AddPlot.vue'
+
 export default defineComponent({
   name: 'App',
+  components: {
+    Dialog,
+    AddPlant,
+    AddCrop,
+    AddBed,
+    AddPlot,
+  },
   setup() {
     const user = useUser()
     const email = ref<string>()
@@ -53,6 +71,15 @@ export default defineComponent({
       auth.signOut()
     }
 
+    const isAddingPlot = ref(false)
+    const isAddingBed = ref(false)
+    const isAddingCrop = ref(false)
+    const isAddingPlant = ref(false)
+    provide('isAddingPlot', isAddingPlot)
+    provide('isAddingBed', isAddingBed)
+    provide('isAddingCrop', isAddingCrop)
+    provide('isAddingPlant', isAddingPlant)
+
     return {
       email,
       password,
@@ -62,6 +89,11 @@ export default defineComponent({
 
       logo,
       routes,
+
+      isAddingPlant,
+      isAddingCrop,
+      isAddingBed,
+      isAddingPlot,
     }
   }
 })

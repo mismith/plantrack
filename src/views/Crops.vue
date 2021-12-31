@@ -1,6 +1,5 @@
 <template>
   <div class="Crops">
-    <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
     <form @submit.prevent>
       <fieldset>
         <label>
@@ -33,13 +32,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, inject, ref } from 'vue'
 import set from 'lodash.set'
 
 import { useCrops, useTreeViewPicker } from '../services/data'
 import { database, toKeyFieldArray } from '../services/firebase'
-import Dialog from '../components/Dialog.vue'
-import AddCrop from '../components/AddCrop.vue'
 import TreeView from '../components/TreeView/TreeView.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
 import { ITreeNode } from '../components/TreeView'
@@ -47,13 +44,10 @@ import { ITreeNode } from '../components/TreeView'
 export default defineComponent({
   name: 'Crops',
   components: {
-    Dialog,
-    AddCrop,
     TreeView,
     CropStatsCard,
   },
   setup() {
-    const isAddingCrop = ref(false)
     const crops = useCrops()
     const cropIds = ref([])
 
@@ -128,7 +122,7 @@ export default defineComponent({
     }
 
     return {
-      isAddingCrop,
+      isAddingCrop: inject('isAddingCrop'),
       crops,
       cropIds,
 

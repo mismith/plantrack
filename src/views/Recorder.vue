@@ -1,7 +1,5 @@
 <template>
   <div class="Recorder">
-    <Dialog v-model="isAddingPlant"><AddPlant /></Dialog>
-    <Dialog v-model="isAddingBed"><AddBed /></Dialog>
     <form ref="formRef" @submit.prevent="handleSubmit">
       <fieldset>
         <label>
@@ -93,13 +91,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, inject, ref } from 'vue'
 
 import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops } from '../services/data'
 import { database, ServerValue, storage } from '../services/firebase'
-import Dialog from '../components/Dialog.vue'
-import AddBed from '../components/AddBed.vue'
-import AddPlant from '../components/AddPlant.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 
 const WEIGHT_SPLIT = {
@@ -232,14 +227,9 @@ async function addPlantEntry({
 export default defineComponent({
   name: 'Recorder',
   components: {
-    Dialog,
-    AddBed,
-    AddPlant,
     PlantTreeView,
   },
   setup() {
-    const isAddingBed = ref(false)
-    const isAddingPlant = ref(false)
     const plantIds = ref<string[]>([])
     const eventId = ref<string>()
     const at = ref<string>()
@@ -323,9 +313,9 @@ export default defineComponent({
 
     return {
       WEIGHT_SPLIT,
+      isAddingBed: inject('isAddingBed'),
+      isAddingPlant: inject('isAddingPlant'),
 
-      isAddingBed,
-      isAddingPlant,
       plantIds,
       eventId,
       at,
