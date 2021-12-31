@@ -250,11 +250,15 @@ button {
 form {
   display: flex;
   flex-direction: column;
+  padding: calc($spacing / 2);
+  gap: calc($spacing / 2);
   overflow: hidden; // @HACK: AddPlant <select> is too wide
 
   fieldset {
     display: flex;
     flex-direction: column;
+    padding: $spacing;
+    margin: 0;
 
     .TreeView,
     input:not([type="file"]),
