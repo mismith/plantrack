@@ -3,7 +3,7 @@
     <form @submit.prevent>
       <fieldset>
         <label>
-          {{cropIds.length || ''}} Crop(s)
+          {{cropIds?.length || crops?.length || ''}} {{cropIds.length ? 'selected' : '' }} crop(s)
           <button type="button" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
           <button type="reset" @click="handleReset">Reset</button>
         </label>
