@@ -1,8 +1,8 @@
-import { computed, inject, reactive, Ref, watch } from 'vue'
+import { computed, reactive, Ref, watch } from 'vue'
 import { differenceInDays, format } from 'date-fns'
 
 import { Booleanable } from '../components/TreeView'
-import firebase, { database, toKeyFieldArray, useRtdbArray } from './firebase'
+import firebase, { database, keyField, toKeyFieldArray, useRtdbArray } from './firebase'
 
 export type Timestamp = number
 export interface Entity {
@@ -64,6 +64,7 @@ export interface Bed extends Entity {
 }
 export interface Plot extends Entity {
   name: string
+  parentPlotId?: string
 }
 
 export interface Event {
@@ -139,6 +140,26 @@ export const useCrops = () => {
   return computed(() => raw.value?.sort((a, b) => a.name.localeCompare(b.name)))
 }
 
+export function arrayToNested<T extends { [k: string]: any }>(
+  dataset: T[],
+  { idKey = 'id', parentKey = 'parentId', childrenKey = 'children' } = {},
+) {
+  const hashTable = Object.create(null)
+  dataset.forEach(datum => {
+    hashTable[datum[idKey]] = { [childrenKey]: [...datum[childrenKey]], ...datum }
+  })
+
+  const tree: T[] = []
+  dataset.forEach(datum => {
+    if(datum[parentKey] && hashTable[datum[parentKey]]) {
+      hashTable[datum[parentKey]][childrenKey].push(hashTable[datum[idKey]])
+    } else {
+      tree.push(hashTable[datum[idKey]])
+    }
+  })
+  return tree
+}
+
 export const INACTIVE = 'inactive'
 export function usePlantDataTree() {
   const plants = usePlants()
@@ -178,7 +199,7 @@ export function usePlantDataTree() {
     plants,
     beds,
     plots,
-    nodes,
+    nodes: computed(() => arrayToNested(nodes.value, { idKey: keyField, parentKey: 'parentPlotId' })),
   }
 }
 
