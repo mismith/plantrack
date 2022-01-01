@@ -7,6 +7,7 @@
     <fieldset>
       <label>Parent Plot</label>
       <select v-model="parentPlotId">
+        <option :value="undefined">-</option>
         <option
           v-for="plot in plots"
           :key="plot.id"
@@ -19,7 +20,7 @@
     </fieldset>
 
     <fieldset>
-      <button type="submit" :disabled="!name">{{isEditing ? 'Save' : 'Add'}} Plot</button>
+      <button type="submit" :disabled="!isValid">{{isEditing ? 'Save' : 'Add'}} Plot</button>
     </fieldset>
   </form>
 </template>
@@ -40,11 +41,12 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { plot } = toRefs(props);
-    const isEditing = computed(() => Boolean(plot))
+    const isEditing = computed(() => Boolean(plot.value))
 
-    const name = ref<string | undefined>(plot.value?.name)
-    const parentPlotId = ref<string | undefined>(plot.value?.parentPlotId)
+    const name = ref(plot.value?.name)
+    const parentPlotId = ref(plot.value?.parentPlotId)
     const plots = usePlots()
+    const isValid = computed(() => Boolean(name.value))
 
     return {
       name,
@@ -52,25 +54,26 @@ export default defineComponent({
       plots: plots.value?.filter((p) => p[keyField] !== plot.value?.[keyField]),
 
       isEditing,
+      isValid,
       async handleSubmit() {
-        if (!name.value) return
+        if (!isValid.value) return
 
         if (isEditing.value && plot.value?.[keyField]) {
           const updatedPlot: UpdatedEntity<Plot> = {
-            name: name.value,
+            name: name.value!,
             parentPlotId: parentPlotId.value || null,
             updatedAt: ServerValue.TIMESTAMP,
           }
           await database.ref(`/users/mismith/plots/${plot.value?.[keyField]}`).update(updatedPlot)
-
-          emit('edit', updatedPlot);
+          emit('update', updatedPlot);
         } else {
           const newPlot: NewEntity<Plot> = {
-            name: name.value,
+            name: name.value!,
             parentPlotId: parentPlotId.value || null,
             createdAt: ServerValue.TIMESTAMP,
           }
           await database.ref('/users/mismith/plots').push(newPlot)
+          emit('create', newPlot);
         }
 
         name.value = undefined

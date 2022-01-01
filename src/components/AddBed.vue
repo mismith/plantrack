@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSubmit" v-bind="$attrs" class="AddBed">
+  <form @submit.prevent="handleSubmit" class="AddBed">
     <fieldset>
       <label>Name</label>
       <input type="text" v-model="name" required />
@@ -23,23 +23,33 @@
     </fieldset>
 
     <fieldset>
-      <button type="submit" :disabled="!name || !plotId">Add Bed</button>
+      <button type="submit" :disabled="!isValid">{{isEditing ? 'Save' : 'Add'}} Bed</button>
     </fieldset>
   </form>
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ref } from 'vue'
+import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 
-import { Bed, NewEntity, usePlots } from '../services/data'
-import { database, ServerValue } from '../services/firebase'
+import { Bed, NewEntity, UpdatedEntity, usePlots } from '../services/data'
+import { database, keyField, ServerValue } from '../services/firebase'
 
 export default defineComponent({
   name: 'AddBed',
-  setup() {
+  props: {
+    bed: {
+      type: Object as PropType<Bed>,
+      required: false,
+    },
+  },
+  setup(props, { emit }) {
+    const { bed } = toRefs(props)
+    const isEditing = computed(() => Boolean(bed.value))
+
+    const name = ref(bed.value?.name)
     const plots = usePlots()
-    const plotId = ref(plots.value?.[0]?.id)
-    const name = ref()
+    const plotId = ref(bed.value?.plotId || plots.value?.[0]?.id)
+    const isValid = computed(() => Boolean(name.value && plotId.value))
 
     return {
       isAddingPlot: inject('isAddingPlot'),
@@ -47,15 +57,31 @@ export default defineComponent({
       plots,
       plotId,
 
-      handleSubmit() {
-        if (!name.value || !plotId.value) return
+      isEditing,
+      isValid,
+      async handleSubmit() {
+        if (!isValid.value) return
 
-        const newBed: NewEntity<Bed> = {
-          name: name.value,
-          plotId: plotId.value,
-          createdAt: ServerValue.TIMESTAMP,
+        if (isEditing.value && bed.value?.[keyField]) {
+          const updatedBed: UpdatedEntity<Bed> = {
+            name: name.value!,
+            plotId: plotId.value!,
+            updatedAt: ServerValue.TIMESTAMP,
+          }
+          await database.ref(`/users/mismith/beds/${bed.value?.[keyField]}`).update(updatedBed)
+          emit('update', updatedBed);
+        } else {
+          const newBed: NewEntity<Bed> = {
+            name: name.value!,
+            plotId: plotId.value!,
+            createdAt: ServerValue.TIMESTAMP,
+          }
+          database.ref('/users/mismith/beds').push(newBed)
+          emit('create', newBed);
         }
-        database.ref('/users/mismith/beds').push(newBed)
+
+        name.value = undefined
+        plotId.value = undefined
       },
     }
   },

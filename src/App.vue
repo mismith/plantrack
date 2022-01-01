@@ -31,8 +31,11 @@
   <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
   <Dialog v-model="isAddingBed"><AddBed /></Dialog>
   <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
+  <Dialog :model-value="Boolean(isEditingBed)" @update:model-value="isEditingBed = undefined">
+    <AddBed :bed="isEditingBed" @update="isEditingBed = undefined" />
+  </Dialog>
   <Dialog :model-value="Boolean(isEditingPlot)" @update:model-value="isEditingPlot = undefined">
-    <AddPlot :plot="isEditingPlot" @edit="isEditingPlot = undefined" />
+    <AddPlot :plot="isEditingPlot" @update="isEditingPlot = undefined" />
   </Dialog>
 </template>
 
@@ -42,7 +45,7 @@ import { defineComponent, provide, ref } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
-import { Plot } from './services/data'
+import { Bed, Plot } from './services/data'
 
 import Logo from './logo.svg?component'
 import Dialog from './components/Dialog.vue'
@@ -76,20 +79,19 @@ export default defineComponent({
       auth.signOut()
     }
 
-    const isAddingPlot = ref(false)
-    const isAddingBed = ref(false)
-    const isAddingCrop = ref(false)
     const isAddingPlant = ref(false)
-    provide('isAddingPlot', isAddingPlot)
-    provide('isAddingBed', isAddingBed)
-    provide('isAddingCrop', isAddingCrop)
+    const isAddingCrop = ref(false)
+    const isAddingBed = ref(false)
+    const isAddingPlot = ref(false)
     provide('isAddingPlant', isAddingPlant)
+    provide('isAddingCrop', isAddingCrop)
+    provide('isAddingBed', isAddingBed)
+    provide('isAddingPlot', isAddingPlot)
 
+    const isEditingBed = ref<Bed>()
     const isEditingPlot = ref<Plot>()
+    provide('isEditingBed', isEditingBed)
     provide('isEditingPlot', isEditingPlot)
-
-    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches
-    provide('isTouchDevice', isTouchDevice)
 
     return {
       email,
@@ -105,6 +107,7 @@ export default defineComponent({
       isAddingBed,
       isAddingPlot,
 
+      isEditingBed,
       isEditingPlot,
     }
   }

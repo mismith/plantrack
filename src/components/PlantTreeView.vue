@@ -52,6 +52,13 @@
           ✎
         </button>
         <button
+          v-if="node.type === 'bed'"
+          type="button"
+          @click.stop="isEditingBed = node"
+        >
+          ✎
+        </button>
+        <button
           v-if="node.type !== 'entry'"
           type="button"
           @click.stop="handleRemoveNode(node, $event.shiftKey)"
@@ -185,6 +192,7 @@ export default defineComponent({
       },
 
       isEditingPlot: inject('isEditingPlot'),
+      isEditingBed: inject('isEditingBed'),
       handleRemoveEntry,
       handleRemoveNode,
       handleAttachmentClick,
