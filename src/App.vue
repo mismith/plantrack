@@ -31,6 +31,9 @@
   <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
   <Dialog v-model="isAddingBed"><AddBed /></Dialog>
   <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
+  <Dialog :model-value="Boolean(isEditingPlot)" @update:model-value="isEditingPlot = undefined">
+    <AddPlot :plot="isEditingPlot" @edit="isEditingPlot = undefined" />
+  </Dialog>
 </template>
 
 <script lang="ts">
@@ -39,6 +42,7 @@ import { defineComponent, provide, ref } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
+import { Plot } from './services/data'
 
 import Logo from './logo.svg?component'
 import Dialog from './components/Dialog.vue'
@@ -81,6 +85,9 @@ export default defineComponent({
     provide('isAddingCrop', isAddingCrop)
     provide('isAddingPlant', isAddingPlant)
 
+    const isEditingPlot = ref<Plot>()
+    provide('isEditingPlot', isEditingPlot)
+
     const isTouchDevice = window.matchMedia("(pointer: coarse)").matches
     provide('isTouchDevice', isTouchDevice)
 
@@ -97,6 +104,8 @@ export default defineComponent({
       isAddingCrop,
       isAddingBed,
       isAddingPlot,
+
+      isEditingPlot,
     }
   }
 })

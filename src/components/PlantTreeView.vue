@@ -41,6 +41,13 @@
           <small v-if="node.children?.length">{<span>{{node.children.length}}</span>}</small>
 
           <button
+            v-if="node.type === 'plot'"
+            type="button"
+            @click.stop="isEditingPlot = node"
+          >
+            Edit
+          </button>
+          <button
             v-if="node.type !== 'entry'"
             type="button"
             @click.stop="handleRemoveNode(node, $event.shiftKey)"
@@ -176,6 +183,7 @@ export default defineComponent({
         return events.find(({ id }) => id === node.children?.[node.children.length - 1]?.eventId)
       },
 
+      isEditingPlot: inject('isEditingPlot'),
       handleRemoveEntry,
       handleRemoveNode,
       handleAttachmentClick,

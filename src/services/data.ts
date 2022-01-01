@@ -8,18 +8,22 @@ export type Timestamp = number
 export interface Entity {
   id: string
   createdAt: Timestamp
+  updatedAt?: Timestamp
 }
 export type OptionalToNullable<O> = {
   [K in keyof O]-?: undefined extends O[K]
-    ? NonNullable<O[K]> | null
+    ? NonNullable<O[K]> | null | undefined
     : (
       Timestamp extends O[K]
         ? typeof firebase.database.ServerValue.TIMESTAMP
         : O[K]
     )
 }
-export type NewEntity<T> = (Omit<T, 'id' | 'createdAt'> | Omit<OptionalToNullable<T>, 'id' | 'createdAt'>) & {
+export type NewEntity<T> = Omit<OptionalToNullable<T>, keyof Entity> & {
   createdAt: typeof firebase.database.ServerValue.TIMESTAMP
+}
+export type UpdatedEntity<T> = Omit<OptionalToNullable<T>, keyof Entity> & {
+  updatedAt: typeof firebase.database.ServerValue.TIMESTAMP
 }
 
 export interface Attachment {
