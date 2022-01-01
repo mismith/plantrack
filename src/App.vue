@@ -295,6 +295,26 @@ button {
     }
   }
 
+  .TreeNodeName,
+  .TreeNodeActions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .TreeNodeName {
+    flex: auto;
+  }
+  .TreeNodeActions {
+    padding: 0 4px;
+  }
+  @media (pointer: fine) {
+    .TreeNodeLeaf:not(:hover) {
+      .TreeNodeActions {
+        visibility: hidden;
+      }
+    }
+  }
+
   fieldset > & {
     justify-content: initial;
     max-height: 400px;

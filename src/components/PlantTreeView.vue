@@ -43,7 +43,7 @@
       </div>
     </template>
     <template #node-append="{ node }">
-      <div class="actions">
+      <div class="TreeNodeActions">
         <button
           v-if="node.type === 'plot'"
           type="button"
@@ -212,26 +212,6 @@ $spacing: 8px;
     height: 1em;
     vertical-align: middle;
     border-radius: 1em;
-  }
-  .TreeNodeName,
-  .actions {
-    display: flex;
-    align-items: center;
-    gap: 0.33em;
-  }
-  .TreeNodeName {
-    flex: auto;
-  }
-  .actions {
-    padding: 0 0.33em;
-  }
-
-  @media (pointer: fine) {
-    .TreeNodeLeaf:not(:hover) {
-      .actions {
-        visibility: hidden;
-      }
-    }
   }
 }
 </style>
