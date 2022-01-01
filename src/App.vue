@@ -139,7 +139,7 @@ $spacing: 8px;
     text-decoration: none;
     padding: $spacing;
     border: 1px solid #999;
-    border-radius: 3px;
+    border-radius: calc($spacing / 2);
 
     &:hover {
       background-color: #7777;
@@ -319,7 +319,7 @@ button {
     justify-content: initial;
     max-height: 400px;
     border: solid 1px rgb(118, 118, 118);
-    border-radius: 3px;
+    border-radius: calc($spacing / 2);
     overflow-y: auto;
   }
 }

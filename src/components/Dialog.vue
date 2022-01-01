@@ -38,6 +38,7 @@ $spacing: 8px;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.67);
   padding: $spacing * 2;
+  border-radius: calc($spacing / 2);
   z-index: 2;
 
   > div {
