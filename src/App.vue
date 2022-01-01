@@ -27,10 +27,9 @@
     <button type="submit">Login</button>
   </form>
 
-  <Dialog v-model="isAddingPlant"><AddPlant /></Dialog>
-  <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
-  <Dialog v-model="isAddingBed"><AddBed /></Dialog>
-  <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
+  <Dialog :model-value="Boolean(isEditingPlant)" @update:model-value="isEditingPlant = undefined">
+    <AddPlant :plant="isEditingPlant" @update="isEditingPlant = undefined" />
+  </Dialog>
   <Dialog :model-value="Boolean(isEditingCrop)" @update:model-value="isEditingCrop = undefined">
     <AddCrop :crop="isEditingCrop" @update="isEditingCrop = undefined" />
   </Dialog>
@@ -40,6 +39,10 @@
   <Dialog :model-value="Boolean(isEditingPlot)" @update:model-value="isEditingPlot = undefined">
     <AddPlot :plot="isEditingPlot" @update="isEditingPlot = undefined" />
   </Dialog>
+  <Dialog v-model="isAddingPlant"><AddPlant /></Dialog>
+  <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
+  <Dialog v-model="isAddingBed"><AddBed /></Dialog>
+  <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
 </template>
 
 <script lang="ts">
@@ -48,7 +51,7 @@ import { defineComponent, provide, ref } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
-import { Bed, Crop, Plot } from './services/data'
+import { Bed, Crop, Plant, Plot } from './services/data'
 
 import Logo from './logo.svg?component'
 import Dialog from './components/Dialog.vue'
@@ -91,9 +94,11 @@ export default defineComponent({
     provide('isAddingBed', isAddingBed)
     provide('isAddingPlot', isAddingPlot)
 
+    const isEditingPlant = ref<Plant>()
     const isEditingCrop = ref<Crop>()
     const isEditingBed = ref<Bed>()
     const isEditingPlot = ref<Plot>()
+    provide('isEditingPlant', isEditingPlant)
     provide('isEditingCrop', isEditingCrop)
     provide('isEditingBed', isEditingBed)
     provide('isEditingPlot', isEditingPlot)
@@ -112,6 +117,7 @@ export default defineComponent({
       isAddingBed,
       isAddingPlot,
 
+      isEditingPlant,
       isEditingCrop,
       isEditingBed,
       isEditingPlot,

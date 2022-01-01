@@ -6,7 +6,7 @@
     class="PlantTreeView"
     @change="handleChange"
   >
-    <template #node-name="{ node, parents }">
+    <template #node-name="{ node }">
       <div class="TreeNodeName">
         <template v-if="node.type === 'entry'">
           <span>{{entryToString(node, { beds, plants })}}</span>
@@ -19,12 +19,6 @@
             style="text-decoration: none;"
             @click.stop="handleAttachmentClick($event, attachment)"
           >📷</a>
-          <button
-            type="button"
-            @click.stop="handleRemoveEntry(node, parents, $event.shiftKey)"
-          >
-            &times;
-          </button>
         </template>
         <template v-else>
           <div style="display: inline-flex; flex-direction: column;">
@@ -42,7 +36,7 @@
         </template>
       </div>
     </template>
-    <template #node-append="{ node }">
+    <template #node-append="{ node, parents }">
       <div class="TreeNodeActions">
         <button
           v-if="node.type === 'plot'"
@@ -59,7 +53,21 @@
           ✎
         </button>
         <button
-          v-if="node.type !== 'entry'"
+          v-if="node.type === 'plant'"
+          type="button"
+          @click.stop="isEditingPlant = node"
+        >
+          ✎
+        </button>
+        <button
+          v-if="node.type === 'entry'"
+          type="button"
+          @click.stop="handleRemoveEntry(node, parents, $event.shiftKey)"
+        >
+          &times;
+        </button>
+        <button
+          v-else
           type="button"
           @click.stop="handleRemoveNode(node, $event.shiftKey)"
         >
@@ -193,6 +201,7 @@ export default defineComponent({
 
       isEditingPlot: inject('isEditingPlot'),
       isEditingBed: inject('isEditingBed'),
+      isEditingPlant: inject('isEditingPlant'),
       handleRemoveEntry,
       handleRemoveNode,
       handleAttachmentClick,

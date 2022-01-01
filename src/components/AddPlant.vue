@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSubmit" v-bind="$attrs" class="AddPlant">
+  <form @submit.prevent="handleSubmit" class="AddPlant">
     <fieldset>
       <header>
         <label>Crop</label>
@@ -32,16 +32,16 @@
     </fieldset>
 
     <fieldset>
-      <button type="submit" :disabled="!cropId || !bedId">Add Plant</button>
+      <button type="submit" :disabled="!isValid">{{isEditing ? 'Save' : 'Add'}} Plant</button>
     </fieldset>
   </form>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref } from 'vue'
+import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 
-import { getSuggestedPlantName, NewEntity, Plant, useCrops, usePlantDataTree, useTreeViewPicker } from '../services/data'
-import { database, ServerValue } from '../services/firebase'
+import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewPicker } from '../services/data'
+import { database, keyField, ServerValue } from '../services/firebase'
 import TreeView from './TreeView/TreeView.vue'
 import { ITreeNode } from './TreeView'
 
@@ -50,13 +50,23 @@ export default defineComponent({
   components: {
     TreeView,
   },
-  setup() {
+  props: {
+    plant: {
+      type: Object as PropType<Plant>,
+      required: false,
+    },
+  },
+  setup(props, { emit }) {
+    const { plant } = toRefs(props)
+    const isEditing = computed(() => Boolean(plant.value))
+
     const { nodes, beds, plants } = usePlantDataTree()
     const crops = useCrops()
-    const cropId = ref(crops.value?.[0]?.id)
-    const bedId = ref(beds.value?.[0]?.id)
-    const name = ref()
+    const cropId = ref(plant.value?.cropId || crops.value?.[0]?.id)
+    const bedId = ref(plant.value?.bedId || beds.value?.[0]?.id)
+    const name = ref(plant.value?.name)
     const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
+    const isValid = computed(() => Boolean(cropId.value && bedId.value))
 
     const treeView = useTreeViewPicker(bedId, { selectable: (node: ITreeNode) => node.type === 'bed' })
 
@@ -71,17 +81,34 @@ export default defineComponent({
       name,
       placeholder,
 
-      handleSubmit() {
-        if (!cropId.value || !bedId.value) return
+      isEditing,
+      isValid,
+      async handleSubmit() {
+        if (!isValid.value) return
 
-        const newPlant: NewEntity<Plant> = {
-          name: name.value || placeholder.value,
-          cropId: cropId.value,
-          bedId: bedId.value,
-          createdAt: ServerValue.TIMESTAMP,
-          entries: null, // @TODO: this shouldn't be necessary
+        if (isEditing.value && plant.value?.[keyField]) {
+          const updatedPlant: UpdatedEntity<Plant> = {
+            name: name.value || placeholder.value,
+            cropId: cropId.value!,
+            bedId: bedId.value!,
+            updatedAt: ServerValue.TIMESTAMP,
+          }
+          await database.ref(`/users/mismith/plants/${plant.value?.[keyField]}`).update(updatedPlant)
+          emit('update', updatedPlant);
+        } else {
+          const newPlant: NewEntity<Plant> = {
+            name: name.value || placeholder.value,
+            cropId: cropId.value!,
+            bedId: bedId.value!,
+            createdAt: ServerValue.TIMESTAMP,
+          }
+          database.ref('/users/mismith/plants').push(newPlant)
+          emit('create', newPlant);
         }
-        database.ref('/users/mismith/plants').push(newPlant)
+
+        name.value = undefined
+        cropId.value = undefined
+        bedId.value = undefined
       },
     }
   },
