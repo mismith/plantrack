@@ -18,6 +18,17 @@
               <small v-if="node.name">({{node.name}})</small>
             </div>
           </template>
+          <template #node-append="{ node }">
+            <div class="TreeNodeActions">
+              <button
+                v-if="node.name"
+                type="button"
+                @click.stop="isEditingCrop = crops.find(({ id }) => id === node.id)"
+              >
+                ✎
+              </button>
+            </div>
+          </template>
         </TreeView>
       </fieldset>
 
@@ -127,6 +138,7 @@ export default defineComponent({
 
     return {
       isAddingCrop: inject('isAddingCrop'),
+      isEditingCrop: inject('isEditingCrop'),
       crops,
       cropIds,
 

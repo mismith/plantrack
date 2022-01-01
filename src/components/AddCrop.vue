@@ -11,36 +11,59 @@
     </fieldset>
 
     <fieldset>
-      <button type="submit" :disabled="!name">Add Crop</button>
+      <button type="submit" :disabled="!isValid">{{isEditing ? 'Save' : 'Add'}} Crop</button>
     </fieldset>
   </form>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 
-import { Crop, NewEntity } from '../services/data'
-import { database, ServerValue } from '../services/firebase'
+import { Crop, NewEntity, UpdatedEntity } from '../services/data'
+import { database, keyField, ServerValue } from '../services/firebase'
 
 export default defineComponent({
   name: 'AddCrop',
-  setup() {
-    const name = ref<string>()
-    const nickname = ref<string>()
+  props: {
+    crop: {
+      type: Object as PropType<Crop>,
+      required: false,
+    },
+  },
+  setup(props, { emit }) {
+    const { crop } = toRefs(props)
+    const isEditing = computed(() => Boolean(crop.value))
+
+    const name = ref(crop.value?.name)
+    const nickname = ref(crop.value?.nickname)
+    const isValid = computed(() => Boolean(name.value))
 
     return {
       name,
       nickname,
 
+      isEditing,
+      isValid,
       async handleSubmit() {
-        if (!name.value) return
+        if (!isValid.value) return
 
-        const newCrop: NewEntity<Crop> = {
-          name: name.value,
-          nickname: nickname.value || null,
-          createdAt: ServerValue.TIMESTAMP,
+        if (isEditing.value && crop.value?.[keyField]) {
+          const updatedCrop: UpdatedEntity<Crop> = {
+            name: name.value!,
+            nickname: nickname.value || null,
+            updatedAt: ServerValue.TIMESTAMP,
+          }
+          await database.ref(`/users/mismith/crops/${crop.value?.[keyField]}`).update(updatedCrop)
+          emit('update', updatedCrop);
+        } else {
+          const newCrop: NewEntity<Crop> = {
+            name: name.value!,
+            nickname: nickname.value || null,
+            createdAt: ServerValue.TIMESTAMP,
+          }
+          database.ref('/users/mismith/crops').push(newCrop)
+          emit('create', newCrop);
         }
-        await database.ref('/users/mismith/crops').push(newCrop)
 
         name.value = undefined
         nickname.value = undefined
