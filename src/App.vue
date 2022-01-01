@@ -185,8 +185,11 @@ button {
       display: flex;
       align-items: center;
 
-      &.hoverable {
-        &.hovered {
+      &.hoverable.hovered {
+        background-color: ButtonFace;
+      }
+      @media (pointer: fine) {
+        &:hover {
           background-color: ButtonFace;
         }
       }

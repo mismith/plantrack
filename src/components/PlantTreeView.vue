@@ -39,22 +39,25 @@
             :style="`background-color: ${getLatestEntryEvent(node)?.color || 'currentColor'}`"
           />
           <small v-if="node.children?.length">{<span>{{node.children.length}}</span>}</small>
-
-          <button
-            v-if="node.type === 'plot'"
-            type="button"
-            @click.stop="isEditingPlot = node"
-          >
-            Edit
-          </button>
-          <button
-            v-if="node.type !== 'entry'"
-            type="button"
-            @click.stop="handleRemoveNode(node, $event.shiftKey)"
-          >
-            &times;
-          </button>
         </template>
+      </div>
+    </template>
+    <template #node-append="{ node }">
+      <div class="actions">
+        <button
+          v-if="node.type === 'plot'"
+          type="button"
+          @click.stop="isEditingPlot = node"
+        >
+          ✎
+        </button>
+        <button
+          v-if="node.type !== 'entry'"
+          type="button"
+          @click.stop="handleRemoveNode(node, $event.shiftKey)"
+        >
+          &times;
+        </button>
       </div>
     </template>
   </TreeView>
@@ -95,7 +98,6 @@ export default defineComponent({
 
     const treeState = reactive<Record<string, Booleanable>>({
       expanded: [],
-      hovered: [],
       selected: [],
       checked: [],
       disabled: [],
@@ -104,7 +106,6 @@ export default defineComponent({
     const treeOptions = computed(() => ({
       indentable: true,
       expandable: true,
-      hoverable: !inject('isTouchDevice'),
       selectable: !props.multiple && ((node: ITreeNode) => node.type === 'bed'),
       checkable: props.multiple && ((node: ITreeNode) => node.type !== 'entry' && {
         recurse: true,
@@ -203,17 +204,23 @@ $spacing: 8px;
     height: 1em;
     vertical-align: middle;
     border-radius: 1em;
-    margin-left: 0.33em;
+  }
+  .TreeNodeName,
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.33em;
   }
   .TreeNodeName {
-    > a,
-    > button,
-    > span,
-    > small {
-      margin-left: 0.33em;
-    }
-    &:not(:hover) {
-      button {
+    flex: auto;
+  }
+  .actions {
+    padding: 0 0.33em;
+  }
+
+  @media (pointer: fine) {
+    .TreeNodeLeaf:not(:hover) {
+      .actions {
         visibility: hidden;
       }
     }

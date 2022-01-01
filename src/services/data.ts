@@ -221,14 +221,12 @@ export function useTreeViewPicker(
 ) {
   const state = reactive({
     expanded: [],
-    hovered: [],
     selected: [] as any[],
     checked: [] as any[],
   })
   const options = reactive({
     indentable: true,
     expandable: true,
-    hoverable: !inject('isTouchDevice'),
     ...config,
   })
   watch(ref, () => {
