@@ -240,12 +240,12 @@ export function useTreeViewPicker(
   config: { selectable?: Booleanable, checkable?: Booleanable } = { selectable: true },
   predicate: (value: any, index: number, obj: any[]) => unknown = Boolean,
 ) {
-  const state = reactive({
+  const state = reactive<Record<string, any>>({
     expanded: [],
-    selected: [] as any[],
-    checked: [] as any[],
+    selected: [],
+    checked: [],
   })
-  const options = reactive({
+  const options = reactive<Record<string, any>>({
     indentable: true,
     expandable: true,
     ...config,

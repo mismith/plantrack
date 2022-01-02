@@ -43,7 +43,7 @@ import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewPicker } from '../services/data'
 import { database, keyField, ServerValue } from '../services/firebase'
 import TreeView from './TreeView/TreeView.vue'
-import { ITreeNode } from './TreeView'
+import { ITreeNode, set, walkDescendents } from './TreeView'
 
 export default defineComponent({
   name: 'AddPlant',
@@ -69,6 +69,20 @@ export default defineComponent({
     const isValid = computed(() => Boolean(cropId.value && bedId.value))
 
     const treeView = useTreeViewPicker(bedId, { selectable: (node: ITreeNode) => node.type === 'bed' })
+    if (bedId.value) {
+      // auto-expand parents above restored selections
+      const checkNode = (node: ITreeNode) => {
+        const containsDescendent = walkDescendents(node, checkNode).filter(Boolean).length
+        if (node.id === bedId.value) {
+          return true;
+        } else if (containsDescendent) {
+          treeView.bind.state.expanded = set(treeView.bind.state.expanded, node, true)
+          return true
+        }
+        return false
+      }
+      nodes.value.forEach(checkNode)
+    }
 
     return {
       nodes,
