@@ -1,9 +1,14 @@
 <template>
   <header style="display: flex; justify-content: space-between; align-items: center; padding: 8px;">
     <Logo class="logo" />
-    <div v-if="user">
-      {{user.email}}
-      <button @click="handleLogout">Logout</button>
+    <div>
+      <template v-if="user">
+        {{user.email}}
+        <button @click="handleLogout">Logout</button>
+      </template>
+      <label title="Toggle Dark Mode">
+        &#9775;&#xFE0E;<input type="checkbox" v-model="isDarkMode" hidden aria-label="Toggle Dark Mode" />
+      </label>
     </div>
   </header>
 
@@ -47,7 +52,7 @@
 
 <script lang="ts">
 /// <reference types="vite-svg-loader" />
-import { defineComponent, provide, ref } from 'vue'
+import { defineComponent, provide, ref, watch } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
@@ -103,6 +108,15 @@ export default defineComponent({
     provide('isEditingBed', isEditingBed)
     provide('isEditingPlot', isEditingPlot)
 
+    const colorSchemeKey = 'plantrack.color-scheme'
+    const colorSchemeStored = window.localStorage.getItem(colorSchemeKey)
+    const isDarkMode = ref(colorSchemeStored !== null ? colorSchemeStored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
+    watch(isDarkMode, (enabled) => {
+      document.documentElement.classList.toggle('dark', enabled)
+      document.documentElement.style.setProperty('color-scheme', enabled ? 'dark' : 'light');
+      window.localStorage.setItem(colorSchemeKey, enabled ? 'dark' : 'light')
+    }, { immediate: true })
+
     return {
       email,
       password,
@@ -121,6 +135,8 @@ export default defineComponent({
       isEditingCrop,
       isEditingBed,
       isEditingPlot,
+
+      isDarkMode,
     }
   }
 })
@@ -159,12 +175,6 @@ $spacing: 8px;
     &.router-link-active {
       background-color: #9999;
     }
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
   }
 }
 

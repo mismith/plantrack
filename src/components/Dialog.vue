@@ -52,7 +52,7 @@ $spacing: 8px;
     right: $spacing;
   }
 
-  @media (prefers-color-scheme: dark) {
+  :root.dark & {
     > div {
       background-color: black;
     }
