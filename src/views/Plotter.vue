@@ -109,7 +109,7 @@
           </g>
 
           <g
-            v-if="selectedBed"
+            v-if="selectedBedPlot && selectedBedPlotBounds"
             :transform="`translate(${selectedBedPlotBounds.min.x - 0.5}, ${selectedBedPlotBounds.min.y - 0.5})`"
             class="plot"
           >
@@ -230,8 +230,8 @@ export default defineComponent({
     const selectedBedPlot = computed(() => plots.value?.find(({ id }) => id === selectedBed.value?.plotId))
     const selectedBedPlotBounds = computed(
       () => {
-        const bedsInPlot = beds.value?.filter(({ plotId }) => plotId === selectedBed.value?.plotId) as Bed[]
-        return bedsInPlot.reduce(
+        const bedsInPlot = beds.value?.filter(({ plotId }) => plotId === selectedBed.value?.plotId)
+        return bedsInPlot?.reduce(
           ({ min, max }, { x = 0, y = 0, width = 0, height = 0 }) => {
             if (min.x === undefined || x < min.x) min.x = x
             if (min.y === undefined || y < min.y) min.y = y
