@@ -1,5 +1,5 @@
 <template>
-  <ol class="TreeView">
+  <ol class="TreeView" v-bind="$attrs">
     <TreeNode
       v-for="node in nodes"
       :key="node.id"

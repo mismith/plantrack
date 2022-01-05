@@ -1,5 +1,5 @@
 <template>
-  <li class="TreeNode">
+  <li class="TreeNode" v-bind="$attrs">
     <slot name="node-before" v-bind="nodeProps" />
     <slot name="node" v-bind="nodeProps">
       <div
@@ -26,8 +26,8 @@
         <slot name="node-expandable" v-bind="nodeProps" v-if="tools.is(options.expandable, node)">
           <button
             type="button"
-            @click.stop="handleExpandToggle(undefined, $event.altKey)"
             class="TreeNodeExpand"
+            @click.stop="handleExpandToggle(undefined, $event.altKey)"
           >
             <span>{{tools.is(state.expanded, node) ? '&minus;' : '+'}}</span>
           </button>
