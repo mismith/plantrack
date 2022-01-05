@@ -1,39 +1,49 @@
 <template>
   <form @submit.prevent="handleSubmit" class="AddPlant">
-    <fieldset>
-      <header>
-        <label>Crop</label>
-        <button type="button" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
-      </header>
+    <div class="Box-body">
+      <fieldset class="form-group required">
+        <header class="form-group-header">
+          <label>Crop</label>
 
-      <select v-model="cropId" required>
-        <option
-          v-for="crop in crops"
-          :key="crop.id"
-          :value="crop.id"
-        >
-          {{crop.name}}: {{crop.nickname}}
-        </option>
-      </select>
-    </fieldset>
+          <button type="button" class="btn btn-sm" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
+        </header>
 
-    <fieldset>
-      <label>Bed</label>
-      <TreeView
-        :nodes="nodes"
-        v-bind="treeView.bind"
-        v-on="treeView.on"
-      />
-    </fieldset>
+        <select v-model="cropId" required class="form-select width-full">
+          <option
+            v-for="crop in crops"
+            :key="crop.id"
+            :value="crop.id"
+          >
+            {{crop.name}}: {{crop.nickname}}
+          </option>
+        </select>
+      </fieldset>
 
-    <fieldset>
-      <label>Name</label>
-      <input type="text" v-model="name" :placeholder="placeholder" />
-    </fieldset>
+      <fieldset class="form-group required">
+        <header class="form-group-header">
+          <label>Bed</label>
+        </header>
+        <TreeView
+          :nodes="nodes"
+          v-bind="treeView.bind"
+          v-on="treeView.on"
+          class="Box"
+        />
+      </fieldset>
 
-    <fieldset>
-      <button type="submit" :disabled="!isValid">{{isEditing ? 'Save' : 'Add'}} Plant</button>
-    </fieldset>
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>Name</label>
+        </header>
+        <input type="text" v-model="name" :placeholder="placeholder" class="form-control width-full" />
+      </fieldset>
+    </div>
+
+    <footer class="Box-footer">
+      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">
+        {{isEditing ? 'Save' : 'Add'}} Plant
+      </button>
+    </footer>
   </form>
 </template>
 
@@ -131,8 +141,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-$spacing: 8px;
-
 .AddPlant {
   fieldset > .TreeView {
     .TreeNode {

@@ -1,35 +1,51 @@
 <template>
-  <header style="display: flex; justify-content: space-between; align-items: center; padding: 8px;">
-    <Logo class="logo" />
-    <div>
-      <template v-if="user">
-        {{user.email}}
-        <button @click="handleLogout">Logout</button>
-      </template>
-      <label title="Toggle Dark Mode">
-        &#9775;&#xFE0E;<input type="checkbox" v-model="isDarkMode" hidden aria-label="Toggle Dark Mode" />
-      </label>
-    </div>
-  </header>
-
-  <template v-if="user">
-    <router-view style="flex: auto;" />
-
-    <div class="pages">
+  <nav class="UnderlineNav color-bg-inset flex-wrap flex-sm-nowrap flex-justify-center flex-sm-justify-between">
+    <router-link to="/" class="UnderlineNav-actions px-3" style="color: currentColor;">
+      <Logo class="logo" />
+    </router-link>
+    <div
+      v-if="user"
+      class="UnderlineNav-body flex-order-2 flex-sm-order-none d-sm-flex"
+      :class="{ 'd-none': !isMenuOpen }"
+    >
       <router-link
         v-for="route in routes.filter(({ path, meta }) => path !== '/' && !meta?.hidden)"
         :key="route.path"
         :to="route.path"
+        role="tab"
+        class="UnderlineNav-item"
+        style="text-transform: capitalize;"
       >
         {{route.path.replace(/\//, '')}}
       </router-link>
     </div>
-  </template>
+    <div
+      class="UnderlineNav-actions px-2 flex-items-center flex-order-1 flex-sm-order-none d-sm-flex"
+      :class="{ 'd-none': !isMenuOpen, 'ml-auto': !user }"
+      style="gap: 4px; white-space: nowrap;"
+    >
+      <template v-if="user">
+        {{user.email}}
+        <button class="btn" title="Logout" @click="handleLogout">
+          <Octicon name="sign-out" />
+        </button>
+      </template>
+      <button type="button" title="Toggle Dark Mode" class="btn" @click="isDarkMode = !isDarkMode">
+        <Octicon :name="isDarkMode ? 'sun' : 'moon'" />
+      </button>
+    </div>
+    <div class="UnderlineNav-actions d-sm-none ml-auto px-2" :class="{ 'd-none': !user }">
+      <button type="button" class="btn" :aria-selected="isMenuOpen" @click="isMenuOpen = !isMenuOpen">
+        <Octicon name="three-bars" />
+      </button>
+    </div>
+  </nav>
 
-  <form v-else style="margin: auto;" @submit.prevent="handleLogin">
-    <input type="email" v-model="email" placeholder="Email" />
-    <input type="password" v-model="password" placeholder="Password" />
-    <button type="submit">Login</button>
+  <router-view v-if="user" style="flex: auto;" />
+  <form v-else class="d-flex flex-column m-auto" style="gap: 8px;" @submit.prevent="handleLogin">
+    <input type="email" v-model="email" placeholder="Email" aria-label="Email" class="form-control" />
+    <input type="password" v-model="password" placeholder="Password" aria-label="Password" class="form-control" />
+    <button type="submit" class="btn">Login</button>
   </form>
 
   <Dialog :model-value="Boolean(isEditingPlant)" @update:model-value="isEditingPlant = undefined">
@@ -64,6 +80,7 @@ import AddPlant from './components/AddPlant.vue'
 import AddCrop from './components/AddCrop.vue'
 import AddBed from './components/AddBed.vue'
 import AddPlot from './components/AddPlot.vue'
+import Octicon from './components/Octicon.vue'
 
 export default defineComponent({
   name: 'App',
@@ -74,6 +91,7 @@ export default defineComponent({
     AddCrop,
     AddBed,
     AddPlot,
+    Octicon,
   },
   setup() {
     const user = useUser()
@@ -110,12 +128,13 @@ export default defineComponent({
 
     const colorSchemeKey = 'plantrack.color-scheme'
     const colorSchemeStored = window.localStorage.getItem(colorSchemeKey)
-    const isDarkMode = ref(colorSchemeStored !== null ? colorSchemeStored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const isDarkMode = ref(colorSchemeStored !== null ? colorSchemeStored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches)
     watch(isDarkMode, (enabled) => {
-      document.documentElement.classList.toggle('dark', enabled)
-      document.documentElement.style.setProperty('color-scheme', enabled ? 'dark' : 'light');
+      document.documentElement.dataset.colorMode = enabled ? 'dark' : 'light'
       window.localStorage.setItem(colorSchemeKey, enabled ? 'dark' : 'light')
     }, { immediate: true })
+
+    const isMenuOpen = ref(false)
 
     return {
       email,
@@ -137,62 +156,107 @@ export default defineComponent({
       isEditingPlot,
 
       isDarkMode,
+      isMenuOpen,
     }
   }
 })
 </script>
 
 <style lang="scss">
-$spacing: 8px;
+@import '@primer/css/index.scss';
+@import '@primer/octicons/index.scss';
+
+:root {
+  --color-plantrack-primary: #99CF26;
+}
 
 .logo {
   width: auto;
-  height: 1.5em;
+  height: 2em;
+  vertical-align: middle;
 
   .text {
     fill: currentColor;
   }
 }
 
-.pages {
-  display: flex;
-  gap: $spacing;
-  padding: $spacing;
+.form-group {
+  .form-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  textarea.form-control {
+    min-height: 64px;
+    height: 64px;
+  }
+}
 
-  a {
-    flex: auto;
-    color: inherit;
-    font-variant: small-caps;
-    text-align: center;
-    text-decoration: none;
-    padding: $spacing;
-    border: 1px solid #999;
-    border-radius: calc($spacing / 2);
+.UnderlineNav {
+  flex-shrink: 0;
 
-    &:hover {
-      background-color: #7777;
-    }
-    &.router-link-active {
-      background-color: #9999;
-    }
+  > * {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+  }
+}
+.UnderlineNav-item {
+  &.selected,
+  &[role=tab][aria-selected=true],
+  &[aria-current]:not([aria-current=false]) {
+    border-bottom-color: var(--color-plantrack-primary);
+  }
+}
+
+.btn-triangle {
+  appearance: none;
+  flex-shrink: 0;
+  display: inline-block;
+  position: relative;
+  width: 1.5em;
+  height: 1.5em;
+  background: none;
+  color: inherit;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  opacity: 0.5;
+  transition: all 0.1s;
+  cursor: inherit;
+
+  > span {
+    display: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: solid 5px transparent;
+    border-left-color: currentColor;
+    border-left-width: 8px;
+    border-right-width: 0;
+    margin: -5px -4px;
+  }
+
+  &.open {
+    transform: rotate(90deg);
   }
 }
 
 html,
 body,
 #app {
-  width: 100%;  height: 100%;
+  width: 100%;
+  height: 100%;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
   font-family: sans-serif;
-}
-
-button {
-  &.active {
-    background-color: Highlight;
-  }
 }
 
 .TreeView {
@@ -210,11 +274,11 @@ button {
       align-items: center;
 
       &.hoverable.hovered {
-        background-color: ButtonFace;
+        background-color: var(--color-accent-subtle);
       }
       @media (pointer: fine) {
         &:hover {
-          background-color: ButtonFace;
+          background-color: var(--color-accent-subtle);
         }
       }
 
@@ -227,37 +291,7 @@ button {
       }
 
       .TreeNodeExpand {
-        appearance: none;
-        flex-shrink: 0;
-        display: inline-block;
-        position: relative;
-        width: 1.5em;
-        height: 1.5em;
-        background: none;
-        color: inherit;
-        padding: 0;
-        margin: 0;
-        border: none;
-        outline: none;
-        opacity: 0.5;
-        transition: all 0.1s;
-        cursor: inherit;
-
-        > span {
-          display: none;
-        }
-
-        &::after {
-          content: "";
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          border: solid 5px transparent;
-          border-left-color: currentColor;
-          border-left-width: 8px;
-          border-right-width: 0;
-          margin: -5px -4px;
-        }
+        @extend .btn-triangle;
       }
       &.expandable {
         cursor: default;
@@ -282,8 +316,8 @@ button {
       &.selected {
         &,
         &.hovered {
-          background-color: Highlight;
-          color: HighlightText;
+          background-color: var(--color-accent-emphasis);
+          color: var(--color-fg-on-emphasis);
         }
       }
 
@@ -316,17 +350,18 @@ button {
     }
   }
 
-  .TreeNodeName,
-  .TreeNodeActions {
+  .TreeNodeName {
     display: flex;
     align-items: center;
+    flex: auto;
     gap: 4px;
   }
-  .TreeNodeName {
-    flex: auto;
-  }
   .TreeNodeActions {
-    padding: 0 4px;
+    .btn {
+      min-width: 24px;
+      min-height: 24px;
+      background-color: transparent;
+    }
   }
   @media (pointer: fine) {
     .TreeNodeLeaf:not(:hover) {
@@ -339,52 +374,7 @@ button {
   fieldset > & {
     justify-content: initial;
     max-height: 400px;
-    border: solid 1px rgb(118, 118, 118);
-    border-radius: calc($spacing / 2);
     overflow-y: auto;
-  }
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  padding: $spacing;
-  gap: $spacing;
-  overflow: hidden; // @HACK: AddPlant <select> is too wide
-
-  fieldset {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing;
-    padding: $spacing;
-    border: 0;
-    margin: 0;
-
-    label {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    > header {
-      display: flex;
-      align-items: center;
-      column-gap: calc($spacing / 2);
-    }
-
-    .TreeView,
-    input:not([type="file"]),
-    select,
-    textarea,
-    [type="submit"] {
-      font-size: 16px;
-    }
-
-    select {
-      width: 100%;
-    }
-    textarea {
-      resize: vertical;
-    }
   }
 }
 </style>

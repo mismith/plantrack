@@ -1,27 +1,35 @@
 <template>
   <form @submit.prevent="handleSubmit" class="AddPlot">
-    <fieldset>
-      <label>Name</label>
-      <input type="text" v-model="name" required />
-    </fieldset>
-    <fieldset>
-      <label>Parent Plot</label>
-      <select v-model="parentPlotId">
-        <option :value="undefined">-</option>
-        <option
-          v-for="plot in plots"
-          :key="plot.id"
-          :value="plot.id"
-        >
-          {{plot.name}}
-        </option>
-      </select>
-      <!-- @TODO: allow clearing if isEditing -->
-    </fieldset>
+    <div class="Box-body">
+      <fieldset class="form-group required">
+        <header class="form-group-header">
+          <label>Name</label>
+        </header>
+        <input type="text" v-model="name" required class="form-control width-full" />
+      </fieldset>
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>Parent Plot</label>
+        </header>
+        <select v-model="parentPlotId" class="form-select width-full">
+          <option :value="undefined"></option>
+          <option
+            v-for="plot in plots"
+            :key="plot.id"
+            :value="plot.id"
+          >
+            {{plot.name}}
+          </option>
+        </select>
+        <!-- @TODO: allow clearing if isEditing -->
+      </fieldset>
+    </div>
 
-    <fieldset>
-      <button type="submit" :disabled="!isValid">{{isEditing ? 'Save' : 'Add'}} Plot</button>
-    </fieldset>
+    <footer class="Box-footer">
+      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">
+        {{isEditing ? 'Save' : 'Add'}} Plot
+      </button>
+    </footer>
   </form>
 </template>
 
@@ -84,8 +92,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss">
-$spacing: 8px;
-
-</style>

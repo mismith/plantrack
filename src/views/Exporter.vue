@@ -1,7 +1,7 @@
 <template>
   <div class="Exporter" style="display: flex; flex-direction: column; overflow: hidden;">
     <header style="text-align: center;">
-      <button @click="handleDownload">Download</button>
+      <button class="btn" @click="handleDownload">Download</button>
     </header>
     <div style="flex: auto; display: flex; overflow: hidden;">
       <pre style="flex: 1; overflow-y: auto;">{{ flatEntries }}</pre>
@@ -75,8 +75,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss">
-$spacing: 8px;
-
-</style>

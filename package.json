@@ -7,6 +7,8 @@
     "build": "vuedx-typecheck . && vite build"
   },
   "dependencies": {
+    "@primer/css": "^19.1.1",
+    "@primer/octicons": "^16.2.0",
     "date-fns": "^2.24.0",
     "firebase": "^8.10.0",
     "gsap": "^3.7.1",

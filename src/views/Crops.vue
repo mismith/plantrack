@@ -1,16 +1,18 @@
 <template>
   <div class="Crops">
-    <form @submit.prevent>
-      <fieldset>
-        <header>
+    <form @submit.prevent class="p-3">
+      <fieldset class="form-group">
+        <header class="form-group-header">
           <label>{{cropIds?.length || crops?.length || ''}} {{cropIds.length ? 'selected' : '' }} crop(s)</label>
-          <button type="button" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
-          <button type="reset" @click="handleReset">Reset</button>
+
+          <button type="button" class="btn btn-sm" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
+          <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
         <TreeView
           :nodes="nodes"
           v-bind="treeView.bind"
           v-on="treeView.on"
+          class="Box"
         >
           <template #node-name="{ node }">
             <div class="TreeNodeName">
@@ -23,9 +25,10 @@
               <button
                 v-if="node.name"
                 type="button"
+                class="btn-octicon"
                 @click.stop="isEditingCrop = crops.find(({ id }) => id === node.id)"
               >
-                ✎
+                <Octicon name="pencil" />
               </button>
             </div>
           </template>
@@ -33,12 +36,14 @@
       </fieldset>
 
       <TransitionExpand group>
-        <CropStatsCard v-for="cropId in cropIds" :key="cropId" :crop-id="cropId" />
+        <CropStatsCard v-for="cropId in cropIds" :key="cropId" :crop-id="cropId" class="mb-3" />
       </TransitionExpand>
 
-      <fieldset>
-        <label>Import</label>
-        <input ref="importInputRef" type="file" accept="text/csv" @change="handleImport" />
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>Import</label>
+        </header>
+        <input ref="importInputRef" type="file" accept="text/csv" class="form-control width-full" @change="handleImport" />
       </fieldset>
     </form>
   </div>
@@ -50,10 +55,12 @@ import set from 'lodash.set'
 
 import { useCrops, useTreeViewPicker } from '../services/data'
 import { database, getUserRefPath, toKeyFieldArray } from '../services/firebase'
+
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 import TreeView from '../components/TreeView/TreeView.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
 import { ITreeNode } from '../components/TreeView'
+import Octicon from '../components/Octicon.vue'
 
 export default defineComponent({
   name: 'Crops',
@@ -61,6 +68,7 @@ export default defineComponent({
     TransitionExpand,
     TreeView,
     CropStatsCard,
+    Octicon,
   },
   setup() {
     const crops = useCrops()

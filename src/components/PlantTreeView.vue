@@ -41,37 +41,42 @@
         <button
           v-if="node.type === 'plot'"
           type="button"
+          class="btn-octicon"
           @click.stop="isEditingPlot = node"
         >
-          ✎
+          <Octicon name="pencil" />
         </button>
         <button
           v-if="node.type === 'bed'"
           type="button"
+          class="btn-octicon"
           @click.stop="isEditingBed = node"
         >
-          ✎
+          <Octicon name="pencil" />
         </button>
         <button
           v-if="node.type === 'plant'"
           type="button"
+          class="btn-octicon"
           @click.stop="isEditingPlant = node"
         >
-          ✎
+          <Octicon name="pencil" />
         </button>
         <button
           v-if="node.type === 'entry'"
           type="button"
+          class="btn-octicon"
           @click.stop="handleRemoveEntry(node, parents, $event.shiftKey)"
         >
-          &times;
+          <Octicon name="trash" />
         </button>
         <button
           v-else
           type="button"
+          class="btn-octicon btn-octicon-danger"
           @click.stop="handleRemoveNode(node, $event.shiftKey)"
         >
-          &times;
+          <Octicon name="trash" />
         </button>
       </div>
     </template>
@@ -83,8 +88,10 @@ import { computed, defineComponent, inject, PropType, reactive, watch } from 'vu
 
 import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops, Attachment } from '../services/data'
 import { database, getUserRefPath, storage } from '../services/firebase'
+
 import { Booleanable, ITreeNode, tools } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
+import Octicon from './Octicon.vue'
 
 function isOrHasDescendent(type: string) {
   return (node: ITreeNode) => node.type !== type && !tools.walkDescendents(
@@ -97,6 +104,7 @@ export default defineComponent({
   name: 'PlantTreeView',
   components: {
     TreeView,
+    Octicon,
   },
   props: {
     modelValue: {
@@ -212,8 +220,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-$spacing: 8px;
-
 .PlantTreeView {
   .eventId {
     display: inline-block;

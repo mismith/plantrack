@@ -133,8 +133,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-$spacing: 8px;
-
 .EntryTimeline {
   display: flex;
   width: 100%;

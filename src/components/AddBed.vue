@@ -1,30 +1,37 @@
 <template>
   <form @submit.prevent="handleSubmit" class="AddBed">
-    <fieldset>
-      <label>Name</label>
-      <input type="text" v-model="name" required />
-    </fieldset>
+    <div class="Box-body">
+      <fieldset class="form-group required">
+        <header class="form-group-header">
+          <label>Name</label>
+        </header>
+        <input type="text" v-model="name" required class="form-control width-full" />
+      </fieldset>
 
-    <fieldset>
-      <header>
-        <label>Plot</label>
-        <button type="button" :class="{ active: isAddingPlot }" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
-      </header>
+      <fieldset class="form-group required">
+        <header class="form-group-header">
+          <label>Plot</label>
 
-      <select v-model="plotId" required>
-        <option
-          v-for="plot in plots"
-          :key="plot.id"
-          :value="plot.id"
-        >
-          {{plot.name}}
-        </option>
-      </select>
-    </fieldset>
+          <button type="button" class="btn btn-sm" :class="{ active: isAddingPlot }" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
+        </header>
 
-    <fieldset>
-      <button type="submit" :disabled="!isValid">{{isEditing ? 'Save' : 'Add'}} Bed</button>
-    </fieldset>
+        <select v-model="plotId" required class="form-select width-full">
+          <option
+            v-for="plot in plots"
+            :key="plot.id"
+            :value="plot.id"
+          >
+            {{plot.name}}
+          </option>
+        </select>
+      </fieldset>
+    </div>
+
+    <footer class="Box-footer">
+      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">
+        {{isEditing ? 'Save' : 'Add'}} Bed
+      </button>
+    </footer>
   </form>
 </template>
 
@@ -88,8 +95,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss">
-$spacing: 8px;
-
-</style>

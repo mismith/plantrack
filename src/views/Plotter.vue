@@ -12,8 +12,8 @@
           </h1>
           <h2>{{ selectedBedPlot?.name }}</h2>
         </div>
-        <input type="range" min="1" max="100" v-model="scale" />
-        <input type="number" min="1" max="100" v-model="scale" />
+        <input type="range" v-model="scale" min="1" max="100" class="d-none d-sm-inline-block" />
+        <input type="number" v-model="scale" min="1" max="100" class="form-control" />
         <!-- <button :disabled="!selectedBedPlot">&#8505;</button> -->
       </nav>
     </header>

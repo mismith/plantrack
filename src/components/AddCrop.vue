@@ -1,18 +1,26 @@
 <template>
   <form @submit.prevent="handleSubmit" class="AddCrop">
-    <fieldset>
-      <label>ID</label>
-      <input type="text" v-model="name" required />
-    </fieldset>
+    <div class="Box-body">
+      <fieldset class="form-group required">
+        <header class="form-group-header">
+          <label>ID</label>
+        </header>
+        <input type="text" v-model="name" required class="form-control width-full" />
+      </fieldset>
 
-    <fieldset>
-      <label>Name</label>
-      <input type="text" v-model="nickname" />
-    </fieldset>
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>Name</label>
+        </header>
+        <input type="text" v-model="nickname" class="form-control width-full" />
+      </fieldset>
+    </div>
 
-    <fieldset>
-      <button type="submit" :disabled="!isValid">{{isEditing ? 'Save' : 'Add'}} Crop</button>
-    </fieldset>
+    <footer class="Box-footer">
+      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">
+        {{isEditing ? 'Save' : 'Add'}} Crop
+      </button>
+    </footer>
   </form>
 </template>
 
@@ -72,8 +80,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style lang="scss">
-$spacing: 8px;
-
-</style>

@@ -1,99 +1,119 @@
 <template>
   <div class="Recorder">
-    <form ref="formRef" @submit.prevent="handleSubmit">
-      <fieldset>
-        <header>
+    <form ref="formRef" @submit.prevent="handleSubmit" class="p-3">
+      <fieldset class="form-group required">
+        <header class="form-group-header">
           <label>{{plantIds.length || ''}} Plant(s)</label>
-          <button type="button" :class="{ active: isAddingPlant }" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
-          <button type="button" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
-          <button type="reset" @click="handleReset">Reset</button>
+
+          <button type="button" class="btn btn-sm" :class="{ active: isAddingPlant }" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
+          <button type="button" class="btn btn-sm" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
+          <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
-        <PlantTreeView v-if="!isLoading" multiple v-model="plantIds" />
+        <PlantTreeView v-if="!isLoading" v-model="plantIds" multiple class="Box" />
       </fieldset>
 
-      <fieldset>
-        <label>Event</label>
-        <select v-model="eventId">
-          <option></option>
-          <option
-            v-for="event in events"
-            :key="event.id"
-            :value="event.id"
-          >
-            {{event.id}}
-          </option>
-        </select>
-        <div style="display: flex; column-gap: 4px;">
-          <button
-            v-for="event in featuredEvents"
-            :key="event.id"
-            type="button"
-            style="flex: auto;"
-            :class="{ active: eventId === event.id }"
-            @click="eventId = event.id"
-          >
-            <span :style="`display: inline-block; width: 1em; height: 1em; background-color: ${event.color}; vertical-align: middle; border: solid 1px currentColor; border-radius: 1em;`" />
-            {{event.id}}
-          </button>
+      <fieldset class="form-group required">
+        <header class="form-group-header">
+          <label>Event</label>
+        </header>
+        <div class="form-group-body">
+          <select v-model="eventId" required class="form-select width-full mb-2">
+            <option></option>
+            <option
+              v-for="event in events"
+              :key="event.id"
+              :value="event.id"
+            >
+              {{event.id}}
+            </option>
+          </select>
+          <div class="BtnGroup d-flex flex-wrap">
+            <button
+              v-for="event in featuredEvents"
+              :key="event.id"
+              type="button"
+              class="BtnGroup-item btn"
+              style="flex: auto;"
+              :aria-selected="eventId === event.id"
+              @click="eventId = event.id"
+            >
+              <span :style="`display: inline-block; width: 1em; height: 1em; background-color: ${event.color}; vertical-align: middle; border: solid 1px currentColor; border-radius: 1em;`" />
+              {{event.id}}
+            </button>
+          </div>
         </div>
       </fieldset>
 
       <TransitionExpand>
-        <fieldset v-if="eventId === 'transplant' || eventId === 'splice'">
-          <label>Where To</label>
-          <PlantTreeView v-model="newBedIds" />
+        <fieldset v-if="eventId === 'transplant' || eventId === 'splice'" class="form-group required">
+          <header class="form-group-header">
+            <label>Where To</label>
+          </header>
+          <PlantTreeView v-model="newBedIds" class="Box" />
         </fieldset>
       </TransitionExpand>
       <TransitionExpand>
-        <fieldset v-if="eventId === 'splice'">
-          <label>New Name</label>
-          <input v-model="newName" :placeholder="newNamePlaceholder" />
+        <fieldset v-if="eventId === 'splice'" class="form-group">
+          <header class="form-group-header">
+            <label>New Name</label>
+          </header>
+          <input type="text" v-model="newName" :placeholder="newNamePlaceholder" class="form-control width-full" />
         </fieldset>
       </TransitionExpand>
       <TransitionExpand>
-        <fieldset v-if="eventId === 'harvest'">
-          <label>How Much</label>
-          <div style="display: flex">
-            <input v-model="weight" min="1" step="0.01" inputmode="decimal" style="flex: auto;" />
-            <select v-model="weightUnit">
+        <fieldset v-if="eventId === 'harvest'" class="form-group">
+          <header class="form-group-header">
+            <label>How Much</label>
+          </header>
+          <div style="display: flex; gap: 4px;">
+            <input type="text" v-model="weight" min="1" step="0.01" inputmode="decimal" class="form-control width-full" style="flex: auto;" />
+            <select v-model="weightUnit" class="form-select">
               <option>g</option>
               <option>kg</option>
               <option>oz</option>
               <option>lb</option>
               <option>items</option>
             </select>
-            <select v-if="plantIds.length > 1" v-model="weightSplit">
+            <select v-if="plantIds.length > 1" v-model="weightSplit" class="form-select">
               <option v-for="key in WEIGHT_SPLIT" :key="key">{{key}}</option>
             </select>
           </div>
         </fieldset>
       </TransitionExpand>
       <TransitionExpand>
-        <fieldset v-if="eventId === 'harvest'">
-          <label>Cull Too</label>
-          <input v-model="cullToo" type="checkbox" />
+        <fieldset v-if="eventId === 'harvest'" class="form-group">
+          <header class="form-group-header">
+            <label>Cull Too</label>
+          </header>
+          <input type="checkbox" v-model="cullToo" />
         </fieldset>
       </TransitionExpand>
 
-      <fieldset>
-        <label>When</label>
-        <input type="datetime-local" v-model="at" />
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>When</label>
+        </header>
+        <input type="datetime-local" v-model="at" class="form-control width-full" />
       </fieldset>
 
-      <fieldset>
-        <label>Note</label>
-        <textarea v-model="note"></textarea>
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>Note</label>
+        </header>
+        <textarea v-model="note" class="form-control width-full"></textarea>
       </fieldset>
 
-      <fieldset>
-        <label>Attachment(s)</label>
-        <input type="file" multiple @change="files = $event.target.files" />
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>Attachment(s)</label>
+        </header>
+        <input type="file" multiple class="form-control width-full" @change="files = $event.target.files" />
       </fieldset>
 
-      <fieldset>
-        <button type="submit" :disabled="!isValid || isLoading">Add Entry</button>
+      <footer class="form-group">
+        <button type="submit" :disabled="!isValid || isLoading" class="btn btn-primary btn-block">Add Entry</button>
         <progress v-if="isLoading" style="width: 100%;" />
-      </fieldset>
+      </footer>
     </form>
   </div>
 </template>

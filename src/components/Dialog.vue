@@ -1,17 +1,24 @@
 <template>
-  <div v-if="modelValue" class="Dialog" @click="close">
-    <div @click.stop>
+  <div v-if="modelValue" class="Dialog p-3" @click="close">
+    <div class="Box Box--overlay anim-scale-in" @click.stop>
       <slot />
+      <button class="close-button" @click.prevent.stop="close">
+        <Octicon name="x" />
+      </button>
     </div>
-    <button @click.prevent.stop="close">&times;</button>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, toRefs } from 'vue'
 
+import Octicon from './Octicon.vue'
+
 export default defineComponent({
   name: 'Dialog',
+  components: {
+    Octicon,
+  },
   props: {
     modelValue: {
       type: Boolean,
@@ -31,31 +38,27 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-$spacing: 8px;
-
 .Dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.67);
-  padding: $spacing * 2;
-  border-radius: calc($spacing / 2);
-  z-index: 2;
+  z-index: 50;
 
   > div {
-    background-color: white;
-    border: 1px solid #999;
+    position: relative;
+    max-height: 100%;
+    overflow: auto;
   }
 
   button {
     position: absolute;
-    top: $spacing;
-    right: $spacing;
-  }
-
-  :root.dark & {
-    > div {
-      background-color: black;
-    }
+    top: 0;
+    right: 0;
+    width: 36px;
+    height: 36px;
   }
 }
 </style>

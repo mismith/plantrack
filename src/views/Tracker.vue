@@ -6,6 +6,7 @@
         <input
           type="date"
           :value="format(startDate, 'yyyy-MM-dd')"
+          class="form-control"
           @input="e => explicitStartDate = parse(e.target.value, 'yyyy-MM-dd', new Date())"
         />
       </label>
@@ -14,6 +15,7 @@
         <input
           type="date"
           :value="format(endDate, 'yyyy-MM-dd')"
+          class="form-control"
           @input="e => explicitEndDate = parse(e.target.value, 'yyyy-MM-dd', new Date())"
         />
       </label>

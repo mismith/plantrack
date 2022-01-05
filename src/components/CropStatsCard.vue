@@ -1,15 +1,17 @@
 <template>
-  <fieldset class="CropStatsCard">
+  <fieldset class="CropStatsCard Box p-1" @click="isShowingPlants = !isShowingPlants">
+    <button class="btn-triangle" :class="{ open: isShowingPlants }"></button>
     <strong>{{crop?.nickname}}</strong>
-    <CropStatsChart :stats="stats" :expected-days-to-harvest="expectedDaysToHarvest" detailed />
+    <CropStatsChart :stats="stats" :expected-days-to-harvest="expectedDaysToHarvest" detailed class="p-2" />
 
-    <button @click="isShowingPlants = !isShowingPlants">{{filteredCropPlants.length}} plants</button>
     <TransitionExpand>
       <TreeView
         v-if="isShowingPlants"
         v-bind="treeView.bind"
         v-on="treeView.on"
         :nodes="nodes"
+        class="Box mt-1"
+        @click.stop
       >
         <template #node-append="{ node }">
           <CropStatsChart :stats="getCropPlantStats(node)" style="flex: auto;" />
@@ -94,3 +96,12 @@ export default defineComponent({
   },
 })
 </script>
+
+<style lang="scss">
+.CropStatsCard {
+  .btn-triangle {
+    vertical-align: middle;
+    margin-top: -2px;
+  }
+}
+</style>
