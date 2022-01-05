@@ -16,12 +16,12 @@ export const routes = [
     component: Plotter,
   },
   {
-    path: '/crops',
-    component: Crops,
-  },
-  {
     path: '/recorder',
     component: Recorder,
+  },
+  {
+    path: '/crops',
+    component: Crops,
   },
   {
     path: '/tracker',
