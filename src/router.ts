@@ -33,6 +33,9 @@ export const routes = [
   {
     path: '/exporter',
     component: Exporter,
+    meta: {
+      hidden: true,
+    },
   },
 ]
 
