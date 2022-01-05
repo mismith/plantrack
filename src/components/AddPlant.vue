@@ -121,8 +121,9 @@ export default defineComponent({
         }
 
         name.value = undefined
-        cropId.value = undefined
-        bedId.value = undefined
+        // let linger to ease batch additions
+        // cropId.value = undefined
+        // bedId.value = undefined
       },
     }
   },

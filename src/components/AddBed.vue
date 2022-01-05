@@ -81,7 +81,8 @@ export default defineComponent({
         }
 
         name.value = undefined
-        plotId.value = undefined
+        // let linger to ease batch additions
+        // plotId.value = undefined
       },
     }
   },

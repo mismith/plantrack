@@ -77,7 +77,8 @@ export default defineComponent({
         }
 
         name.value = undefined
-        parentPlotId.value = undefined
+        // let linger to ease batch additions
+        // parentPlotId.value = undefined
       },
     }
   },
