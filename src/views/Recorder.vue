@@ -102,7 +102,7 @@
 import { computed, defineComponent, inject, ref } from 'vue'
 
 import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops } from '../services/data'
-import { database, ServerValue, storage } from '../services/firebase'
+import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
 import PlantTreeView from '../components/PlantTreeView.vue'
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 
@@ -122,7 +122,7 @@ async function uploadAttachment(file: File): Promise<Attachment> {
   }
   // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
   const fileKey = database.ref().push().key
-  const ref = storage.ref(`/users/mismith/attachments/${fileKey}`)
+  const ref = storage.ref(getUserRefPath(`/attachments/${fileKey}`))
   await ref.put(file)
 
   const attachment: Attachment = {
@@ -155,7 +155,7 @@ async function addPlantEntry({
   note?: string,
 }, attachments?: Entry['attachments']) {
   if (!plantId || !eventId) return
-  const plantsRef = database.ref('/users/mismith/plants')
+  const plantsRef = database.ref(getUserRefPath('/plants'))
   const plantRef = plantsRef.child(plantId)
 
   let payload: Entry['payload']

@@ -32,7 +32,7 @@
 import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 
 import { Bed, NewEntity, UpdatedEntity, usePlots } from '../services/data'
-import { database, keyField, ServerValue } from '../services/firebase'
+import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 
 export default defineComponent({
   name: 'AddBed',
@@ -68,7 +68,7 @@ export default defineComponent({
             plotId: plotId.value!,
             updatedAt: ServerValue.TIMESTAMP,
           }
-          await database.ref(`/users/mismith/beds/${bed.value?.[keyField]}`).update(updatedBed)
+          await database.ref(getUserRefPath(`/beds/${bed.value?.[keyField]}`)).update(updatedBed)
           emit('update', updatedBed);
         } else {
           const newBed: NewEntity<Bed> = {
@@ -76,7 +76,7 @@ export default defineComponent({
             plotId: plotId.value!,
             createdAt: ServerValue.TIMESTAMP,
           }
-          database.ref('/users/mismith/beds').push(newBed)
+          database.ref(getUserRefPath('/beds')).push(newBed)
           emit('create', newBed);
         }
 

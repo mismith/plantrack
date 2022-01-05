@@ -15,15 +15,15 @@ import { computed, defineComponent } from 'vue'
 
 import { Bed, Crop, Plant, Plot } from '../services/data'
 import { downloadCSVRowsAsFile } from '../services/exporter'
-import { database, useRtdbObject } from '../services/firebase'
+import { database, getUserRefPath, useRtdbObject } from '../services/firebase'
 
 export default defineComponent({
   name: 'Exporter',
   setup() {
-    const plots = useRtdbObject<Record<string, Plot>>(database.ref('/users/mismith/plots'))
-    const beds = useRtdbObject<Record<string, Bed>>(database.ref('/users/mismith/beds'))
-    const crops = useRtdbObject<Record<string, Crop>>(database.ref('/users/mismith/crops'))
-    const plants = useRtdbObject<Record<string, Plant>>(database.ref('/users/mismith/plants'))
+    const plots = useRtdbObject<Record<string, Plot>>(database.ref(getUserRefPath('/plots')))
+    const beds = useRtdbObject<Record<string, Bed>>(database.ref(getUserRefPath('/beds')))
+    const crops = useRtdbObject<Record<string, Crop>>(database.ref(getUserRefPath('/crops')))
+    const plants = useRtdbObject<Record<string, Plant>>(database.ref(getUserRefPath('/plants')))
 
     const bedsWithPlot = computed(() => Object.entries(beds.value || {}).reduce((acc, [bedId, bed]) => {
       acc[bedId] = {

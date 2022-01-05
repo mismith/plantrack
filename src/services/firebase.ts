@@ -31,7 +31,7 @@ if (window.location.hostname === 'localhost') {
   storage.useEmulator("localhost", 9199)
 }
 
-export function useUser(auth: firebase.auth.Auth = firebase.auth()) {
+export function useUser() {
   const user = ref<firebase.User | null>(auth.currentUser)
 
   auth.onIdTokenChanged(authUser => {
@@ -39,6 +39,10 @@ export function useUser(auth: firebase.auth.Auth = firebase.auth()) {
   })
 
   return user
+}
+
+export function getUserRefPath(path: string, user = auth.currentUser) {
+  return `/users/${user?.uid}/${path.replace(/^\/+/, '/')}`
 }
 
 export function toKeyFieldArray<T extends object>(obj: Record<string, T>, theKeyField = keyField): T[] {

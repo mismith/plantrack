@@ -2,7 +2,7 @@ import { computed, reactive, Ref, watch } from 'vue'
 import { differenceInDays, format } from 'date-fns'
 
 import { Booleanable } from '../components/TreeView'
-import firebase, { database, keyField, toKeyFieldArray, useRtdbArray } from './firebase'
+import firebase, { database, getUserRefPath, keyField, toKeyFieldArray, useRtdbArray } from './firebase'
 
 export type Timestamp = number
 export interface Entity {
@@ -132,11 +132,11 @@ export const events: Event[] = [
   },
 ]
 
-export const usePlots = () => useRtdbArray<Plot>(database.ref('/users/mismith/plots'))
-export const useBeds = () => useRtdbArray<Bed>(database.ref('/users/mismith/beds'))
-export const usePlants = () => useRtdbArray<Plant>(database.ref('/users/mismith/plants'))
+export const usePlots = () => useRtdbArray<Plot>(database.ref(getUserRefPath('/plots')))
+export const useBeds = () => useRtdbArray<Bed>(database.ref(getUserRefPath('/beds')))
+export const usePlants = () => useRtdbArray<Plant>(database.ref(getUserRefPath('/plants')))
 export const useCrops = () => {
-  const raw = useRtdbArray<Crop>(database.ref('/users/mismith/crops'))
+  const raw = useRtdbArray<Crop>(database.ref(getUserRefPath('/crops')))
   return computed(() => raw.value?.sort((a, b) => a.name.localeCompare(b.name)))
 }
 

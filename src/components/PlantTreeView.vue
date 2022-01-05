@@ -82,7 +82,7 @@
 import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue'
 
 import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops, Attachment } from '../services/data'
-import { database, storage } from '../services/firebase'
+import { database, getUserRefPath, storage } from '../services/firebase'
 import { Booleanable, ITreeNode, tools } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
 
@@ -149,12 +149,12 @@ export default defineComponent({
     async function handleRemoveEntry(entry: Entry, parents: ITreeNode[] = [], skipConfirm = false) {
       if (skipConfirm || window.confirm('Are you sure?')) {
         const plant = parents[parents.length - 1] as Plant
-        await database.ref(`/users/mismith/plants/${plant.id}/entries/${entry.id}`).remove()
+        await database.ref(getUserRefPath(`/plants/${plant.id}/entries/${entry.id}`)).remove()
       }
     }
     async function handleRemoveNode(node: ITreeNode, skipConfirm = false) {
       if (skipConfirm || window.confirm('Are you sure?')) {
-        await database.ref(`/users/mismith/${node.type}s/${node.id}`).remove()
+        await database.ref(getUserRefPath(`/${node.type}s/${node.id}`)).remove()
       }
     }
     async function handleAttachmentClick(event: any, attachment: Attachment) {

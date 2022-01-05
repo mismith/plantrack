@@ -20,7 +20,7 @@
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 
 import { Crop, NewEntity, UpdatedEntity } from '../services/data'
-import { database, keyField, ServerValue } from '../services/firebase'
+import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 
 export default defineComponent({
   name: 'AddCrop',
@@ -53,7 +53,7 @@ export default defineComponent({
             nickname: nickname.value || null,
             updatedAt: ServerValue.TIMESTAMP,
           }
-          await database.ref(`/users/mismith/crops/${crop.value?.[keyField]}`).update(updatedCrop)
+          await database.ref(getUserRefPath(`/crops/${crop.value?.[keyField]}`)).update(updatedCrop)
           emit('update', updatedCrop);
         } else {
           const newCrop: NewEntity<Crop> = {
@@ -61,7 +61,7 @@ export default defineComponent({
             nickname: nickname.value || null,
             createdAt: ServerValue.TIMESTAMP,
           }
-          database.ref('/users/mismith/crops').push(newCrop)
+          database.ref(getUserRefPath('/crops')).push(newCrop)
           emit('create', newCrop);
         }
 

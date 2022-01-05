@@ -49,7 +49,7 @@ import { computed, defineComponent, inject, ref } from 'vue'
 import set from 'lodash.set'
 
 import { useCrops, useTreeViewPicker } from '../services/data'
-import { database, toKeyFieldArray } from '../services/firebase'
+import { database, getUserRefPath, toKeyFieldArray } from '../services/firebase'
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 import TreeView from '../components/TreeView/TreeView.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
@@ -116,13 +116,13 @@ export default defineComponent({
         return crop
       })
 
-      const existingCrops = Object.entries((await database.ref('/users/mismith/crops').once('value')).val())
+      const existingCrops = Object.entries((await database.ref(getUserRefPath('/crops')).once('value')).val())
       const imported = await Promise.all(newCrops.map(async (newCrop) => {
         const existingCrop = existingCrops.find(([id, { name }]: [string, any]) => name === newCrop.name)
         if (existingCrop) {
-          await database.ref(`/users/mismith/crops/${existingCrop[0]}`).update(newCrop)
+          await database.ref(getUserRefPath(`/crops/${existingCrop[0]}`)).update(newCrop)
         } else {
-          await database.ref('/users/mismith/crops').push(newCrop)
+          await database.ref(getUserRefPath('/crops')).push(newCrop)
         }
       }))
 

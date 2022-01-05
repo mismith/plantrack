@@ -140,7 +140,7 @@ import { computed, defineComponent, inject, nextTick, onMounted, onUnmounted, re
 import { gsap } from 'gsap'
 import { Draggable } from 'gsap/Draggable'
 import { Bed, useBeds, usePlots } from '../services/data'
-import { database } from '../services/firebase'
+import { database, getUserRefPath } from '../services/firebase'
 
 gsap.registerPlugin(Draggable)
 const ls = {
@@ -244,7 +244,7 @@ export default defineComponent({
         )
       }
     )
-    const bedsRef = database.ref('/users/mismith/beds')
+    const bedsRef = database.ref(getUserRefPath('/beds'))
     const groupedBeds = ref<Bed[]>([])
     const isGrouped = computed(() => groupedBeds.value?.length > 1)
     const handleGroupAlignLeft = async () => {

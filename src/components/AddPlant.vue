@@ -41,7 +41,7 @@
 import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 
 import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewPicker } from '../services/data'
-import { database, keyField, ServerValue } from '../services/firebase'
+import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 import TreeView from './TreeView/TreeView.vue'
 import { ITreeNode, set, walkDescendents } from './TreeView'
 
@@ -107,7 +107,7 @@ export default defineComponent({
             bedId: bedId.value!,
             updatedAt: ServerValue.TIMESTAMP,
           }
-          await database.ref(`/users/mismith/plants/${plant.value?.[keyField]}`).update(updatedPlant)
+          await database.ref(getUserRefPath(`/plants/${plant.value?.[keyField]}`)).update(updatedPlant)
           emit('update', updatedPlant);
         } else {
           const newPlant: NewEntity<Plant> = {
@@ -116,7 +116,7 @@ export default defineComponent({
             bedId: bedId.value!,
             createdAt: ServerValue.TIMESTAMP,
           }
-          database.ref('/users/mismith/plants').push(newPlant)
+          database.ref(getUserRefPath('/plants')).push(newPlant)
           emit('create', newPlant);
         }
 

@@ -29,7 +29,7 @@
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 
 import { NewEntity, Plot, usePlots, UpdatedEntity } from '../services/data'
-import { database, keyField, ServerValue } from '../services/firebase'
+import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 
 export default defineComponent({
   name: 'AddPlot',
@@ -64,7 +64,7 @@ export default defineComponent({
             parentPlotId: parentPlotId.value || null,
             updatedAt: ServerValue.TIMESTAMP,
           }
-          await database.ref(`/users/mismith/plots/${plot.value?.[keyField]}`).update(updatedPlot)
+          await database.ref(getUserRefPath(`/plots/${plot.value?.[keyField]}`)).update(updatedPlot)
           emit('update', updatedPlot);
         } else {
           const newPlot: NewEntity<Plot> = {
@@ -72,7 +72,7 @@ export default defineComponent({
             parentPlotId: parentPlotId.value || null,
             createdAt: ServerValue.TIMESTAMP,
           }
-          await database.ref('/users/mismith/plots').push(newPlot)
+          await database.ref(getUserRefPath('/plots')).push(newPlot)
           emit('create', newPlot);
         }
 
