@@ -149,7 +149,7 @@ $spacing: 8px;
   width: auto;
   height: 1.5em;
 
-  path[fill="#000"] {
+  .text {
     fill: currentColor;
   }
 }
@@ -181,8 +181,7 @@ $spacing: 8px;
 html,
 body,
 #app {
-  width: 100%;
-  height: 100%;
+  width: 100%;  height: 100%;
   padding: 0;
   margin: 0;
   display: flex;
