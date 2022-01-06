@@ -23,7 +23,7 @@
         <template v-else>
           <div style="display: inline-flex; flex-direction: column;">
             <span>{{node.name || node.id}}</span>
-            <small v-if="node.cropId" style="font-size: 0.5em;">{{crops?.find(({ id }) => id === node.cropId)?.nickname}}</small>
+            <small v-if="node.cropId" style="font-size: 0.75em;">{{crops?.find(({ id }) => id === node.cropId)?.nickname}}</small>
           </div>
 
           <span

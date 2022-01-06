@@ -245,11 +245,11 @@ export default defineComponent({
     position: absolute;
     top: 50%;
     left: 50%;
-    border: solid 5px transparent;
+    border: solid 0.4em transparent;
     border-left-color: currentColor;
-    border-left-width: 8px;
+    border-left-width: 0.7em;
     border-right-width: 0;
-    margin: -5px -4px;
+    margin: -0.4em -0.35em;
   }
 
   &.open {
@@ -367,10 +367,16 @@ body,
     gap: 4px;
   }
   .TreeNodeActions {
-    .btn {
-      min-width: 24px;
-      min-height: 24px;
+    display: flex;
+    align-self: stretch;
+
+    .btn-octicon {
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
       background-color: transparent;
+      padding: 0 0.5em;
+      margin: 0;
     }
   }
   @media (pointer: fine) {
@@ -378,6 +384,13 @@ body,
       .TreeNodeActions {
         visibility: hidden;
       }
+    }
+  }
+  @media (pointer: coarse) {
+    font-size: 1.25rem;
+
+    .TreeNodeName {
+      font-size: 0.875rem;
     }
   }
 
