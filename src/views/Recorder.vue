@@ -32,7 +32,7 @@
               v-for="event in featuredEvents"
               :key="event.id"
               type="button"
-              class="BtnGroup-item btn"
+              class="BtnGroup-item btn btn-sm px-1"
               style="flex: auto;"
               :aria-selected="eventId === event.id"
               @click="eventId = event.id"
