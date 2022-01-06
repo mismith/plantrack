@@ -26,9 +26,9 @@
     </div>
 
     <footer class="Box-footer">
-      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">
+      <Button type="submit" :disabled="!isValid" :loading="isLoading" class="btn-primary btn-block">
         {{isEditing ? 'Save' : 'Add'}} Plot
-      </button>
+      </Button>
     </footer>
   </form>
 </template>
@@ -39,8 +39,13 @@ import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 import { NewEntity, Plot, usePlots, UpdatedEntity } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 
+import Button from './Button.vue'
+
 export default defineComponent({
   name: 'AddPlot',
+  components: {
+    Button,
+  },
   props: {
     plot: {
       type: Object as PropType<Plot>,
@@ -55,6 +60,7 @@ export default defineComponent({
     const parentPlotId = ref(plot.value?.parentPlotId)
     const plots = usePlots()
     const isValid = computed(() => Boolean(name.value))
+    const isLoading = ref(false)
 
     return {
       name,
@@ -63,8 +69,11 @@ export default defineComponent({
 
       isEditing,
       isValid,
+      isLoading,
       async handleSubmit() {
         if (!isValid.value) return
+
+        isLoading.value = true
 
         if (isEditing.value && plot.value?.[keyField]) {
           const updatedPlot: UpdatedEntity<Plot> = {
@@ -83,6 +92,8 @@ export default defineComponent({
           await database.ref(getUserRefPath('/plots')).push(newPlot)
           emit('create', newPlot);
         }
+
+        isLoading.value = false
 
         name.value = undefined
         // let linger to ease batch additions

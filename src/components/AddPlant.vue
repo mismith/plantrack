@@ -40,9 +40,9 @@
     </div>
 
     <footer class="Box-footer">
-      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">
+      <Button type="submit" :disabled="!isValid" :loading="isLoading" class="btn-primary btn-block">
         {{isEditing ? 'Save' : 'Add'}} Plant
-      </button>
+      </Button>
     </footer>
   </form>
 </template>
@@ -52,12 +52,15 @@ import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 
 import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewPicker } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
+
+import Button from './Button.vue'
 import TreeView from './TreeView/TreeView.vue'
 import { ITreeNode, set, walkDescendents } from './TreeView'
 
 export default defineComponent({
   name: 'AddPlant',
   components: {
+    Button,
     TreeView,
   },
   props: {
@@ -77,6 +80,7 @@ export default defineComponent({
     const name = ref(plant.value?.name)
     const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
     const isValid = computed(() => Boolean(cropId.value && bedId.value))
+    const isLoading = ref(false)
 
     const treeView = useTreeViewPicker(bedId, { selectable: (node: ITreeNode) => node.type === 'bed' })
     if (bedId.value) {
@@ -107,8 +111,11 @@ export default defineComponent({
 
       isEditing,
       isValid,
+      isLoading,
       async handleSubmit() {
         if (!isValid.value) return
+
+        isLoading.value = true
 
         if (isEditing.value && plant.value?.[keyField]) {
           const updatedPlant: UpdatedEntity<Plant> = {
@@ -129,6 +136,8 @@ export default defineComponent({
           database.ref(getUserRefPath('/plants')).push(newPlant)
           emit('create', newPlant);
         }
+
+        isLoading.value = false
 
         name.value = undefined
         // let linger to ease batch additions

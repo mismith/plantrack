@@ -45,7 +45,7 @@
   <form v-else class="d-flex flex-column m-auto" style="gap: 8px;" @submit.prevent="handleLogin">
     <input type="email" v-model="email" placeholder="Email" aria-label="Email" class="form-control" />
     <input type="password" v-model="password" placeholder="Password" aria-label="Password" class="form-control" />
-    <button type="submit" class="btn">Login</button>
+    <Button type="submit" :loading="isLoading" :disabled="isLoading">Login</Button>
   </form>
 
   <Dialog :model-value="Boolean(isEditingPlant)" @update:model-value="isEditingPlant = undefined">
@@ -75,6 +75,7 @@ import { auth, useUser } from './services/firebase'
 import { Bed, Crop, Plant, Plot } from './services/data'
 
 import Logo from './logo.svg?component'
+import Button from './components/Button.vue'
 import Dialog from './components/Dialog.vue'
 import AddPlant from './components/AddPlant.vue'
 import AddCrop from './components/AddCrop.vue'
@@ -86,6 +87,7 @@ export default defineComponent({
   name: 'App',
   components: {
     Logo,
+    Button,
     Dialog,
     AddPlant,
     AddCrop,
@@ -97,12 +99,19 @@ export default defineComponent({
     const user = useUser()
     const email = ref<string>()
     const password = ref<string>()
+    const isLoading = ref(false)
     async function handleLogin() {
-      if (email.value && password.value) {
-        await auth.signInWithEmailAndPassword(email.value, password.value)
-      } else {
-        console.warn('Missing email and/or password', email.value, password.value)
+      isLoading.value = true
+      try {
+        if (email.value && password.value) {
+          await auth.signInWithEmailAndPassword(email.value, password.value)
+        } else {
+          throw new Error('Missing email and/or password')
+        }
+      } catch (error) {
+        console.warn(error)
       }
+      isLoading.value = false
     }
     async function handleLogout() {
       auth.signOut()
@@ -137,9 +146,10 @@ export default defineComponent({
     const isMenuOpen = ref(false)
 
     return {
+      user,
       email,
       password,
-      user,
+      isLoading,
       handleLogin,
       handleLogout,
 

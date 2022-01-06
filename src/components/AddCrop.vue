@@ -17,9 +17,9 @@
     </div>
 
     <footer class="Box-footer">
-      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">
+      <Button type="submit" :disabled="!isValid" :loading="isLoading" class="btn-primary btn-block">
         {{isEditing ? 'Save' : 'Add'}} Crop
-      </button>
+      </Button>
     </footer>
   </form>
 </template>
@@ -30,8 +30,13 @@ import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
 import { Crop, NewEntity, UpdatedEntity } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 
+import Button from './Button.vue'
+
 export default defineComponent({
   name: 'AddCrop',
+  components: {
+    Button,
+  },
   props: {
     crop: {
       type: Object as PropType<Crop>,
@@ -45,6 +50,7 @@ export default defineComponent({
     const name = ref(crop.value?.name)
     const nickname = ref(crop.value?.nickname)
     const isValid = computed(() => Boolean(name.value))
+    const isLoading = ref(false)
 
     return {
       name,
@@ -52,8 +58,11 @@ export default defineComponent({
 
       isEditing,
       isValid,
+      isLoading,
       async handleSubmit() {
         if (!isValid.value) return
+
+        isLoading.value = true
 
         if (isEditing.value && crop.value?.[keyField]) {
           const updatedCrop: UpdatedEntity<Crop> = {
@@ -72,6 +81,8 @@ export default defineComponent({
           database.ref(getUserRefPath('/crops')).push(newCrop)
           emit('create', newCrop);
         }
+
+        isLoading.value = false
 
         name.value = undefined
         nickname.value = undefined

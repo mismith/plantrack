@@ -28,9 +28,9 @@
     </div>
 
     <footer class="Box-footer">
-      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">
+      <Button type="submit" :disabled="!isValid" :loading="isLoading" class="btn-primary btn-block">
         {{isEditing ? 'Save' : 'Add'}} Bed
-      </button>
+      </Button>
     </footer>
   </form>
 </template>
@@ -41,8 +41,13 @@ import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 import { Bed, NewEntity, UpdatedEntity, usePlots } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 
+import Button from './Button.vue'
+
 export default defineComponent({
   name: 'AddBed',
+  components: {
+    Button,
+  },
   props: {
     bed: {
       type: Object as PropType<Bed>,
@@ -57,6 +62,7 @@ export default defineComponent({
     const plots = usePlots()
     const plotId = ref(bed.value?.plotId || plots.value?.[0]?.id)
     const isValid = computed(() => Boolean(name.value && plotId.value))
+    const isLoading = ref(false)
 
     return {
       isAddingPlot: inject('isAddingPlot'),
@@ -66,8 +72,11 @@ export default defineComponent({
 
       isEditing,
       isValid,
+      isLoading,
       async handleSubmit() {
         if (!isValid.value) return
+
+        isLoading.value = true
 
         if (isEditing.value && bed.value?.[keyField]) {
           const updatedBed: UpdatedEntity<Bed> = {
@@ -86,6 +95,8 @@ export default defineComponent({
           database.ref(getUserRefPath('/beds')).push(newBed)
           emit('create', newBed);
         }
+
+        isLoading.value = false
 
         name.value = undefined
         // let linger to ease batch additions
