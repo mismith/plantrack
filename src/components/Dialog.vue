@@ -10,9 +10,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs } from 'vue'
+import { defineComponent, onBeforeUnmount, ref, toRefs, watch } from 'vue'
 
 import Octicon from './Octicon.vue'
+
+const stack = ref<string[]>([])
 
 export default defineComponent({
   name: 'Dialog',
@@ -22,12 +24,32 @@ export default defineComponent({
   props: {
     modelValue: {
       type: Boolean,
+      default: false,
     },
   },
   setup(props, { emit }) {
     const { modelValue } = toRefs(props)
 
     const close = () => emit('update:modelValue', false)
+
+    const id = `${Date.now()}${Math.random()}`
+    function handleEsc({ key }: KeyboardEvent) {
+      if (key === 'Escape' && stack.value[stack.value.length - 1] === id) {
+        close()
+      }
+    }
+    watch(modelValue, (isOpen) => {
+      if (isOpen) {
+        stack.value.push(id)
+        document.addEventListener('keydown', handleEsc)
+      } else {
+        stack.value.pop()
+        document.removeEventListener('keydown', handleEsc)
+      }
+    }, { immediate: true })
+    onBeforeUnmount(() => {
+      document.removeEventListener('keydown', handleEsc)
+    })
 
     return {
       modelValue,
