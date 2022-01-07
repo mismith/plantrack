@@ -16,9 +16,11 @@
             href="#"
             target="_blank"
             :title="attachment.name"
-            style="text-decoration: none;"
+            class="btn-octicon"
             @click.stop="handleAttachmentClick($event, attachment)"
-          >📷</a>
+          >
+            <Octicon name="image" />
+          </a>
         </template>
         <template v-else>
           <div style="display: inline-flex; flex-direction: column;">

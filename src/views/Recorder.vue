@@ -17,7 +17,7 @@
           <label>Event</label>
         </header>
         <div class="form-group-body">
-          <select v-model="eventId" required class="form-select width-full mb-2">
+          <select v-model="eventId" required class="form-control form-select width-full mb-2">
             <option></option>
             <option
               v-for="event in events"
@@ -67,14 +67,14 @@
           </header>
           <div style="display: flex; gap: 4px;">
             <input type="text" v-model="weight" min="1" step="0.01" inputmode="decimal" class="form-control width-full" style="flex: auto;" />
-            <select v-model="weightUnit" class="form-select">
+            <select v-model="weightUnit" class="form-control form-select">
               <option>g</option>
               <option>kg</option>
               <option>oz</option>
               <option>lb</option>
               <option>items</option>
             </select>
-            <select v-if="plantIds.length > 1" v-model="weightSplit" class="form-select">
+            <select v-if="plantIds.length > 1" v-model="weightSplit" class="form-control form-select">
               <option v-for="key in WEIGHT_SPLIT" :key="key">{{key}}</option>
             </select>
           </div>

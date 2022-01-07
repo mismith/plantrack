@@ -15,7 +15,7 @@
           <button type="button" class="btn btn-sm" :class="{ active: isAddingPlot }" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
         </header>
 
-        <select v-model="plotId" required class="form-select width-full">
+        <select v-model="plotId" required class="form-control form-select width-full">
           <option
             v-for="plot in plots"
             :key="plot.id"

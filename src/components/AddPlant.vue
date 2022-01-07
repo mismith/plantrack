@@ -8,7 +8,7 @@
           <button type="button" class="btn btn-sm" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
         </header>
 
-        <select v-model="cropId" required class="form-select width-full">
+        <select v-model="cropId" required class="form-control form-select width-full">
           <option
             v-for="crop in crops"
             :key="crop.id"

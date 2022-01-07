@@ -11,7 +11,7 @@
         <header class="form-group-header">
           <label>Parent Plot</label>
         </header>
-        <select v-model="parentPlotId" class="form-select width-full">
+        <select v-model="parentPlotId" class="form-control form-select width-full">
           <option :value="undefined"></option>
           <option
             v-for="plot in plots"

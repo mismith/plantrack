@@ -6,7 +6,6 @@
     <div
       v-if="user"
       class="UnderlineNav-body flex-order-2 flex-sm-order-none d-sm-flex"
-      :class="{ 'd-none': !isMenuOpen }"
     >
       <router-link
         v-for="route in routes.filter(({ path, meta }) => path !== '/' && !meta?.hidden)"
@@ -219,6 +218,22 @@ export default defineComponent({
   }
 }
 
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+}
+
+input[type="file"] {
+  line-height: 1rem;
+}
+
 .btn-triangle {
   appearance: none;
   flex-shrink: 0;
@@ -257,18 +272,6 @@ export default defineComponent({
   }
 }
 
-html,
-body,
-#app {
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  font-family: sans-serif;
-}
-
 .TreeView {
   display: flex;
   flex-direction: column;
@@ -302,6 +305,8 @@ body,
 
       .TreeNodeExpand {
         @extend .btn-triangle;
+
+        flex-shrink: 0;
       }
       &.expandable {
         cursor: default;
@@ -319,6 +324,7 @@ body,
       }
 
       .TreeNodeCheck {
+        flex-shrink: 0;
         width: 1.2em;
         height: 1.2em;
         margin: 0.2em;
@@ -360,6 +366,15 @@ body,
     }
   }
 
+  .btn-octicon {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    background-color: transparent;
+    padding: 0 0.5em;
+    margin: 0;
+  }
+  
   .TreeNodeName {
     display: flex;
     align-items: center;
@@ -369,15 +384,6 @@ body,
   .TreeNodeActions {
     display: flex;
     align-self: stretch;
-
-    .btn-octicon {
-      display: inline-flex;
-      align-items: center;
-      height: 100%;
-      background-color: transparent;
-      padding: 0 0.5em;
-      margin: 0;
-    }
   }
   @media (pointer: fine) {
     .TreeNodeLeaf:not(:hover) {
