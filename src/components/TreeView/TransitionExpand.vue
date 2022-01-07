@@ -68,9 +68,10 @@ export default {
 <style scoped>
 * {
   will-change: height;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
+  /* @mismith: disabled because causes some overflow issues on nested contents */
+  /* transform: translateZ(0); */
+  /* backface-visibility: hidden; */
+  /* perspective: 1000px; */
 }
 </style>
 

@@ -3,13 +3,17 @@
     <form ref="formRef" @submit.prevent="handleSubmit" class="p-3">
       <fieldset class="form-group required">
         <header class="form-group-header">
-          <label>{{plantIds.length || ''}} Plant(s)</label>
+          <label>Plant(s)</label>
 
           <button type="button" class="btn btn-sm" :class="{ active: isAddingPlant }" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
           <button type="button" class="btn btn-sm" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
           <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
-        <PlantTreeView v-if="!isLoading" v-model="plantIds" multiple class="Box" />
+        <TreeViewSelect
+          :display-value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
+        >
+          <PlantTreeView v-if="!isLoading" v-model="plantIds" multiple />
+        </TreeViewSelect>
       </fieldset>
 
       <fieldset class="form-group required">
@@ -49,7 +53,12 @@
           <header class="form-group-header">
             <label>Where To</label>
           </header>
-          <PlantTreeView v-model="newBedIds" class="Box" />
+          <TreeViewSelect
+            v-model="isNewBedIdsSelectOpen"
+            :display-value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
+          >
+            <PlantTreeView v-model="newBedIds" />
+          </TreeViewSelect>
         </fieldset>
       </TransitionExpand>
       <TransitionExpand>
@@ -119,10 +128,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref } from 'vue'
+import { computed, defineComponent, inject, ref, watch } from 'vue'
 
-import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops } from '../services/data'
+import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds } from '../services/data'
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
+import TreeViewSelect from '../components/TreeViewSelect.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 
@@ -256,6 +266,7 @@ async function addPlantEntry({
 export default defineComponent({
   name: 'Recorder',
   components: {
+    TreeViewSelect,
     PlantTreeView,
     TransitionExpand,
   },
@@ -267,7 +278,14 @@ export default defineComponent({
     const files = ref<FileList>()
     const formRef = ref<HTMLFormElement>()
 
+    const beds = useBeds()
     const newBedIds = ref<string[]>([])
+    const isNewBedIdsSelectOpen = ref(false)
+    watch(newBedIds, (v) => {
+      if (v.length) {
+        isNewBedIdsSelectOpen.value = false
+      }
+    })
     const newName = ref<string>()
     const plants = usePlants()
     const crops = useCrops()
@@ -346,6 +364,7 @@ export default defineComponent({
       isAddingBed: inject('isAddingBed'),
       isAddingPlant: inject('isAddingPlant'),
 
+      plants,
       plantIds,
       eventId,
       at,
@@ -355,7 +374,9 @@ export default defineComponent({
 
       events,
       featuredEvents: events.filter(({ featured }) => featured),
+      beds,
       newBedIds,
+      isNewBedIdsSelectOpen,
       newName,
       newNamePlaceholder,
       weight,

@@ -23,12 +23,16 @@
         <header class="form-group-header">
           <label>Bed</label>
         </header>
-        <TreeView
-          :nodes="nodes"
-          v-bind="treeView.bind"
-          v-on="treeView.on"
-          class="Box"
-        />
+        <TreeViewSelect
+          v-model="isBedIdSelectOpen"
+          :display-value="beds?.find(({ id }) => id === bedId)?.name || ''"
+        >
+          <TreeView
+            :nodes="nodes"
+            v-bind="treeView.bind"
+            v-on="treeView.on"
+          />
+        </TreeViewSelect>
       </fieldset>
 
       <fieldset class="form-group">
@@ -48,12 +52,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
+import { computed, defineComponent, inject, PropType, ref, toRefs, watch } from 'vue'
 
 import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewProps } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 
 import Button from './Button.vue'
+import TreeViewSelect from './TreeViewSelect.vue'
 import TreeView from './TreeView/TreeView.vue'
 import { ITreeNode, set, walkDescendents } from './TreeView'
 
@@ -61,6 +66,7 @@ export default defineComponent({
   name: 'AddPlant',
   components: {
     Button,
+    TreeViewSelect,
     TreeView,
   },
   props: {
@@ -82,6 +88,10 @@ export default defineComponent({
     const isValid = computed(() => Boolean(cropId.value && bedId.value))
     const isLoading = ref(false)
 
+    const isBedIdSelectOpen = ref(false)
+    watch(bedId, () => {
+      isBedIdSelectOpen.value = false
+    })
     const treeView = useTreeViewProps(bedId, { selectable: (node: ITreeNode) => node.type === 'bed' })
     if (bedId.value) {
       // auto-expand parents above restored selections
@@ -100,7 +110,9 @@ export default defineComponent({
 
     return {
       nodes,
+      beds,
       treeView,
+      isBedIdSelectOpen,
 
       isAddingCrop: inject('isAddingCrop'),
       crops,
@@ -151,7 +163,7 @@ export default defineComponent({
 
 <style lang="scss">
 .AddPlant {
-  fieldset > .TreeView {
+  .TreeView {
     .TreeNode {
       > .TreeNodeLeaf {
         &:not(.selectable) {

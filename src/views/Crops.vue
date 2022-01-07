@@ -3,36 +3,39 @@
     <form @submit.prevent class="p-3">
       <fieldset class="form-group">
         <header class="form-group-header">
-          <label>{{cropIds?.length || crops?.length || ''}} {{cropIds.length ? 'selected' : '' }} crop(s)</label>
+          <label>Crop(s)</label>
 
           <button type="button" class="btn btn-sm" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
           <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
-        <TreeView
-          :nodes="nodes"
-          v-bind="treeView.bind"
-          v-on="treeView.on"
-          class="Box"
+        <TreeViewSelect
+          :display-value="cropIds.length > 1 ? `${cropIds.length} crops selected` : cropIds.map((cropId) => crops.find(({ id }) => id === cropId)?.nickname).filter(Boolean)"
         >
-          <template #node-name="{ node }">
-            <div class="TreeNodeName">
-              {{node.nickname || node.id}}
-              <small v-if="node.name">({{node.name}})</small>
-            </div>
-          </template>
-          <template #node-append="{ node }">
-            <div class="TreeNodeActions">
-              <button
-                v-if="node.name"
-                type="button"
-                class="btn-octicon"
-                @click.stop="isEditingCrop = crops.find(({ id }) => id === node.id)"
-              >
-                <Octicon name="pencil" />
-              </button>
-            </div>
-          </template>
-        </TreeView>
+          <TreeView
+            :nodes="nodes"
+            v-bind="treeView.bind"
+            v-on="treeView.on"
+          >
+            <template #node-name="{ node }">
+              <div class="TreeNodeName">
+                {{node.nickname || node.id}}
+                <small v-if="node.name">({{node.name}})</small>
+              </div>
+            </template>
+            <template #node-append="{ node }">
+              <div class="TreeNodeActions">
+                <button
+                  v-if="node.name"
+                  type="button"
+                  class="btn-octicon"
+                  @click.stop="isEditingCrop = crops.find(({ id }) => id === node.id)"
+                >
+                  <Octicon name="pencil" />
+                </button>
+              </div>
+            </template>
+          </TreeView>
+        </TreeViewSelect>
       </fieldset>
 
       <TransitionExpand group>
@@ -57,6 +60,7 @@ import { useCrops, useTreeViewProps } from '../services/data'
 import { database, getUserRefPath, toKeyFieldArray } from '../services/firebase'
 
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
+import TreeViewSelect from '../components/TreeViewSelect.vue'
 import TreeView from '../components/TreeView/TreeView.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
 import { ITreeNode } from '../components/TreeView'
@@ -66,6 +70,7 @@ export default defineComponent({
   name: 'Crops',
   components: {
     TransitionExpand,
+    TreeViewSelect,
     TreeView,
     CropStatsCard,
     Octicon,

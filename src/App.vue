@@ -399,11 +399,5 @@ input[type="file"] {
       font-size: 0.875rem;
     }
   }
-
-  fieldset > & {
-    justify-content: initial;
-    max-height: 400px;
-    overflow-y: auto;
-  }
 }
 </style>

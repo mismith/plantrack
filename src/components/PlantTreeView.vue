@@ -115,6 +115,7 @@ export default defineComponent({
     },
     multiple: {
       type: Boolean,
+      required: false,
     },
   },
   setup(props, { emit }) {
