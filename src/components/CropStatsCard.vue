@@ -103,5 +103,14 @@ export default defineComponent({
     vertical-align: middle;
     margin-top: -2px;
   }
+  .TreeView {
+    > .TreeNode {
+      > .TreeNodeLeaf {
+        .TreeNodeExpand {
+          display: none;
+        }
+      }
+    }
+  }
 }
 </style>
