@@ -53,7 +53,7 @@
 import { computed, defineComponent, inject, ref } from 'vue'
 import set from 'lodash.set'
 
-import { useCrops, useTreeViewPicker } from '../services/data'
+import { useCrops, useTreeViewProps } from '../services/data'
 import { database, getUserRefPath, toKeyFieldArray } from '../services/firebase'
 
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
@@ -98,7 +98,7 @@ export default defineComponent({
       }
       return []
     })
-    const treeView = useTreeViewPicker(cropIds, { checkable: { recurse: true } }, (cropId) => crops.value?.find(({ id }) => id === cropId))
+    const treeView = useTreeViewProps(cropIds, { checkable: { recurse: true } }, (cropId) => crops.value?.find(({ id }) => id === cropId))
 
     const importInputRef = ref<HTMLInputElement | null>(null)
     async function handleImport(event: any) {

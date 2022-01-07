@@ -24,7 +24,7 @@
 <script lang="ts">
 import { computed, defineComponent, ref, toRefs, watch } from 'vue'
 
-import { events, Plant, useCrops, usePlants, useTreeViewPicker } from '../services/data'
+import { events, Plant, useCrops, usePlants, useTreeViewProps } from '../services/data'
 import { getPlantsForCropId, getStatsForPlants } from '../services/stats'
 import CropStatsChart from '../components/CropStatsChart.vue'
 import TreeView from '../components/TreeView/TreeView.vue'
@@ -77,7 +77,7 @@ export default defineComponent({
     }
 
     const nodes = cropPlants
-    const treeView = useTreeViewPicker(cropPlantIds, { checkable: true })
+    const treeView = useTreeViewProps(cropPlantIds, { checkable: true })
 
     return {
       cropId,

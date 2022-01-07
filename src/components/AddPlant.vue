@@ -50,7 +50,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 
-import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewPicker } from '../services/data'
+import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewProps } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 
 import Button from './Button.vue'
@@ -82,7 +82,7 @@ export default defineComponent({
     const isValid = computed(() => Boolean(cropId.value && bedId.value))
     const isLoading = ref(false)
 
-    const treeView = useTreeViewPicker(bedId, { selectable: (node: ITreeNode) => node.type === 'bed' })
+    const treeView = useTreeViewProps(bedId, { selectable: (node: ITreeNode) => node.type === 'bed' })
     if (bedId.value) {
       // auto-expand parents above restored selections
       const checkNode = (node: ITreeNode) => {

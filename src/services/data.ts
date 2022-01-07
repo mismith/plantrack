@@ -235,7 +235,7 @@ export function getSuggestedPlantName(cropId?: string, crops?: Crop[], plants?: 
   return `${crop?.name || 'Plant'}.${(cropPlants?.length || 0) + 1}`
 }
 
-export function useTreeViewPicker(
+export function useTreeViewProps(
   ref: Ref,
   config: { selectable?: Booleanable, checkable?: Booleanable } = { selectable: true },
   predicate: (value: any, index: number, obj: any[]) => unknown = Boolean,
