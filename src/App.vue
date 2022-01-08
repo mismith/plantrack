@@ -24,7 +24,7 @@
       <button type="button" title="Toggle Dark Mode" class="Header-link close-button circle" @click="isDarkMode = !isDarkMode">
         <Octicon :name="isDarkMode ? 'sun' : 'moon'" />
       </button>
-      <Dropdown v-if="user" direction="sw" menu-class="mt-3 mr-2" class="ml-2">
+      <Dropdown v-if="user" direction="sw" menu-class="mt-2" class="ml-2">
         <template #summary>
           <summary title="Account" class="Header-link close-button circle">
             <Octicon name="person" />
