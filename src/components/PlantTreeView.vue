@@ -67,7 +67,7 @@
         <button
           v-if="node.type === 'entry'"
           type="button"
-          class="btn-octicon"
+          class="btn-octicon btn-octicon-danger"
           @click.stop="handleRemoveEntry(node, parents, $event.shiftKey)"
         >
           <Octicon name="trash" />
