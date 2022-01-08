@@ -18,6 +18,8 @@
 import { computed, defineComponent, inject, onMounted, ref } from 'vue'
 
 import { firebase, auth } from '../services/firebase'
+import { useAsyncWrapper } from '../services/errors'
+
 import Button from './Button.vue'
 
 export default defineComponent({
@@ -26,55 +28,49 @@ export default defineComponent({
     Button,
   },
   setup() {
-    const toast = inject<any>('toast')
-    const handleError = inject<any>('toastError')
+    const toast = inject<Function>('toast')
+    const [runAsync] = useAsyncWrapper()
+    const isLoading = ref<boolean | string>(false)
 
     const email = ref<string>()
     const isValid = computed(() => Boolean(email.value))
     const EMAIL_LINK_KEY = 'plantrack.emailForSignInWithEmailLink'
     async function handleSignInWithEmailLink() {
       isLoading.value = 'email'
-      try {
+      await runAsync(async () => {
         if (email.value) {
           await auth.sendSignInLinkToEmail(email.value, {
             url: window.location.href,
             handleCodeInApp: true,
           })
           window.localStorage.setItem(EMAIL_LINK_KEY, email.value)
-          toast('Email link sent successfully', 'success')
+          toast?.('Email link sent successfully', 'success')
           email.value = undefined
         } else {
           throw new Error('Missing email')
         }
-      } catch (error) {
-        handleError(error)
-      }
+      })
       isLoading.value = false
     }
     onMounted(async () => {
       if (auth.isSignInWithEmailLink(window.location.href)) {
         isLoading.value = 'email'
-        try {
+        await runAsync(async () => {
           const email = window.localStorage.getItem(EMAIL_LINK_KEY) || window.prompt('Please provide your email for confirmation') || ''
           await auth.signInWithEmailLink(email, window.location.href)
           window.localStorage.removeItem(EMAIL_LINK_KEY)
           window.history.replaceState(null, '', window.location.pathname)
-        } catch (error) {
-          handleError(error)
-        }
+        })
         isLoading.value = false
       }
     })
 
-    const isLoading = ref<string | boolean>(false)
     async function handleSignInWithGoogle() {
       isLoading.value = 'google'
-      try {
+      await runAsync(async () => {
         const google = new firebase.auth.GoogleAuthProvider()
         await auth.signInWithPopup(google)
-      } catch (error) {
-        handleError(error)
-      }
+      })
       isLoading.value = false
     }
 

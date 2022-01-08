@@ -34,10 +34,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
+import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 
 import { NewEntity, Plot, usePlots, UpdatedEntity } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
+import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
 
@@ -60,7 +61,38 @@ export default defineComponent({
     const parentPlotId = ref(plot.value?.parentPlotId)
     const plots = usePlots()
     const isValid = computed(() => Boolean(name.value))
-    const isLoading = ref(false)
+
+    const toast = inject<Function>('toast')
+    const [runAsync, isLoading] = useAsyncWrapper()
+    async function handleSubmit() {
+      if (!isValid.value) return
+
+      await runAsync(async () => {
+        if (isEditing.value && plot.value?.[keyField]) {
+          const updatedPlot: UpdatedEntity<Plot> = {
+            name: name.value!,
+            parentPlotId: parentPlotId.value || null,
+            updatedAt: ServerValue.TIMESTAMP,
+          }
+          await database.ref(getUserRefPath(`/plots/${plot.value?.[keyField]}`)).update(updatedPlot)
+          emit('update', updatedPlot);
+          toast?.('Plot saved successfully', 'success')
+        } else {
+          const newPlot: NewEntity<Plot> = {
+            name: name.value!,
+            parentPlotId: parentPlotId.value || null,
+            createdAt: ServerValue.TIMESTAMP,
+          }
+          await database.ref(getUserRefPath('/plots')).push(newPlot)
+          emit('create', newPlot);
+          toast?.('Plot added successfully', 'success')
+        }
+      })
+
+      name.value = undefined
+      // let linger to ease batch additions
+      // parentPlotId.value = undefined
+    }
 
     return {
       name,
@@ -70,35 +102,7 @@ export default defineComponent({
       isEditing,
       isValid,
       isLoading,
-      async handleSubmit() {
-        if (!isValid.value) return
-
-        isLoading.value = true
-
-        if (isEditing.value && plot.value?.[keyField]) {
-          const updatedPlot: UpdatedEntity<Plot> = {
-            name: name.value!,
-            parentPlotId: parentPlotId.value || null,
-            updatedAt: ServerValue.TIMESTAMP,
-          }
-          await database.ref(getUserRefPath(`/plots/${plot.value?.[keyField]}`)).update(updatedPlot)
-          emit('update', updatedPlot);
-        } else {
-          const newPlot: NewEntity<Plot> = {
-            name: name.value!,
-            parentPlotId: parentPlotId.value || null,
-            createdAt: ServerValue.TIMESTAMP,
-          }
-          await database.ref(getUserRefPath('/plots')).push(newPlot)
-          emit('create', newPlot);
-        }
-
-        isLoading.value = false
-
-        name.value = undefined
-        // let linger to ease batch additions
-        // parentPlotId.value = undefined
-      },
+      handleSubmit,
     }
   },
 })

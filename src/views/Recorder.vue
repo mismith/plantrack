@@ -134,6 +134,8 @@ import { computed, defineComponent, inject, ref, watch } from 'vue'
 
 import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds } from '../services/data'
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
+import { useAsyncWrapper } from '../services/errors'
+
 import TreeViewSelect from '../components/TreeViewSelect.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
@@ -310,7 +312,6 @@ export default defineComponent({
       })()
       return Boolean(requireds && conditionals)
     })
-    const isLoading = ref(false)
 
     function handleReset() {
       plantIds.value = []
@@ -325,40 +326,45 @@ export default defineComponent({
       files.value = undefined
       formRef.value?.reset()
     }
+
+    const toast = inject<Function>('toast')
+    const [runAsync, isLoading] = useAsyncWrapper()
     async function handleSubmit() {
-      isLoading.value = true
-      const individualWeight = weight.value
-        ? (
-          weightSplit.value === WEIGHT_SPLIT.ALL
-            ? round(Number.parseFloat(weight.value) / plantIds.value.length)
-            : Number.parseFloat(weight.value)
-        )
-        : undefined
+      await runAsync(async () => {
+        const individualWeight = weight.value
+          ? (
+            weightSplit.value === WEIGHT_SPLIT.ALL
+              ? round(Number.parseFloat(weight.value) / plantIds.value.length)
+              : Number.parseFloat(weight.value)
+          )
+          : undefined
 
-      const attachments = await Promise.all(Array.from(files.value || []).map(uploadAttachment))
-      await Promise.all(plantIds.value.map(async (plantId) => {
-        const params = {
-          plantId,
-          eventId: eventId.value,
-          newBedId: newBedIds.value?.[0],
-          newName: newName.value || newNamePlaceholder.value,
-          weight: individualWeight,
-          weightUnit: weightUnit.value,
-          at: at.value,
-          note: note.value,
-        }
-        await addPlantEntry(params, attachments)
+        const attachments = await Promise.all(Array.from(files.value || []).map(uploadAttachment))
+        await Promise.all(plantIds.value.map(async (plantId) => {
+          const params = {
+            plantId,
+            eventId: eventId.value,
+            newBedId: newBedIds.value?.[0],
+            newName: newName.value || newNamePlaceholder.value,
+            weight: individualWeight,
+            weightUnit: weightUnit.value,
+            at: at.value,
+            note: note.value,
+          }
+          await addPlantEntry(params, attachments)
 
-        if (cullToo.value) {
-          await addPlantEntry({
-            ...params,
-            eventId: 'cull',
-          })
-        }
-      }))
+          if (cullToo.value) {
+            await addPlantEntry({
+              ...params,
+              eventId: 'cull',
+            })
+          }
+        }))
+
+        toast?.('Entry added successfully', 'success')
+      })
 
       handleReset()
-      isLoading.value = false
     }
 
     return {

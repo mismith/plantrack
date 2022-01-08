@@ -25,10 +25,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, ref, toRefs } from 'vue'
+import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
 
 import { Crop, NewEntity, UpdatedEntity } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
+import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
 
@@ -50,20 +51,13 @@ export default defineComponent({
     const name = ref(crop.value?.name)
     const nickname = ref(crop.value?.nickname)
     const isValid = computed(() => Boolean(name.value))
-    const isLoading = ref(false)
 
-    return {
-      name,
-      nickname,
+    const toast = inject<Function>('toast')
+    const [runAsync, isLoading] = useAsyncWrapper()
+    async function handleSubmit() {
+      if (!isValid.value) return
 
-      isEditing,
-      isValid,
-      isLoading,
-      async handleSubmit() {
-        if (!isValid.value) return
-
-        isLoading.value = true
-
+      await runAsync(async () => {
         if (isEditing.value && crop.value?.[keyField]) {
           const updatedCrop: UpdatedEntity<Crop> = {
             name: name.value!,
@@ -72,6 +66,7 @@ export default defineComponent({
           }
           await database.ref(getUserRefPath(`/crops/${crop.value?.[keyField]}`)).update(updatedCrop)
           emit('update', updatedCrop);
+          toast?.('Crop saved successfully', 'success')
         } else {
           const newCrop: NewEntity<Crop> = {
             name: name.value!,
@@ -80,13 +75,22 @@ export default defineComponent({
           }
           database.ref(getUserRefPath('/crops')).push(newCrop)
           emit('create', newCrop);
+          toast?.('Crop added successfully', 'success')
         }
+      })
 
-        isLoading.value = false
+      name.value = undefined
+      nickname.value = undefined
+    }
 
-        name.value = undefined
-        nickname.value = undefined
-      },
+    return {
+      name,
+      nickname,
+
+      isEditing,
+      isValid,
+      isLoading,
+      handleSubmit,
     }
   },
 })

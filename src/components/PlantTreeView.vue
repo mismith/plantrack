@@ -90,6 +90,7 @@ import { computed, defineComponent, inject, PropType, reactive, watch } from 'vu
 
 import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops, Attachment } from '../services/data'
 import { database, getUserRefPath, storage } from '../services/firebase'
+import { useAsyncWrapper } from '../services/errors'
 
 import { Booleanable, ITreeNode, tools } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
@@ -157,25 +158,36 @@ export default defineComponent({
       }
     }, { immediate: true })
 
+    const toast = inject<Function>('toast')
+    const [runAsync] = useAsyncWrapper()
     async function handleRemoveEntry(entry: Entry, parents: ITreeNode[] = [], skipConfirm = false) {
       if (skipConfirm || window.confirm('Are you sure?')) {
-        const plant = parents[parents.length - 1] as Plant
-        await database.ref(getUserRefPath(`/plants/${plant.id}/entries/${entry.id}`)).remove()
+        runAsync(async () => {
+          const plant = parents[parents.length - 1] as Plant
+          await database.ref(getUserRefPath(`/plants/${plant.id}/entries/${entry.id}`)).remove()
+          toast?.('Entry deleted successfully', 'success')
+        })
       }
     }
     async function handleRemoveNode(node: ITreeNode, skipConfirm = false) {
       if (skipConfirm || window.confirm('Are you sure?')) {
-        await database.ref(getUserRefPath(`/${node.type}s/${node.id}`)).remove()
+        runAsync(async () => {
+          await database.ref(getUserRefPath(`/${node.type}s/${node.id}`)).remove()
+          const type = `${node.type.charAt(0).toUpperCase()}${node.type.slice(1)}`
+          toast?.(`${type} deleted successfully`, 'success')
+        })
       }
     }
     async function handleAttachmentClick(event: any, attachment: Attachment) {
-      event.preventDefault()
-      const ref = storage.ref(`/${attachment.url}`)
-      const href = await ref.getDownloadURL()
-      const a = document.createElement("a")
-      a.target = event.target.target
-      a.href = href
-      a.click()
+      runAsync(async () => {
+        event.preventDefault()
+        const ref = storage.ref(`/${attachment.url}`)
+        const href = await ref.getDownloadURL()
+        const a = document.createElement("a")
+        a.target = event.target.target
+        a.href = href
+        a.click()
+      })
     }
     function handleChange(changes: Record<string, any>) {
       Object.assign(treeState, changes)

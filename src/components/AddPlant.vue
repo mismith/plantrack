@@ -56,6 +56,7 @@ import { computed, defineComponent, inject, PropType, ref, toRefs, watch } from 
 
 import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewProps } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
+import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
 import TreeViewSelect from './TreeViewSelect.vue'
@@ -86,7 +87,6 @@ export default defineComponent({
     const name = ref(plant.value?.name)
     const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
     const isValid = computed(() => Boolean(cropId.value && bedId.value))
-    const isLoading = ref(false)
 
     const isBedIdSelectOpen = ref(false)
     watch(bedId, () => {
@@ -108,6 +108,41 @@ export default defineComponent({
       nodes.value.forEach(checkNode)
     }
 
+    const toast = inject<Function>('toast')
+    const [runAsync, isLoading] = useAsyncWrapper()
+    async function handleSubmit() {
+      if (!isValid.value) return
+
+      await runAsync(async () => {
+        if (isEditing.value && plant.value?.[keyField]) {
+          const updatedPlant: UpdatedEntity<Plant> = {
+            name: name.value || placeholder.value,
+            cropId: cropId.value!,
+            bedId: bedId.value!,
+            updatedAt: ServerValue.TIMESTAMP,
+          }
+          await database.ref(getUserRefPath(`/plants/${plant.value?.[keyField]}`)).update(updatedPlant)
+          emit('update', updatedPlant);
+          toast?.('Plant saved successfully', 'success')
+        } else {
+          const newPlant: NewEntity<Plant> = {
+            name: name.value || placeholder.value,
+            cropId: cropId.value!,
+            bedId: bedId.value!,
+            createdAt: ServerValue.TIMESTAMP,
+          }
+          database.ref(getUserRefPath('/plants')).push(newPlant)
+          emit('create', newPlant);
+          toast?.('Plant added successfully', 'success')
+        }
+      })
+
+      name.value = undefined
+      // let linger to ease batch additions
+      // cropId.value = undefined
+      // bedId.value = undefined
+    }
+
     return {
       nodes,
       beds,
@@ -124,38 +159,7 @@ export default defineComponent({
       isEditing,
       isValid,
       isLoading,
-      async handleSubmit() {
-        if (!isValid.value) return
-
-        isLoading.value = true
-
-        if (isEditing.value && plant.value?.[keyField]) {
-          const updatedPlant: UpdatedEntity<Plant> = {
-            name: name.value || placeholder.value,
-            cropId: cropId.value!,
-            bedId: bedId.value!,
-            updatedAt: ServerValue.TIMESTAMP,
-          }
-          await database.ref(getUserRefPath(`/plants/${plant.value?.[keyField]}`)).update(updatedPlant)
-          emit('update', updatedPlant);
-        } else {
-          const newPlant: NewEntity<Plant> = {
-            name: name.value || placeholder.value,
-            cropId: cropId.value!,
-            bedId: bedId.value!,
-            createdAt: ServerValue.TIMESTAMP,
-          }
-          database.ref(getUserRefPath('/plants')).push(newPlant)
-          emit('create', newPlant);
-        }
-
-        isLoading.value = false
-
-        name.value = undefined
-        // let linger to ease batch additions
-        // cropId.value = undefined
-        // bedId.value = undefined
-      },
+      handleSubmit,
     }
   },
 })
