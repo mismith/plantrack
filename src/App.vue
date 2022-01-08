@@ -63,11 +63,15 @@
   <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
   <Dialog v-model="isAddingBed"><AddBed /></Dialog>
   <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
+
+  <Toast v-model="toast.isOpen" :type="toast.type">
+    {{toast.message}}
+  </Toast>
 </template>
 
 <script lang="ts">
 /// <reference types="vite-svg-loader" />
-import { defineComponent, provide, ref, watch } from 'vue'
+import { defineComponent, provide, reactive, ref, watch } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
@@ -84,6 +88,7 @@ import AddCrop from './components/AddCrop.vue'
 import AddBed from './components/AddBed.vue'
 import AddPlot from './components/AddPlot.vue'
 import Octicon from './components/Octicon.vue'
+import Toast from './components/Toast.vue'
 
 export default defineComponent({
   name: 'App',
@@ -99,6 +104,7 @@ export default defineComponent({
     AddBed,
     AddPlot,
     Octicon,
+    Toast,
   },
   setup() {
     const user = useUser()
@@ -129,6 +135,22 @@ export default defineComponent({
     provide('isEditingBed', isEditingBed)
     provide('isEditingPlot', isEditingPlot)
 
+    const toast = reactive({
+      isOpen: false,
+      message: '',
+      type: '',
+    })
+    function toaster(message: string, type?: string) {
+      toast.message = message
+      if (type) toast.type = type
+      toast.isOpen = true
+    }
+    provide('toast', toaster)
+    function toastError(error: any) {
+      toaster(error?.getMessage?.() || error?.message || error, 'error')
+    }
+    provide('toastError', toastError)
+
     async function handleLogout() {
       auth.signOut()
     }
@@ -149,6 +171,8 @@ export default defineComponent({
       isEditingCrop,
       isEditingBed,
       isEditingPlot,
+
+      toast,
 
       handleLogout,
     }
