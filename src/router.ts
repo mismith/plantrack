@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import Plotter from './views/Plotter.vue'
-import Crops from './views/Crops.vue'
 import Recorder from './views/Recorder.vue'
+import Tracker from './views/Tracker.vue'
 import OldTracker from './views/OldTracker.vue'
 import Exporter from './views/Exporter.vue'
 
@@ -20,8 +20,8 @@ export const routes = [
     component: Recorder,
   },
   {
-    path: '/crops',
-    component: Crops,
+    path: '/tracker',
+    component: Tracker,
   },
   {
     path: '/old-tracker',
