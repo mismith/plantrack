@@ -52,8 +52,6 @@ export default defineComponent({
 
 <style lang="scss">
 .TreeViewSelect {
-  max-width: calc(100vw - 2 * 16px); // @HACK
-
   .SelectMenu-modal {
     font-size: 1rem;
   }
