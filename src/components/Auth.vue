@@ -57,6 +57,7 @@ export default defineComponent({
           const email = window.localStorage.getItem(EMAIL_LINK_KEY) || window.prompt('Please provide your email for confirmation') || ''
           await auth.signInWithEmailLink(email, window.location.href)
           window.localStorage.removeItem(EMAIL_LINK_KEY)
+          window.history.replaceState(null, '', window.location.pathname)
         } catch (error) {
           handleError(error)
         }
