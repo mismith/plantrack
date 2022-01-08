@@ -119,9 +119,11 @@
         <input type="file" multiple class="form-control width-full" @change="files = $event.target.files" />
       </fieldset>
 
-      <footer class="form-group">
-        <button type="submit" :disabled="!isValid || isLoading" class="btn btn-primary btn-block">Add Entry</button>
-        <progress v-if="isLoading" style="width: 100%;" />
+      <footer class="color-bg-default p-3 mb-n3 ml-n3 mr-n3 border-top" style="position: sticky; bottom: 0;">
+        <div class="form-group my-0">
+          <button type="submit" :disabled="!isValid || isLoading" class="btn btn-primary btn-block">Add Entry</button>
+          <progress v-if="isLoading" style="width: 100%;" />
+        </div>
       </footer>
     </form>
   </div>
