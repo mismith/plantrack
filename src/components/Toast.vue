@@ -1,6 +1,6 @@
 <template>
-  <aside v-if="modelValue" class="position-fixed bottom-0 right-0">
-    <div class="Toast position-relative overflow-hidden" :class="`Toast--${type}`">
+  <aside v-if="modelValue" class="ToastContainer position-fixed bottom-0 right-0">
+    <div class="Toast position-relative overflow-hidden anim-fade-up" :class="`Toast--${type}`">
       <span class="Toast-icon">
         <Octicon :name="icon" />
       </span>
@@ -10,7 +10,7 @@
           v-if="timeout"
           class="position-absolute left-0 right-0 bottom-0 anim-grow-x"
           :class="`color-bg-${color}-emphasis`"
-          :style="{ paddingTop: '2px', animationDelay: '0ms', animationDuration: `${timeout}ms`, animationTimingFunction: 'linear' }"
+          :style="{ animationDuration: `${timeout}ms` }"
         />
       </div>
       <button class="Toast-dismissButton" @click="handleClose">
@@ -90,3 +90,18 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.ToastContainer {
+  z-index: 110;
+
+  .anim-fade-up {
+    animation-delay: 0ms;
+  }
+  .anim-grow-x {
+    padding-top: 2px;
+    animation-delay: 0ms;
+    animation-timing-function: linear;
+  }
+}
+</style>
