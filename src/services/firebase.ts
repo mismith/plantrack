@@ -4,6 +4,7 @@ import 'firebase/auth'
 import 'firebase/database'
 import 'firebase/storage'
 
+export { firebase }
 export const config = {
   apiKey: 'AIzaSyDvmckvDo8aydVkAXLJ5kkoyLiCmQGot34',
   authDomain: 'plantrack-app.firebaseapp.com',

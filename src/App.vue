@@ -40,12 +40,8 @@
     </div>
   </nav>
 
-  <router-view v-if="user" style="flex: auto;" />
-  <form v-else class="d-flex flex-column m-auto" style="gap: 8px;" @submit.prevent="handleSignIn">
-    <input type="email" v-model="email" placeholder="Email" aria-label="Email" class="form-control" />
-    <input type="password" v-model="password" placeholder="Password" aria-label="Password" class="form-control" />
-    <Button type="submit" :loading="isLoading" :disabled="isLoading">Sign in</Button>
-  </form>
+  <router-view v-if="user" class="flex-auto" />
+  <Auth v-else />
 
   <Dialog :model-value="Boolean(isEditingPlant)" @update:model-value="isEditingPlant = undefined">
     <AddPlant :plant="isEditingPlant" @update="isEditingPlant = undefined" />
@@ -77,6 +73,7 @@ import Logo from './assets/logo.svg?component'
 import Touchicon from './assets/touchicon.svg?component'
 import Dropdown from './components/Dropdown.vue'
 import Button from './components/Button.vue'
+import Auth from './components/Auth.vue'
 import Dialog from './components/Dialog.vue'
 import AddPlant from './components/AddPlant.vue'
 import AddCrop from './components/AddCrop.vue'
@@ -91,6 +88,7 @@ export default defineComponent({
     Touchicon,
     Dropdown,
     Button,
+    Auth,
     Dialog,
     AddPlant,
     AddCrop,
@@ -100,25 +98,14 @@ export default defineComponent({
   },
   setup() {
     const user = useUser()
-    const email = ref<string>()
-    const password = ref<string>()
-    const isLoading = ref(false)
-    async function handleSignIn() {
-      isLoading.value = true
-      try {
-        if (email.value && password.value) {
-          await auth.signInWithEmailAndPassword(email.value, password.value)
-        } else {
-          throw new Error('Missing email and/or password')
-        }
-      } catch (error) {
-        console.warn(error)
-      }
-      isLoading.value = false
-    }
-    async function handleLogout() {
-      auth.signOut()
-    }
+    const isMenuOpen = ref(false)
+    const colorSchemeKey = 'plantrack.color-scheme'
+    const colorSchemeStored = window.localStorage.getItem(colorSchemeKey)
+    const isDarkMode = ref(colorSchemeStored !== null ? colorSchemeStored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches)
+    watch(isDarkMode, (enabled) => {
+      document.documentElement.dataset.colorMode = enabled ? 'dark' : 'light'
+      window.localStorage.setItem(colorSchemeKey, enabled ? 'dark' : 'light')
+    }, { immediate: true })
 
     const isAddingPlant = ref(false)
     const isAddingCrop = ref(false)
@@ -138,21 +125,14 @@ export default defineComponent({
     provide('isEditingBed', isEditingBed)
     provide('isEditingPlot', isEditingPlot)
 
-    const colorSchemeKey = 'plantrack.color-scheme'
-    const colorSchemeStored = window.localStorage.getItem(colorSchemeKey)
-    const isDarkMode = ref(colorSchemeStored !== null ? colorSchemeStored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches)
-    watch(isDarkMode, (enabled) => {
-      document.documentElement.dataset.colorMode = enabled ? 'dark' : 'light'
-      window.localStorage.setItem(colorSchemeKey, enabled ? 'dark' : 'light')
-    }, { immediate: true })
+    async function handleLogout() {
+      auth.signOut()
+    }
 
     return {
       user,
-      email,
-      password,
-      isLoading,
-      handleSignIn,
-      handleLogout,
+      isMenuOpen,
+      isDarkMode,
 
       routes,
 
@@ -166,7 +146,7 @@ export default defineComponent({
       isEditingBed,
       isEditingPlot,
 
-      isDarkMode,
+      handleLogout,
     }
   }
 })
