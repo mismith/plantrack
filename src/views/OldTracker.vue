@@ -1,5 +1,5 @@
 <template>
-  <div class="Tracker">
+  <div class="OldTracker">
     <header>
       <label>
         Start Date
@@ -58,7 +58,7 @@ import { getEventGroupsForPlants, getPlantsForCropId, getStatsStringForPlants } 
 import EntryTimeline, { getEndDate, getStartDate } from '../components/EntryTimeline.vue'
 
 export default defineComponent({
-  name: 'Tracker',
+  name: 'OldTracker',
   components: {
     EntryTimeline,
   },
@@ -117,7 +117,7 @@ export default defineComponent({
 <style lang="scss">
 $spacing: 8px;
 
-.Tracker {
+.OldTracker {
   > header {
     display: flex;
     justify-content: space-between;
