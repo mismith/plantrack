@@ -32,6 +32,10 @@
           </summary>
         </template>
 
+        <span class="dropdown-header">
+          {{user.email}}
+        </span>
+        <hr class="dropdown-divider" />
         <a href="#" class="dropdown-item" @click="handleLogout">
           <Octicon name="sign-out" />
           Sign out
