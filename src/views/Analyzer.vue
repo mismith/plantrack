@@ -1,5 +1,5 @@
 <template>
-  <div class="Tracker">
+  <div class="Analyzer">
     <form @submit.prevent class="p-3">
       <fieldset class="form-group">
         <header class="form-group-header">
@@ -67,7 +67,7 @@ import { ITreeNode } from '../components/TreeView'
 import Octicon from '../components/Octicon.vue'
 
 export default defineComponent({
-  name: 'Tracker',
+  name: 'Analyzer',
   components: {
     TransitionExpand,
     TreeViewSelect,
