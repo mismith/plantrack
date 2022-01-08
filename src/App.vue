@@ -73,7 +73,7 @@ import { routes } from './router'
 import { auth, useUser } from './services/firebase'
 import { Bed, Crop, Plant, Plot } from './services/data'
 
-import Logo from './logo.svg?component'
+import Logo from './assets/logo.svg?component'
 import Button from './components/Button.vue'
 import Dialog from './components/Dialog.vue'
 import AddPlant from './components/AddPlant.vue'
