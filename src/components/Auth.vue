@@ -42,6 +42,7 @@ export default defineComponent({
           })
           window.localStorage.setItem(EMAIL_LINK_KEY, email.value)
           toast('Email link sent successfully', 'success')
+          email.value = undefined
         } else {
           throw new Error('Missing email')
         }
