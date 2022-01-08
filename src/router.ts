@@ -14,34 +14,46 @@ export const routes = [
   {
     path: '/plotter',
     component: Plotter,
+    meta: {
+      title: 'Plotter',
+    },
   },
   {
     path: '/recorder',
     component: Recorder,
+    meta: {
+      title: 'Recorder',
+    },
   },
   {
     path: '/analyzer',
     component: Analyzer,
+    meta: {
+      title: 'Analyzer',
+    },
   },
   {
     path: '/old-tracker',
     component: OldTracker,
-    meta: {
-      hidden: true,
-    },
   },
   {
     path: '/exporter',
     component: Exporter,
-    meta: {
-      hidden: true,
-    },
   },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.meta?.title) {
+    document.title = `${to.meta.title} › plantrack`
+  } else {
+    document.title = 'plantrack'
+  }
+  next()
 })
 
 export default router

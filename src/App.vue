@@ -9,14 +9,13 @@
     <div class="Header-item Header-item--full d-flex flex-justify-center" style="overflow-x: auto;">
       <div v-if="user" class="UnderlineNav">
         <router-link
-          v-for="route in routes.filter(({ path, meta }) => path !== '/' && !meta?.hidden)"
+          v-for="route in routes.filter(({ meta }) => meta?.title)"
           :key="route.path"
           :to="route.path"
           role="tab"
           class="UnderlineNav-item Header-link"
-          style="text-transform: capitalize;"
         >
-          {{route.path.replace(/\//, '')}}
+          {{route.meta.title}}
         </router-link>
       </div>
     </div>
