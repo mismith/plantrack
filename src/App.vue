@@ -1,5 +1,5 @@
 <template>
-  <nav class="UnderlineNav color-bg-inset flex-wrap flex-sm-nowrap flex-justify-center flex-sm-justify-between">
+  <nav class="UnderlineNav color-bg-inset flex-wrap flex-sm-nowrap flex-justify-center flex-sm-justify-between" style="position: sticky; top: 0; z-index: 10;">
     <router-link to="/" class="UnderlineNav-actions px-3" style="color: currentColor;">
       <Logo class="logo" />
     </router-link>
