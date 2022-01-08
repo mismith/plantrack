@@ -41,10 +41,10 @@
   </nav>
 
   <router-view v-if="user" style="flex: auto;" />
-  <form v-else class="d-flex flex-column m-auto" style="gap: 8px;" @submit.prevent="handleLogin">
+  <form v-else class="d-flex flex-column m-auto" style="gap: 8px;" @submit.prevent="handleSignIn">
     <input type="email" v-model="email" placeholder="Email" aria-label="Email" class="form-control" />
     <input type="password" v-model="password" placeholder="Password" aria-label="Password" class="form-control" />
-    <Button type="submit" :loading="isLoading" :disabled="isLoading">Login</Button>
+    <Button type="submit" :loading="isLoading" :disabled="isLoading">Sign in</Button>
   </form>
 
   <Dialog :model-value="Boolean(isEditingPlant)" @update:model-value="isEditingPlant = undefined">
@@ -103,7 +103,7 @@ export default defineComponent({
     const email = ref<string>()
     const password = ref<string>()
     const isLoading = ref(false)
-    async function handleLogin() {
+    async function handleSignIn() {
       isLoading.value = true
       try {
         if (email.value && password.value) {
@@ -151,7 +151,7 @@ export default defineComponent({
       email,
       password,
       isLoading,
-      handleLogin,
+      handleSignIn,
       handleLogout,
 
       routes,
