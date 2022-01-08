@@ -1,95 +1,86 @@
 <template>
-  <form class="Auth Box m-auto" @submit.prevent="handleSignIn">
+  <form class="Auth Box m-auto" @submit.prevent="handleSignInWithEmailLink">
     <div class="Box-row d-flex flex-column" style="gap: 8px;">
       <input type="email" v-model="email" required placeholder="Email" aria-label="Email" class="form-control" />
-      <input type="password" v-model="password" required placeholder="Password" aria-label="Password" class="form-control" />
-      <button type="submit" :disabled="!isValid" class="btn btn-primary btn-block">Sign in</button>
+      <Button type="submit" :loading="isLoading === 'email'" :disabled="!isValid" class="btn-primary btn-block">
+        Sign in with email link
+      </Button>
     </div>
     <footer class="Box-footer">
-      <Button type="button" :loading="isLoading" class="btn-block" @click="handleSignInWithGoogle">
+      <Button type="button" :loading="isLoading === 'google'" class="btn-block" @click="handleSignInWithGoogle">
         Sign in with Google
       </Button>
     </footer>
   </form>
-  <aside v-if="errorMessage" class="position-fixed bottom-0 right-0">
-    <div class="Toast Toast--error">
-      <span class="Toast-icon">
-        <Octicon name="stop" />
-      </span>
-      <div class="Toast-content">
-        {{errorMessage}}
-      </div>
-      <button class="Toast-dismissButton" @click="errorMessage = undefined">
-        <Octicon name="x" />
-      </button>
-    </div>
-  </aside>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, defineComponent, inject, onMounted, ref } from 'vue'
 
 import { firebase, auth } from '../services/firebase'
 import Button from './Button.vue'
-import Octicon from './Octicon.vue'
 
 export default defineComponent({
   name: 'Auth',
   components: {
     Button,
-    Octicon,
   },
   setup() {
-    const errorMessage = ref<string>()
-    const errorMessageTimeout = ref()
-    watch(errorMessage, (v) => {
-      window.clearTimeout(errorMessageTimeout.value)
-      if (v) {
-        errorMessageTimeout.value = window.setTimeout(() => {
-          errorMessage.value = undefined
-        }, 5000)
-      }
-    })
-    onBeforeUnmount(() => {
-      window.clearTimeout(errorMessageTimeout.value)
-    })
+    const toast = inject<any>('toast')
+    const handleError = inject<any>('toastError')
 
     const email = ref<string>()
-    const password = ref<string>()
-    const isValid = computed(() => Boolean(email.value && password.value))
-    const isLoading = ref(false)
-    async function handleSignIn() {
-      isLoading.value = true;
+    const isValid = computed(() => Boolean(email.value))
+    const EMAIL_LINK_KEY = 'plantrack.emailForSignInWithEmailLink'
+    async function handleSignInWithEmailLink() {
+      isLoading.value = 'email'
       try {
-        if (email.value && password.value) {
-          await auth.signInWithEmailAndPassword(email.value, password.value)
+        if (email.value) {
+          await auth.sendSignInLinkToEmail(email.value, {
+            url: window.location.href,
+            handleCodeInApp: true,
+          })
+          window.localStorage.setItem(EMAIL_LINK_KEY, email.value)
+          toast('Email link sent successfully', 'success')
         } else {
-          throw new Error('Missing email and/or password')
+          throw new Error('Missing email')
         }
-      } catch (error: any) {
-        errorMessage.value = error?.getMessage?.() || error?.message || error
+      } catch (error) {
+        handleError(error)
       }
-      isLoading.value = false;
+      isLoading.value = false
     }
+    onMounted(async () => {
+      if (auth.isSignInWithEmailLink(window.location.href)) {
+        isLoading.value = 'email'
+        try {
+          const email = window.localStorage.getItem(EMAIL_LINK_KEY) || window.prompt('Please provide your email for confirmation') || ''
+          await auth.signInWithEmailLink(email, window.location.href)
+          window.localStorage.removeItem(EMAIL_LINK_KEY)
+        } catch (error) {
+          handleError(error)
+        }
+        isLoading.value = false
+      }
+    })
+
+    const isLoading = ref<string | boolean>(false)
     async function handleSignInWithGoogle() {
-      isLoading.value = true;
+      isLoading.value = 'google'
       try {
         const google = new firebase.auth.GoogleAuthProvider()
-        const { user } = await auth.signInWithPopup(google)
-        console.log(user)
-      } catch (error: any) {
-        errorMessage.value = error?.getMessage?.() || error?.message || error
+        await auth.signInWithPopup(google)
+      } catch (error) {
+        handleError(error)
       }
-      isLoading.value = false;
+      isLoading.value = false
     }
 
     return {
-      errorMessage,
       email,
-      password,
       isValid,
       isLoading,
-      handleSignIn,
+      handleSignInWithEmailLink,
       handleSignInWithGoogle,
     }
   }
