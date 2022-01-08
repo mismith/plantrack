@@ -44,7 +44,7 @@
 
       <fieldset class="form-group">
         <header class="form-group-header">
-          <label>Import</label>
+          <label>Import Crops</label>
         </header>
         <input ref="importInputRef" type="file" accept="text/csv" class="form-control width-full" @change="handleImport" />
       </fieldset>
