@@ -1,42 +1,42 @@
 <template>
-  <nav class="UnderlineNav color-bg-inset flex-wrap flex-sm-nowrap flex-justify-center flex-sm-justify-between" style="position: sticky; top: 0; z-index: 10;">
-    <router-link to="/" class="UnderlineNav-actions px-3" style="color: currentColor;">
-      <Logo class="logo" />
-    </router-link>
-    <div
-      v-if="user"
-      class="UnderlineNav-body flex-order-2 flex-sm-order-none d-sm-flex"
-    >
-      <router-link
-        v-for="route in routes.filter(({ path, meta }) => path !== '/' && !meta?.hidden)"
-        :key="route.path"
-        :to="route.path"
-        role="tab"
-        class="UnderlineNav-item"
-        style="text-transform: capitalize;"
-      >
-        {{route.path.replace(/\//, '')}}
+  <nav class="Header py-0 px-2 px-sm-3" style="position: sticky; top: 0; z-index: 10;">
+    <div class="Header-item">
+      <router-link to="/" class="Header-link">
+        <Logo class="logo d-sm-inline-flex" :class="{ 'd-none': user }" />
+        <Touchicon class="logo d-sm-none" :class="{ 'd-none': !user }" />
       </router-link>
     </div>
-    <div
-      class="UnderlineNav-actions px-2 flex-items-center flex-order-1 flex-sm-order-none d-sm-flex"
-      :class="{ 'd-none': !isMenuOpen, 'ml-auto': !user }"
-      style="gap: 4px; white-space: nowrap;"
-    >
-      <template v-if="user">
-        {{user.email}}
-        <button class="btn" title="Logout" @click="handleLogout">
-          <Octicon name="sign-out" />
-        </button>
-      </template>
-      <button type="button" title="Toggle Dark Mode" class="btn" @click="isDarkMode = !isDarkMode">
+    <div class="Header-item Header-item--full d-flex flex-justify-center" style="overflow-x: auto;">
+      <div v-if="user" class="UnderlineNav">
+        <router-link
+          v-for="route in routes.filter(({ path, meta }) => path !== '/' && !meta?.hidden)"
+          :key="route.path"
+          :to="route.path"
+          role="tab"
+          class="UnderlineNav-item Header-link"
+          style="text-transform: capitalize;"
+        >
+          {{route.path.replace(/\//, '')}}
+        </router-link>
+      </div>
+    </div>
+    <div class="Header-item">
+      <button type="button" title="Toggle Dark Mode" class="Header-link close-button circle" @click="isDarkMode = !isDarkMode">
         <Octicon :name="isDarkMode ? 'sun' : 'moon'" />
       </button>
-    </div>
-    <div class="UnderlineNav-actions d-sm-none ml-auto px-2" :class="{ 'd-none': !user }">
-      <button type="button" class="btn" :aria-selected="isMenuOpen" @click="isMenuOpen = !isMenuOpen">
-        <Octicon name="three-bars" />
-      </button>
+      <Dropdown v-if="user" direction="sw" menu-class="mt-3 mr-2" class="ml-2">
+        <template #summary>
+          <summary title="Account" class="Header-link close-button circle">
+            <Octicon name="person" />
+            <span class="dropdown-caret" />
+          </summary>
+        </template>
+
+        <a href="#" class="dropdown-item" @click="handleLogout">
+          <Octicon name="sign-out" />
+          Sign out
+        </a>
+      </Dropdown>
     </div>
   </nav>
 
@@ -74,6 +74,8 @@ import { auth, useUser } from './services/firebase'
 import { Bed, Crop, Plant, Plot } from './services/data'
 
 import Logo from './assets/logo.svg?component'
+import Touchicon from './assets/touchicon.svg?component'
+import Dropdown from './components/Dropdown.vue'
 import Button from './components/Button.vue'
 import Dialog from './components/Dialog.vue'
 import AddPlant from './components/AddPlant.vue'
@@ -86,6 +88,8 @@ export default defineComponent({
   name: 'App',
   components: {
     Logo,
+    Touchicon,
+    Dropdown,
     Button,
     Dialog,
     AddPlant,
@@ -142,8 +146,6 @@ export default defineComponent({
       window.localStorage.setItem(colorSchemeKey, enabled ? 'dark' : 'light')
     }, { immediate: true })
 
-    const isMenuOpen = ref(false)
-
     return {
       user,
       email,
@@ -165,7 +167,6 @@ export default defineComponent({
       isEditingPlot,
 
       isDarkMode,
-      isMenuOpen,
     }
   }
 })
@@ -201,19 +202,28 @@ export default defineComponent({
   }
 }
 
-.UnderlineNav {
-  flex-shrink: 0;
+.Header {
+  min-height: 48px;
 
-  > * {
-    display: flex;
-    align-items: center;
-    min-height: 48px;
+  .Header-item {
+    margin-right: 0;
   }
+  .Header-link.circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+  }
+}
+.UnderlineNav {
+  box-shadow: none;
 }
 .UnderlineNav-item {
   &.selected,
   &[role=tab][aria-selected=true],
   &[aria-current]:not([aria-current=false]) {
+    color: var(--color-header-logo);
     border-bottom-color: var(--color-plantrack-primary);
   }
 }
