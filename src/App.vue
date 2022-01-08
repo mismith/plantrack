@@ -26,7 +26,7 @@
       </button>
       <Dropdown v-if="user" direction="sw" menu-class="mt-2" class="ml-2">
         <template #summary>
-          <summary title="Account" class="Header-link close-button circle">
+          <summary title="Account" aria-haspopup="true" class="Header-link close-button circle">
             <Octicon name="person" />
             <span class="dropdown-caret" />
           </summary>

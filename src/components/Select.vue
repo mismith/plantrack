@@ -5,22 +5,24 @@
     class="Select details-reset details-overlay position-relative" 
     @toggle="handleToggle"
   >
-    <summary aria-haspopup="true" style="cursor: inherit;">
-      <slot name="trigger">
-        <div class="form-control form-select width-full">
-          <template v-if="value">
-            <slot name="value">
-              {{value}}
-            </slot>
-          </template>
-          <template v-else>
-            <slot name="placeholder">
-              <span class="color-fg-subtle">{{placeholder}}</span>
-            </slot>
-          </template>
-        </div>
-      </slot>
-    </summary>
+    <slot name="summary">
+      <summary aria-haspopup="true" style="cursor: inherit;">
+        <slot name="trigger">
+          <div class="form-control form-select width-full">
+            <template v-if="value">
+              <slot name="value">
+                {{value}}
+              </slot>
+            </template>
+            <template v-else>
+              <slot name="placeholder">
+                <span class="color-fg-subtle">{{placeholder}}</span>
+              </slot>
+            </template>
+          </div>
+        </slot>
+      </summary>
+    </slot>
     <div class="SelectMenu position-fixed">
       <div class="SelectMenu-modal width-full overflow-auto">
         <slot />
