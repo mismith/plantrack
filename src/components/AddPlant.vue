@@ -25,7 +25,7 @@
         </header>
         <TreeViewSelect
           v-model="isBedIdSelectOpen"
-          :display-value="beds?.find(({ id }) => id === bedId)?.name || ''"
+          :value="beds?.find(({ id }) => id === bedId)?.name || ''"
         >
           <TreeView
             :nodes="nodes"

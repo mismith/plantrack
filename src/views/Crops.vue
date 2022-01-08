@@ -9,7 +9,7 @@
           <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
         <TreeViewSelect
-          :display-value="cropIds.length > 1 ? `${cropIds.length} crops selected` : cropIds.map((cropId) => crops.find(({ id }) => id === cropId)?.nickname).filter(Boolean)"
+          :value="cropIds.length > 1 ? `${cropIds.length} crops selected` : cropIds.map((cropId) => crops.find(({ id }) => id === cropId)?.nickname).filter(Boolean)"
         >
           <TreeView
             :nodes="nodes"

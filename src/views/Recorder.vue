@@ -10,7 +10,7 @@
           <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
         <TreeViewSelect
-          :display-value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
+          :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
         >
           <PlantTreeView v-if="!isLoading" v-model="plantIds" multiple />
         </TreeViewSelect>
@@ -55,7 +55,7 @@
           </header>
           <TreeViewSelect
             v-model="isNewBedIdsSelectOpen"
-            :display-value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
+            :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
           >
             <PlantTreeView v-model="newBedIds" />
           </TreeViewSelect>
