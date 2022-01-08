@@ -75,15 +75,15 @@
             <label>How Much</label>
           </header>
           <div style="display: flex; gap: 4px;">
-            <input type="text" v-model="weight" min="1" step="0.01" inputmode="decimal" class="form-control width-full" style="flex: auto;" />
-            <select v-model="weightUnit" class="form-control form-select">
+            <input type="text" v-model="weight" min="1" step="0.01" inputmode="decimal" class="form-control width-full flex-auto" />
+            <select v-model="weightUnit" class="form-control form-select width-auto">
               <option>g</option>
               <option>kg</option>
               <option>oz</option>
               <option>lb</option>
               <option>items</option>
             </select>
-            <select v-if="plantIds.length > 1" v-model="weightSplit" class="form-control form-select">
+            <select v-if="plantIds.length > 1" v-model="weightSplit" class="form-control form-select width-auto">
               <option v-for="key in WEIGHT_SPLIT" :key="key">{{key}}</option>
             </select>
           </div>
