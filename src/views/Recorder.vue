@@ -421,7 +421,9 @@ export default defineComponent({
     }
     function handleShowTags() {
       isShowing.tags = true
-      window.setTimeout(() => tagIdsRef.value?.querySelector('summary')?.click())
+      if (tags.value?.length) {
+        window.setTimeout(() => tagIdsRef.value?.querySelector('summary')?.click())
+      }
     }
 
     const formRef = ref<HTMLFormElement>()
