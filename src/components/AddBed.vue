@@ -65,7 +65,7 @@ export default defineComponent({
 
     const name = ref(bed.value?.name)
     const plots = usePlots()
-    const plotIds = ref([bed.value?.plotId || plots.value?.[0]?.id])
+    const plotIds = ref([bed.value?.plotId || plots.value?.[0]?.id].filter(Boolean))
     const isValid = computed(() => Boolean(name.value && plotIds.value?.[0]))
 
     const isPlotIdsSelectOpen = ref(false)

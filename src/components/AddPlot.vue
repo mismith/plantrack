@@ -62,7 +62,7 @@ export default defineComponent({
     const isEditing = computed(() => Boolean(plot.value))
 
     const name = ref(plot.value?.name)
-    const parentPlotIds = ref([plot.value?.parentPlotId])
+    const parentPlotIds = ref([plot.value?.parentPlotId].filter(Boolean))
     const plots = usePlots()
     const isValid = computed(() => Boolean(name.value))
 

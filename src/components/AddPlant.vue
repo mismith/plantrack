@@ -81,7 +81,7 @@ export default defineComponent({
     const { nodes, beds, plants } = usePlantDataTree()
     const crops = useCrops()
     const cropId = ref(plant.value?.cropId || crops.value?.[0]?.id)
-    const bedIds = ref([plant.value?.bedId || beds.value?.[0]?.id])
+    const bedIds = ref([plant.value?.bedId || beds.value?.[0]?.id].filter(Boolean))
     const name = ref(plant.value?.name)
     const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
     const isValid = computed(() => Boolean(cropId.value && bedIds.value?.[0]))
