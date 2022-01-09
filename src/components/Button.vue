@@ -1,5 +1,5 @@
 <template>
-  <button v-bind="$attrs" class="Button btn">
+  <button type="button" v-bind="$attrs" class="Button btn">
     <div class="Button-content" :style="{ opacity: loading ? 0 : undefined }">
       <slot />
     </div>
