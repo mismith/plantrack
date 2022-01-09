@@ -11,16 +11,16 @@
         <header class="form-group-header">
           <label>Parent Plot</label>
         </header>
-        <select v-model="parentPlotId" class="form-control form-select width-full">
-          <option :value="undefined"></option>
-          <option
-            v-for="plot in plots"
-            :key="plot.id"
-            :value="plot.id"
-          >
-            {{plot.name}}
-          </option>
-        </select>
+        <TreeViewSelect
+          v-model="isParentPlotIdsSelectOpen"
+          :value="plots?.find(({ id }) => id === parentPlotIds?.[0])?.name || ''"
+        >
+          <PlantTreeView
+            v-model="parentPlotIds"
+            :filter="node => node.type !== 'entry'"
+            selectable-type="plot"
+          />
+        </TreeViewSelect>
         <!-- @TODO: allow clearing if isEditing -->
       </fieldset>
     </div>
@@ -34,18 +34,22 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
+import { computed, defineComponent, inject, PropType, ref, toRefs, watch } from 'vue'
 
 import { NewEntity, Plot, usePlots, UpdatedEntity } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
+import TreeViewSelect from './TreeViewSelect.vue'
+import PlantTreeView from './PlantTreeView.vue'
 
 export default defineComponent({
   name: 'AddPlot',
   components: {
     Button,
+    TreeViewSelect,
+    PlantTreeView,
   },
   props: {
     plot: {
@@ -58,9 +62,16 @@ export default defineComponent({
     const isEditing = computed(() => Boolean(plot.value))
 
     const name = ref(plot.value?.name)
-    const parentPlotId = ref(plot.value?.parentPlotId)
+    const parentPlotIds = ref([plot.value?.parentPlotId])
     const plots = usePlots()
     const isValid = computed(() => Boolean(name.value))
+
+    const isParentPlotIdsSelectOpen = ref(false)
+    watch(parentPlotIds, (v) => {
+      if (v.length) {
+        isParentPlotIdsSelectOpen.value = false
+      }
+    })
 
     const toast = inject<Function>('toast')
     const [runAsync, isLoading] = useAsyncWrapper()
@@ -71,7 +82,7 @@ export default defineComponent({
         if (isEditing.value && plot.value?.[keyField]) {
           const updatedPlot: UpdatedEntity<Plot> = {
             name: name.value!,
-            parentPlotId: parentPlotId.value || null,
+            parentPlotId: parentPlotIds.value?.[0] || null,
             updatedAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath(`/plots/${plot.value?.[keyField]}`)).update(updatedPlot)
@@ -80,7 +91,7 @@ export default defineComponent({
         } else {
           const newPlot: NewEntity<Plot> = {
             name: name.value!,
-            parentPlotId: parentPlotId.value || null,
+            parentPlotId: parentPlotIds.value?.[0] || null,
             createdAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath('/plots')).push(newPlot)
@@ -96,7 +107,8 @@ export default defineComponent({
 
     return {
       name,
-      parentPlotId,
+      parentPlotIds,
+      isParentPlotIdsSelectOpen,
       plots: plots.value?.filter((p) => p[keyField] !== plot.value?.[keyField]),
 
       isEditing,
