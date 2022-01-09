@@ -86,13 +86,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, reactive, watch } from 'vue'
+import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue'
 
 import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops, Attachment } from '../services/data'
 import { database, getUserRefPath, storage } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
-import { Booleanable, ITreeNode, tools } from './TreeView'
+import { Booleanable, ITreeNode, set, tools, walkDescendents } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
 import Octicon from './Octicon.vue'
 
@@ -118,9 +118,14 @@ export default defineComponent({
       type: Boolean,
       required: false,
     },
+    filter: {
+      type: Function as PropType<(node: ITreeNode) => boolean>,
+      required: false,
+    },
   },
   setup(props, { emit }) {
-    const { nodes, plants, beds } = usePlantDataTree()
+    const { modelValue, multiple, filter } = toRefs(props)
+    const { nodes, plants, beds } = usePlantDataTree({ filter: filter.value })
     const crops = useCrops()
 
     const treeState = reactive<Record<string, Booleanable>>({
@@ -133,30 +138,45 @@ export default defineComponent({
     const treeOptions = computed(() => ({
       indentable: true,
       expandable: true,
-      selectable: !props.multiple && ((node: ITreeNode) => node.type === 'bed'),
-      checkable: props.multiple && ((node: ITreeNode) => node.type !== 'entry' && {
+      selectable: !multiple.value && ((node: ITreeNode) => node.type === 'bed'),
+      checkable: multiple.value && ((node: ITreeNode) => node.type !== 'entry' && {
         recurse: true,
       }),
       // renamable: multiple,
     }))
-    watch(() => props.modelValue, () => {
-      if (props.multiple) {
-        treeState.checked = props.modelValue
+    watch(modelValue, (v) => {
+      if (multiple.value) {
+        treeState.checked = v
       } else {
-        treeState.selected = props.modelValue
+        treeState.selected = v
       }
     }, { immediate: true })
-    watch(() => props.multiple, () => {
-      if (props.multiple) {
+    watch(multiple, (v) => {
+      if (v) {
         treeState.selected = []
-        treeState.checked = props.modelValue
+        treeState.checked = modelValue.value
         treeState.disabled = isOrHasDescendent('plant')
       } else {
-        treeState.selected = props.modelValue
+        treeState.selected = modelValue.value
         treeState.checked = []
         treeState.disabled = isOrHasDescendent('bed')
       }
     }, { immediate: true })
+
+    // auto-expand parents above restored selections
+    if (modelValue.value?.length) {
+      const checkNode = (node: ITreeNode) => {
+        const containsDescendent = walkDescendents(node, checkNode).filter(Boolean).length
+        if (node.id === modelValue.value?.[0]) {
+          return true;
+        } else if (containsDescendent) {
+          treeState.expanded = set(treeState.expanded, node, true)
+          return true
+        }
+        return false
+      }
+      nodes.value.forEach(checkNode)
+    }
 
     const toast = inject<Function>('toast')
     const [runAsync] = useAsyncWrapper()
@@ -193,11 +213,11 @@ export default defineComponent({
       Object.assign(treeState, changes)
 
       let value
-      if (props.multiple && changes.checked && Array.isArray(treeState.checked)) {
+      if (multiple.value && changes.checked && Array.isArray(treeState.checked)) {
         value = treeState.checked.filter(
           id => plants.value?.map(({ id }) => id).includes(id)
         )
-      } else if (!props.multiple && changes.selected && Array.isArray(treeState.selected)) {
+      } else if (!multiple.value && changes.selected && Array.isArray(treeState.selected)) {
         value = treeState.selected.filter(
           id => beds.value?.map(({ id }) => id).includes(id)
         )

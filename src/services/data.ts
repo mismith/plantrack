@@ -1,7 +1,7 @@
 import { computed, reactive, Ref, watch } from 'vue'
 import { differenceInDays, format } from 'date-fns'
 
-import { Booleanable } from '../components/TreeView'
+import { Booleanable, ITreeNode } from '../components/TreeView'
 import firebase, { database, getUserRefPath, keyField, toKeyFieldArray, useRtdbArray } from './firebase'
 
 export type Timestamp = number
@@ -161,18 +161,18 @@ export function arrayToNested<T extends { [k: string]: any }>(
 }
 
 export const INACTIVE = 'inactive'
-export function usePlantDataTree() {
+export function usePlantDataTree({ filter = Boolean }: { filter?(node: ITreeNode): boolean } = {}) {
   const plants = usePlants()
   const beds = useBeds()
   const plots = usePlots()
 
-  const nodes = computed(() => [...plots.value || [], {
+  const nodes = computed(() => ([...plots.value || [], {
     id: 'system',
     name: 'System',
     createdAt: Date.now(),
   }].map((plot) => ({
     type: 'plot',
-    children: [...beds.value || [], {
+    children: ([...beds.value || [], {
       id: INACTIVE,
       name: 'Inactive',
       plotId: 'system',
@@ -183,17 +183,17 @@ export function usePlantDataTree() {
         children: toKeyFieldArray<Entry>(plant.entries || {}).map((entry) => ({
           type: 'entry',
           ...entry,
-        })).sort((a, b) => a.at - b.at),
+        })).filter(filter).sort((a, b) => a.at - b.at),
         ...plant,
-      })) || []).sort(
+      })) || []).filter(filter).sort(
         bed.id === INACTIVE
           ? (a, b) => (a.children[a.children.length - 1]?.at || 0) - (b.children[b.children.length - 1]?.at || 0)
           : () => 0,
       ),
       ...bed,
-    })) || [],
+    })) || []).filter(filter),
     ...plot,
-  })) || [])
+  })) || []).filter(filter))
 
   return {
     plants,

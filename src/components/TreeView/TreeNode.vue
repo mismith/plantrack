@@ -120,7 +120,6 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-
     function handleChange(changes: Record<string, any>) {
       emit('change', changes)
     }

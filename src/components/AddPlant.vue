@@ -24,13 +24,12 @@
           <label>Bed</label>
         </header>
         <TreeViewSelect
-          v-model="isBedIdSelectOpen"
-          :value="beds?.find(({ id }) => id === bedId)?.name || ''"
+          v-model="isBedIdsSelectOpen"
+          :value="beds?.find(({ id }) => id === bedIds?.[0])?.name || ''"
         >
-          <TreeView
-            :nodes="nodes"
-            v-bind="treeView.bind"
-            v-on="treeView.on"
+          <PlantTreeView
+            v-model="bedIds"
+            :filter="node => node.type !== 'entry'"
           />
         </TreeViewSelect>
       </fieldset>
@@ -54,21 +53,20 @@
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, ref, toRefs, watch } from 'vue'
 
-import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree, useTreeViewProps } from '../services/data'
+import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
 import TreeViewSelect from './TreeViewSelect.vue'
-import TreeView from './TreeView/TreeView.vue'
-import { ITreeNode, set, walkDescendents } from './TreeView'
+import PlantTreeView from './PlantTreeView.vue'
 
 export default defineComponent({
   name: 'AddPlant',
   components: {
     Button,
     TreeViewSelect,
-    TreeView,
+    PlantTreeView,
   },
   props: {
     plant: {
@@ -83,30 +81,17 @@ export default defineComponent({
     const { nodes, beds, plants } = usePlantDataTree()
     const crops = useCrops()
     const cropId = ref(plant.value?.cropId || crops.value?.[0]?.id)
-    const bedId = ref(plant.value?.bedId || beds.value?.[0]?.id)
+    const bedIds = ref([plant.value?.bedId || beds.value?.[0]?.id])
     const name = ref(plant.value?.name)
     const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
-    const isValid = computed(() => Boolean(cropId.value && bedId.value))
+    const isValid = computed(() => Boolean(cropId.value && bedIds.value?.[0]))
 
-    const isBedIdSelectOpen = ref(false)
-    watch(bedId, () => {
-      isBedIdSelectOpen.value = false
-    })
-    const treeView = useTreeViewProps(bedId, { selectable: (node: ITreeNode) => node.type === 'bed' })
-    if (bedId.value) {
-      // auto-expand parents above restored selections
-      const checkNode = (node: ITreeNode) => {
-        const containsDescendent = walkDescendents(node, checkNode).filter(Boolean).length
-        if (node.id === bedId.value) {
-          return true;
-        } else if (containsDescendent) {
-          treeView.bind.state.expanded = set(treeView.bind.state.expanded, node, true)
-          return true
-        }
-        return false
+    const isBedIdsSelectOpen = ref(false)
+    watch(bedIds, (v) => {
+      if (v.length) {
+        isBedIdsSelectOpen.value = false
       }
-      nodes.value.forEach(checkNode)
-    }
+    })
 
     const toast = inject<Function>('toast')
     const [runAsync, isLoading] = useAsyncWrapper()
@@ -118,7 +103,7 @@ export default defineComponent({
           const updatedPlant: UpdatedEntity<Plant> = {
             name: name.value || placeholder.value,
             cropId: cropId.value!,
-            bedId: bedId.value!,
+            bedId: bedIds.value[0]!,
             updatedAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath(`/plants/${plant.value?.[keyField]}`)).update(updatedPlant)
@@ -128,7 +113,7 @@ export default defineComponent({
           const newPlant: NewEntity<Plant> = {
             name: name.value || placeholder.value,
             cropId: cropId.value!,
-            bedId: bedId.value!,
+            bedId: bedIds.value[0]!,
             createdAt: ServerValue.TIMESTAMP,
           }
           database.ref(getUserRefPath('/plants')).push(newPlant)
@@ -140,19 +125,18 @@ export default defineComponent({
       name.value = undefined
       // let linger to ease batch additions
       // cropId.value = undefined
-      // bedId.value = undefined
+      // bedIds.value = []
     }
 
     return {
       nodes,
       beds,
-      treeView,
-      isBedIdSelectOpen,
+      isBedIdsSelectOpen,
 
       isAddingCrop: inject('isAddingCrop'),
       crops,
       cropId,
-      bedId,
+      bedIds,
       name,
       placeholder,
 

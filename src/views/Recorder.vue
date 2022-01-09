@@ -57,7 +57,10 @@
             v-model="isNewBedIdsSelectOpen"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
           >
-            <PlantTreeView v-model="newBedIds" />
+            <PlantTreeView
+              v-model="newBedIds"
+              :filter="node => node.type !== 'entry'"
+            />
           </TreeViewSelect>
         </fieldset>
       </TransitionExpand>
