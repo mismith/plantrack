@@ -19,7 +19,7 @@
         </router-link>
       </div>
     </div>
-    <div class="Header-item">
+    <div class="Header-item pl-2">
       <button type="button" title="Toggle Dark Mode" class="Header-link close-button circle" @click="isDarkMode = !isDarkMode">
         <Octicon :name="isDarkMode ? 'sun' : 'moon'" />
       </button>
