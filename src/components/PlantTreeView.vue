@@ -34,7 +34,7 @@
             :title="getLatestEntryEvent(node)?.id"
             :style="`background-color: ${getLatestEntryEvent(node)?.color || 'currentColor'}`"
           />
-          <small v-if="node.children?.length">{<span>{{node.children.length}}</span>}</small>
+          <span v-if="node.children?.length" class="Counter Counter--secondary">{{node.children.length}}</span>
         </template>
       </div>
     </template>
