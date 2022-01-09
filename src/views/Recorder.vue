@@ -209,15 +209,15 @@ async function uploadAttachment(file: File): Promise<Attachment> {
     throw new Error(`Attachment must be under 10MB (${file.name})`)
   }
   // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
-  const fileKey = database.ref().push().key
-  const ref = storage.ref(getUserRefPath(`/attachments/${fileKey}`))
+  const id = database.ref().push().key!
+  const ref = storage.ref(getUserRefPath(`/attachments/${id}`))
   await ref.put(file)
 
   const attachment: Attachment = {
+    id,
     name: file.name,
     size: file.size,
     type: file.type,
-    url: ref.fullPath,
     at: Date.now(),
   }
   return attachment

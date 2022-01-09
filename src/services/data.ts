@@ -27,10 +27,10 @@ export type UpdatedEntity<T> = Omit<OptionalToNullable<T>, keyof Entity> & {
 }
 
 export interface Attachment {
+  id: string
   name: string
   size: number
   type: string
-  url: string
   at: Timestamp
 }
 export interface Crop extends Entity {

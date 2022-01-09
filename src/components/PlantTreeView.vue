@@ -12,7 +12,7 @@
           <span>{{entryToString(node, { beds, plants })}}</span>
           <a
             v-for="attachment in node.attachments"
-            :key="attachment.url"
+            :key="attachment.id"
             href="#"
             target="_blank"
             :title="attachment.name"
@@ -207,12 +207,9 @@ export default defineComponent({
     async function handleAttachmentClick(event: any, attachment: Attachment) {
       runAsync(async () => {
         event.preventDefault()
-        const ref = storage.ref(`/${attachment.url}`)
+        const ref = storage.ref(getUserRefPath(`/attachments/${attachment.id}`))
         const href = await ref.getDownloadURL()
-        const a = document.createElement("a")
-        a.target = event.target.target
-        a.href = href
-        a.click()
+        window.open(href, event.target.target || '_blank')
       })
     }
     function handleChange(changes: Record<string, any>) {
