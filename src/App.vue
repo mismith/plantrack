@@ -201,11 +201,6 @@ export default defineComponent({
 }
 
 .form-group {
-  .form-group-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
   textarea.form-control {
     min-height: 64px;
     height: 64px;

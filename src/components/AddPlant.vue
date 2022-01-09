@@ -4,19 +4,21 @@
       <fieldset class="form-group required">
         <header class="form-group-header">
           <label>Crop</label>
-
-          <button type="button" class="btn btn-sm" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
         </header>
-
-        <select v-model="cropId" required class="form-control form-select width-full">
-          <option
-            v-for="crop in crops"
-            :key="crop.id"
-            :value="crop.id"
-          >
-            {{crop.name}}: {{crop.nickname}}
-          </option>
-        </select>
+        <div class="d-flex">
+          <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingCrop = !isAddingCrop">
+            <Octicon name="plus-circle" />
+          </button>
+          <select v-model="cropId" required class="form-control form-select width-full mr-0">
+            <option
+              v-for="crop in crops"
+              :key="crop.id"
+              :value="crop.id"
+            >
+              {{crop.name}}: {{crop.nickname}}
+            </option>
+          </select>
+        </div>
       </fieldset>
 
       <fieldset class="form-group required">
@@ -27,6 +29,11 @@
           v-model="isBedIdsSelectOpen"
           :value="beds?.find(({ id }) => id === bedIds?.[0])?.name || ''"
         >
+          <template #prepend>
+            <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingBed = !isAddingBed">
+              <Octicon name="plus-circle" />
+            </button>
+          </template>
           <PlantTreeView
             v-model="bedIds"
             :filter="node => node.type !== 'entry'"
@@ -60,6 +67,7 @@ import { useAsyncWrapper } from '../services/errors'
 import Button from './Button.vue'
 import TreeViewSelectMenu from './TreeViewSelectMenu.vue'
 import PlantTreeView from './PlantTreeView.vue'
+import Octicon from './Octicon.vue'
 
 export default defineComponent({
   name: 'AddPlant',
@@ -67,6 +75,7 @@ export default defineComponent({
     Button,
     TreeViewSelectMenu,
     PlantTreeView,
+    Octicon,
   },
   props: {
     plant: {
@@ -134,6 +143,7 @@ export default defineComponent({
       isBedIdsSelectOpen,
 
       isAddingCrop: inject('isAddingCrop'),
+      isAddingBed: inject('isAddingBed'),
       crops,
       cropId,
       bedIds,

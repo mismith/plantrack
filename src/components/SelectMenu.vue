@@ -7,6 +7,7 @@
   >
     <slot name="summary">
       <summary aria-haspopup="true" class="d-flex" style="cursor: inherit;">
+        <slot name="prepend" />
         <slot name="trigger">
           <div class="form-control form-select width-full flex-auto mr-0">
             <template v-if="value">
@@ -22,7 +23,7 @@
           </div>
         </slot>
         <slot v-if="clearable" name="clearable">
-          <button type="button" class="btn-octicon" @click="handleClear">
+          <button type="button" class="btn-octicon anim-scale-in" @click="handleClear">
             <Octicon name="x-circle-fill" />
           </button>
         </slot>

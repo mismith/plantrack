@@ -4,13 +4,17 @@
       <fieldset class="form-group">
         <header class="form-group-header">
           <label>Crop(s)</label>
-
-          <button type="button" class="btn btn-sm" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
-          <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
         <TreeViewSelectMenu
           :value="cropIds.length > 1 ? `${cropIds.length} crops selected` : cropIds.map((cropId) => crops.find(({ id }) => id === cropId)?.nickname).filter(Boolean)"
+          :clearable="Boolean(cropIds.length)"
+          @clear="cropIds = []"
         >
+          <template #prepend>
+            <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingCrop = !isAddingCrop">
+              <Octicon name="plus-circle" />
+            </button>
+          </template>
           <TreeView
             :nodes="nodes"
             v-bind="treeView.bind"
@@ -145,10 +149,6 @@ export default defineComponent({
       window.alert(`Imported ${imported.length} crops successfully`)
     }
 
-    function handleReset() {
-      cropIds.value = []
-    }
-
     return {
       isAddingCrop: inject('isAddingCrop'),
       isEditingCrop: inject('isEditingCrop'),
@@ -160,8 +160,6 @@ export default defineComponent({
 
       importInputRef,
       handleImport,
-
-      handleReset,
     }
   },
 })

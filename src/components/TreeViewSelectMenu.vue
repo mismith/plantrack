@@ -6,6 +6,10 @@
     @clear="handleClear"
     class="TreeViewSelectMenu" 
   >
+    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
+    </template>
+
     <template #value>
       <span v-for="chunk in valueChunks" :key="chunk" class="no-wrap">{{chunk}}</span>
       <!-- <span class="Truncate">

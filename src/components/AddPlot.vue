@@ -14,7 +14,7 @@
         <TreeViewSelectMenu
           v-model="isParentPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === parentPlotIds?.[0])?.name || ''"
-          clearable
+          :clearable="Boolean(parentPlotIds.length)"
           @clear="parentPlotIds = []"
         >
           <PlantTreeView

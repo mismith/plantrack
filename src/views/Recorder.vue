@@ -4,14 +4,17 @@
       <fieldset class="form-group required">
         <header class="form-group-header">
           <label>Plant(s)</label>
-
-          <button type="button" class="btn btn-sm" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
-          <button type="button" class="btn btn-sm" @click="isAddingBed = !isAddingBed">Add Bed</button>
-          <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
         <TreeViewSelectMenu
           :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
+          :clearable="Boolean(plantIds.length)"
+          @clear="plantIds = []"
         >
+          <template #prepend>
+            <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingPlant = !isAddingPlant">
+              <Octicon name="plus-circle" />
+            </button>
+          </template>
           <PlantTreeView v-if="!isLoading" v-model="plantIds" multiple />
         </TreeViewSelectMenu>
       </fieldset>
@@ -58,6 +61,11 @@
             v-model="isNewBedIdsSelectOpen"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
           >
+            <template #prepend>
+              <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingBed = !isAddingBed">
+                <Octicon name="plus-circle" />
+              </button>
+            </template>
             <PlantTreeView
               v-model="newBedIds"
               :filter="node => node.type !== 'entry'"
@@ -413,8 +421,8 @@ export default defineComponent({
 
     return {
       WEIGHT_SPLIT,
-      isAddingBed: inject('isAddingBed'),
       isAddingPlant: inject('isAddingPlant'),
+      isAddingBed: inject('isAddingBed'),
 
       plants,
       plantIds,

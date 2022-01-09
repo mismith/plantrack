@@ -11,13 +11,16 @@
       <fieldset class="form-group required">
         <header class="form-group-header">
           <label>Plot</label>
-
-          <button type="button" class="btn btn-sm" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
         </header>
         <TreeViewSelectMenu
           v-model="isPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === plotIds?.[0])?.name || ''"
         >
+          <template #prepend>
+            <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingPlot = !isAddingPlot">
+              <Octicon name="plus-circle" />
+            </button>
+          </template>
           <PlantTreeView
             v-model="plotIds"
             :filter="node => node.type !== 'entry'"
@@ -45,6 +48,7 @@ import { useAsyncWrapper } from '../services/errors'
 import Button from './Button.vue'
 import TreeViewSelectMenu from './TreeViewSelectMenu.vue'
 import PlantTreeView from './PlantTreeView.vue'
+import Octicon from './Octicon.vue'
 
 export default defineComponent({
   name: 'AddBed',
@@ -52,6 +56,7 @@ export default defineComponent({
     Button,
     TreeViewSelectMenu,
     PlantTreeView,
+    Octicon,
   },
   props: {
     bed: {
