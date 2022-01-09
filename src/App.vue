@@ -58,10 +58,14 @@
   <Dialog :model-value="Boolean(isEditingPlot)" @update:model-value="isEditingPlot = undefined">
     <AddPlot :plot="isEditingPlot" @update="isEditingPlot = undefined" />
   </Dialog>
+  <Dialog :model-value="Boolean(isEditingTag)" @update:model-value="isEditingTag = undefined">
+    <AddTag :tag="isEditingTag" @update="isEditingTag = undefined" />
+  </Dialog>
   <Dialog v-model="isAddingPlant"><AddPlant /></Dialog>
   <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
   <Dialog v-model="isAddingBed"><AddBed /></Dialog>
   <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
+  <Dialog v-model="isAddingTag"><AddTag /></Dialog>
 
   <Toast v-model="toastState.isOpen" :type="toastState.type">
     {{toastState.message}}
@@ -70,11 +74,11 @@
 
 <script lang="ts">
 /// <reference types="vite-svg-loader" />
-import { defineComponent, nextTick, provide, reactive, ref, watch } from 'vue'
+import { defineComponent, provide, reactive, ref, watch } from 'vue'
 
 import { routes } from './router'
 import { auth, useUser } from './services/firebase'
-import { Bed, Crop, Plant, Plot } from './services/data'
+import { Bed, Crop, Plant, Plot, Tag } from './services/data'
 
 import Logo from './assets/logo.svg?component'
 import Touchicon from './assets/touchicon.svg?component'
@@ -86,8 +90,9 @@ import AddPlant from './components/AddPlant.vue'
 import AddCrop from './components/AddCrop.vue'
 import AddBed from './components/AddBed.vue'
 import AddPlot from './components/AddPlot.vue'
-import Octicon from './components/Octicon.vue'
+import AddTag from './components/AddTag.vue'
 import Toast from './components/Toast.vue'
+import Octicon from './components/Octicon.vue'
 
 export default defineComponent({
   name: 'App',
@@ -102,8 +107,9 @@ export default defineComponent({
     AddCrop,
     AddBed,
     AddPlot,
-    Octicon,
+    AddTag,
     Toast,
+    Octicon,
   },
   setup() {
     const user = useUser()
@@ -120,19 +126,23 @@ export default defineComponent({
     const isAddingCrop = ref(false)
     const isAddingBed = ref(false)
     const isAddingPlot = ref(false)
+    const isAddingTag = ref(false)
     provide('isAddingPlant', isAddingPlant)
     provide('isAddingCrop', isAddingCrop)
     provide('isAddingBed', isAddingBed)
     provide('isAddingPlot', isAddingPlot)
+    provide('isAddingTag', isAddingTag)
 
     const isEditingPlant = ref<Plant>()
     const isEditingCrop = ref<Crop>()
     const isEditingBed = ref<Bed>()
     const isEditingPlot = ref<Plot>()
+    const isEditingTag = ref<Tag>()
     provide('isEditingPlant', isEditingPlant)
     provide('isEditingCrop', isEditingCrop)
     provide('isEditingBed', isEditingBed)
     provide('isEditingPlot', isEditingPlot)
+    provide('isEditingTag', isEditingTag)
 
     const toastState = reactive({
       isOpen: false,
@@ -168,11 +178,13 @@ export default defineComponent({
       isAddingCrop,
       isAddingBed,
       isAddingPlot,
+      isAddingTag,
 
       isEditingPlant,
       isEditingCrop,
       isEditingBed,
       isEditingPlot,
+      isEditingTag,
 
       toastState,
 

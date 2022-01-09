@@ -45,8 +45,9 @@ export interface Entry extends Entity {
   eventId: string
   at: Timestamp
   payload?: Record<string, any>
-  attachments?: Attachment[]
   note?: string
+  attachments?: Attachment[]
+  tagIds?: string[]
 }
 export interface Plant extends Entity {
   name: string
@@ -65,6 +66,9 @@ export interface Bed extends Entity {
 export interface Plot extends Entity {
   name: string
   parentPlotId?: string
+}
+export interface Tag extends Entity {
+  name: string
 }
 
 export interface Event {
@@ -132,6 +136,7 @@ export const events: Event[] = [
   },
 ]
 
+export const useTags = () => useRtdbArray<Tag>(database.ref(getUserRefPath('/tags')))
 export const usePlots = () => useRtdbArray<Plot>(database.ref(getUserRefPath('/plots')))
 export const useBeds = () => useRtdbArray<Bed>(database.ref(getUserRefPath('/beds')))
 export const usePlants = () => useRtdbArray<Plant>(database.ref(getUserRefPath('/plants')))

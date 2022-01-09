@@ -145,6 +145,48 @@
         </fieldset>
       </TransitionExpand>
 
+      <TransitionExpand>
+        <fieldset v-if="isShowing.tags" ref="tagIdsRef" class="form-group">
+          <header class="form-group-header">
+            <label>Tag(s)</label>
+          </header>
+          <SelectMenu
+            :value="tagIds.length"
+            clearable
+            @clear="tagIds = []; isShowing.tags = false;"
+          >
+            <template #prepend>
+              <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingTag = !isAddingTag">
+                <Octicon name="plus-circle" />
+              </button>
+            </template>
+            <template #value>
+              <span
+                v-for="tagId in tagIds"
+                :key="tagId"
+                class="Label"
+              >
+                {{tags.find(({ id }) => id === tagId)?.name || ''}}
+              </span>
+            </template>
+            <div class="SelectMenu-list">
+              <button
+                v-for="tag in tags"
+                :key="tag.id"
+                type="button"
+                role="menuitemcheckbox"
+                :aria-checked="tagIds.includes(tag.id)"
+                class="SelectMenu-item"
+                @click="tagIds = tagIds.includes(tag.id) ? tagIds.filter(tagId => tagId !== tag.id) : tagIds.concat(tag.id)"
+              >
+                <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
+                <span class="Label Label--large">{{tag.name}}</span>
+              </button>
+            </div>
+          </SelectMenu>
+        </fieldset>
+      </TransitionExpand>
+
       <aside class="d-flex flex-wrap flex-justify-center mb-3" style="gap: 8px;">
         <Button v-if="!isShowing.at" class="flex-auto" @click="handleShowAt">
           <Octicon name="plus-circle" class="mr-2" />
@@ -153,6 +195,10 @@
         <Button v-if="!isShowing.attachments" class="flex-auto" @click="handleShowAttachments">
           <Octicon name="plus-circle" class="mr-2" />
           Add Attachment(s)
+        </Button>
+        <Button v-if="!isShowing.tags" class="flex-auto" @click="handleShowTags">
+          <Octicon name="plus-circle" class="mr-2" />
+          Add Tag(s)
         </Button>
       </aside>
 
@@ -169,7 +215,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, reactive, ref, watch } from 'vue'
 
-import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds } from '../services/data'
+import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds, useTags } from '../services/data'
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
@@ -178,6 +224,7 @@ import PlantTreeView from '../components/PlantTreeView.vue'
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 import Button from '../components/Button.vue'
 import Octicon from '../components/Octicon.vue'
+import SelectMenu from '../components/SelectMenu.vue'
 
 const WEIGHT_SPLIT = {
   ALL: 'total',
@@ -217,6 +264,8 @@ async function addPlantEntry({
   weightUnit,
   at,
   note,
+  attachments,
+  tagIds,
 }: {
   plantId: string,
   eventId?: string,
@@ -226,7 +275,9 @@ async function addPlantEntry({
   weightUnit?: string,
   at?: string,
   note?: string,
-}, attachments?: Entry['attachments']) {
+  attachments?: Entry['attachments'],
+  tagIds?: string[],
+}) {
   if (!plantId || !eventId) return
   const plantsRef = database.ref(getUserRefPath('/plants'))
   const plantRef = plantsRef.child(plantId)
@@ -289,8 +340,9 @@ async function addPlantEntry({
     eventId,
     at: at ? new Date(at).valueOf() : ServerValue.TIMESTAMP,
     payload: payload || null,
-    attachments: attachments || null,
     note: note || null,
+    attachments: attachments || null,
+    tagIds: tagIds?.length && tagIds || null,
     createdAt: ServerValue.TIMESTAMP,
   }
   await plantRef.child('entries').push(newEntry)
@@ -314,6 +366,7 @@ export default defineComponent({
     TransitionExpand,
     Button,
     Octicon,
+    SelectMenu,
   },
   setup() {
     const plantIds = ref<string[]>([])
@@ -338,13 +391,17 @@ export default defineComponent({
     const cullToo = ref(false)
     const at = ref<string>()
     const files = ref<FileList>()
+    const tags = useTags()
+    const tagIds = ref<string[]>([])
 
     const isShowing = reactive({
       at: false,
       attachments: false,
+      tags: false,
     })
     const atRef = ref<HTMLInputElement>()
     const attachmentsRef = ref<HTMLInputElement>()
+    const tagIdsRef = ref<HTMLInputElement>()
     function handleShowAt() {
       isShowing.at = true
       window.setTimeout(() => atRef.value?.focus?.())
@@ -352,6 +409,10 @@ export default defineComponent({
     function handleShowAttachments() {
       isShowing.attachments = true
       window.setTimeout(() => attachmentsRef.value?.click?.())
+    }
+    function handleShowTags() {
+      isShowing.tags = true
+      window.setTimeout(() => tagIdsRef.value?.querySelector('summary')?.click())
     }
 
     const formRef = ref<HTMLFormElement>()
@@ -376,6 +437,7 @@ export default defineComponent({
       cullToo.value = false
       at.value = undefined
       note.value = undefined
+      tagIds.value = []
       files.value = undefined
       formRef.value?.reset()
     }
@@ -402,8 +464,12 @@ export default defineComponent({
             weightUnit: weightUnit.value,
             at: at.value,
             note: note.value,
+            tagIds: tagIds.value,
           }
-          await addPlantEntry(params, attachments)
+          await addPlantEntry({
+            ...params,
+            attachments, // don't include attachments in cull entry
+          })
 
           if (cullToo.value) {
             await addPlantEntry({
@@ -423,6 +489,7 @@ export default defineComponent({
       WEIGHT_SPLIT,
       isAddingPlant: inject('isAddingPlant'),
       isAddingBed: inject('isAddingBed'),
+      isAddingTag: inject('isAddingTag'),
 
       plants,
       plantIds,
@@ -441,12 +508,16 @@ export default defineComponent({
       weightUnit,
       weightSplit,
       cullToo,
+      tags,
+      tagIds,
 
       isShowing,
       atRef,
       attachmentsRef,
+      tagIdsRef,
       handleShowAt,
       handleShowAttachments,
+      handleShowTags,
 
       formRef,
       isValid,
