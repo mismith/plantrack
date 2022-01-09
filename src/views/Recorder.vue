@@ -9,11 +9,11 @@
           <button type="button" class="btn btn-sm" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
           <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
-        <TreeViewSelect
+        <TreeViewSelectMenu
           :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
         >
           <PlantTreeView v-if="!isLoading" v-model="plantIds" multiple />
-        </TreeViewSelect>
+        </TreeViewSelectMenu>
       </fieldset>
 
       <fieldset class="form-group required">
@@ -53,7 +53,7 @@
           <header class="form-group-header">
             <label>Where To</label>
           </header>
-          <TreeViewSelect
+          <TreeViewSelectMenu
             v-model="isNewBedIdsSelectOpen"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
           >
@@ -61,7 +61,7 @@
               v-model="newBedIds"
               :filter="node => node.type !== 'entry'"
             />
-          </TreeViewSelect>
+          </TreeViewSelectMenu>
         </fieldset>
       </TransitionExpand>
       <TransitionExpand>
@@ -139,7 +139,7 @@ import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants,
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
-import TreeViewSelect from '../components/TreeViewSelect.vue'
+import TreeViewSelectMenu from '../components/TreeViewSelectMenu.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 
@@ -273,7 +273,7 @@ async function addPlantEntry({
 export default defineComponent({
   name: 'Recorder',
   components: {
-    TreeViewSelect,
+    TreeViewSelectMenu,
     PlantTreeView,
     TransitionExpand,
   },

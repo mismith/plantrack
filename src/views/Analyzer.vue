@@ -8,7 +8,7 @@
           <button type="button" class="btn btn-sm" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
           <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
-        <TreeViewSelect
+        <TreeViewSelectMenu
           :value="cropIds.length > 1 ? `${cropIds.length} crops selected` : cropIds.map((cropId) => crops.find(({ id }) => id === cropId)?.nickname).filter(Boolean)"
         >
           <TreeView
@@ -35,7 +35,7 @@
               </div>
             </template>
           </TreeView>
-        </TreeViewSelect>
+        </TreeViewSelectMenu>
       </fieldset>
 
       <TransitionExpand group>
@@ -60,7 +60,7 @@ import { useCrops, useTreeViewProps } from '../services/data'
 import { database, getUserRefPath, toKeyFieldArray } from '../services/firebase'
 
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
-import TreeViewSelect from '../components/TreeViewSelect.vue'
+import TreeViewSelectMenu from '../components/TreeViewSelectMenu.vue'
 import TreeView from '../components/TreeView/TreeView.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
 import { ITreeNode } from '../components/TreeView'
@@ -70,7 +70,7 @@ export default defineComponent({
   name: 'Analyzer',
   components: {
     TransitionExpand,
-    TreeViewSelect,
+    TreeViewSelectMenu,
     TreeView,
     CropStatsCard,
     Octicon,

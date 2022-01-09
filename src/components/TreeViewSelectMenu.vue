@@ -1,10 +1,10 @@
 <template>
-  <Select
+  <SelectMenu
     v-bind="{ ...$attrs, ...$props, value: valueChunks.length }"
     :modelValue="modelValue"
     @update:modelValue="handleChange"
     @clear="handleClear"
-    class="TreeViewSelect" 
+    class="TreeViewSelectMenu" 
   >
     <template #value>
       <span v-for="chunk in valueChunks" :key="chunk" class="no-wrap">{{chunk}}</span>
@@ -16,20 +16,20 @@
     </template>
 
     <slot />
-  </Select>
+  </SelectMenu>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, toRefs } from 'vue'
-import Select from './Select.vue'
+import SelectMenu from './SelectMenu.vue'
 
 export default defineComponent({
+  name: 'TreeViewSelectMenu',
   components: {
-    Select,
+    SelectMenu,
   },
-  name: 'TreeViewSelect',
   props: {
-    ...Select.props,
+    ...SelectMenu.props,
     value: {
       type: [String, Array],
       required: false,
@@ -56,7 +56,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.TreeViewSelect {
+.TreeViewSelectMenu {
   .SelectMenu-modal {
     font-size: 1rem;
   }

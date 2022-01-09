@@ -14,7 +14,7 @@
 
           <button type="button" class="btn btn-sm" :class="{ active: isAddingPlot }" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
         </header>
-        <TreeViewSelect
+        <TreeViewSelectMenu
           v-model="isPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === plotIds?.[0])?.name || ''"
         >
@@ -23,7 +23,7 @@
             :filter="node => node.type !== 'entry'"
             selectable-type="plot"
           />
-        </TreeViewSelect>
+        </TreeViewSelectMenu>
       </fieldset>
     </div>
 
@@ -43,14 +43,14 @@ import { database, getUserRefPath, keyField, ServerValue } from '../services/fir
 import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
-import TreeViewSelect from './TreeViewSelect.vue'
+import TreeViewSelectMenu from './TreeViewSelectMenu.vue'
 import PlantTreeView from './PlantTreeView.vue'
 
 export default defineComponent({
   name: 'AddBed',
   components: {
     Button,
-    TreeViewSelect,
+    TreeViewSelectMenu,
     PlantTreeView,
   },
   props: {

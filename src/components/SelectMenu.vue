@@ -2,7 +2,7 @@
   <details
     v-bind="$attrs"
     ref="detailsRef"
-    class="Select details-reset details-overlay position-relative" 
+    class="SelectMenuContainer details-reset details-overlay position-relative" 
     @toggle="handleToggle"
   >
     <slot name="summary">
@@ -42,7 +42,7 @@ import { defineComponent, ref, toRefs, watch } from 'vue'
 import Octicon from './Octicon.vue'
 
 export default defineComponent({
-  name: 'Select',
+  name: 'SelectMenu',
   components: {
     Octicon,
   },
@@ -89,9 +89,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-.Select {
-    
-}
-</style>
