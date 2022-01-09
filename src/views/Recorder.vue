@@ -25,7 +25,6 @@
         </header>
         <div class="form-group-body">
           <select v-model="eventId" required class="form-control form-select width-full mb-2">
-            <option></option>
             <option
               v-for="event in events"
               :key="event.id"
