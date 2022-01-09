@@ -122,10 +122,14 @@ export default defineComponent({
       type: Function as PropType<(node: ITreeNode) => boolean>,
       required: false,
     },
+    selectableType: {
+      type: String,
+      default: 'bed',
+    },
   },
   setup(props, { emit }) {
-    const { modelValue, multiple, filter } = toRefs(props)
-    const { nodes, plants, beds } = usePlantDataTree({ filter: filter.value })
+    const { modelValue, multiple, filter, selectableType } = toRefs(props)
+    const { nodes, plants, beds, plots } = usePlantDataTree({ filter: filter.value })
     const crops = useCrops()
 
     const treeState = reactive<Record<string, Booleanable>>({
@@ -138,7 +142,7 @@ export default defineComponent({
     const treeOptions = computed(() => ({
       indentable: true,
       expandable: true,
-      selectable: !multiple.value && ((node: ITreeNode) => node.type === 'bed'),
+      selectable: !multiple.value && ((node: ITreeNode) => node.type === selectableType.value),
       checkable: multiple.value && ((node: ITreeNode) => node.type !== 'entry' && {
         recurse: true,
       }),
@@ -159,7 +163,7 @@ export default defineComponent({
       } else {
         treeState.selected = modelValue.value
         treeState.checked = []
-        treeState.disabled = isOrHasDescendent('bed')
+        treeState.disabled = isOrHasDescendent(selectableType.value)
       }
     }, { immediate: true })
 
@@ -218,8 +222,9 @@ export default defineComponent({
           id => plants.value?.map(({ id }) => id).includes(id)
         )
       } else if (!multiple.value && changes.selected && Array.isArray(treeState.selected)) {
+        const collection = selectableType.value === 'plot' ? plots : beds
         value = treeState.selected.filter(
-          id => beds.value?.map(({ id }) => id).includes(id)
+          id => collection.value?.map(({ id }) => id).includes(id)
         )
       }
       if (value) {

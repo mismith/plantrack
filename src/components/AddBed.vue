@@ -14,16 +14,16 @@
 
           <button type="button" class="btn btn-sm" :class="{ active: isAddingPlot }" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
         </header>
-
-        <select v-model="plotId" required class="form-control form-select width-full">
-          <option
-            v-for="plot in plots"
-            :key="plot.id"
-            :value="plot.id"
-          >
-            {{plot.name}}
-          </option>
-        </select>
+        <TreeViewSelect
+          v-model="isPlotIdsSelectOpen"
+          :value="plots?.find(({ id }) => id === plotIds?.[0])?.name || ''"
+        >
+          <PlantTreeView
+            v-model="plotIds"
+            :filter="node => node.type !== 'entry'"
+            selectable-type="plot"
+          />
+        </TreeViewSelect>
       </fieldset>
     </div>
 
@@ -36,18 +36,22 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, ref, toRefs } from 'vue'
+import { computed, defineComponent, inject, PropType, ref, toRefs, watch } from 'vue'
 
 import { Bed, NewEntity, UpdatedEntity, usePlots } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
+import TreeViewSelect from './TreeViewSelect.vue'
+import PlantTreeView from './PlantTreeView.vue'
 
 export default defineComponent({
   name: 'AddBed',
   components: {
     Button,
+    TreeViewSelect,
+    PlantTreeView,
   },
   props: {
     bed: {
@@ -61,8 +65,15 @@ export default defineComponent({
 
     const name = ref(bed.value?.name)
     const plots = usePlots()
-    const plotId = ref(bed.value?.plotId || plots.value?.[0]?.id)
-    const isValid = computed(() => Boolean(name.value && plotId.value))
+    const plotIds = ref([bed.value?.plotId || plots.value?.[0]?.id])
+    const isValid = computed(() => Boolean(name.value && plotIds.value?.[0]))
+
+    const isPlotIdsSelectOpen = ref(false)
+    watch(plotIds, (v) => {
+      if (v.length) {
+        isPlotIdsSelectOpen.value = false
+      }
+    })
 
     const toast = inject<Function>('toast')
     const [runAsync, isLoading] = useAsyncWrapper()
@@ -73,7 +84,7 @@ export default defineComponent({
         if (isEditing.value && bed.value?.[keyField]) {
           const updatedBed: UpdatedEntity<Bed> = {
             name: name.value!,
-            plotId: plotId.value!,
+            plotId: plotIds.value[0]!,
             updatedAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath(`/beds/${bed.value?.[keyField]}`)).update(updatedBed)
@@ -82,7 +93,7 @@ export default defineComponent({
         } else {
           const newBed: NewEntity<Bed> = {
             name: name.value!,
-            plotId: plotId.value!,
+            plotId: plotIds.value[0]!,
             createdAt: ServerValue.TIMESTAMP,
           }
           database.ref(getUserRefPath('/beds')).push(newBed)
@@ -93,14 +104,15 @@ export default defineComponent({
 
       name.value = undefined
       // let linger to ease batch additions
-      // plotId.value = undefined
+      // plotIds.value = []
     }
 
     return {
       isAddingPlot: inject('isAddingPlot'),
       name,
       plots,
-      plotId,
+      plotIds,
+      isPlotIdsSelectOpen,
 
       isEditing,
       isValid,
