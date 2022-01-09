@@ -149,7 +149,7 @@
           <header class="form-group-header">
             <label>Tag(s)</label>
           </header>
-          <TagSelect v-model="tagIds" />
+          <TagSelect v-model="tagIds" @clear="tagIds = []; isShowing.tagIds = false;" />
         </fieldset>
       </TransitionExpand>
 

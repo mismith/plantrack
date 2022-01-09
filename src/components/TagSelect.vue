@@ -3,7 +3,7 @@
     :value="modelValue.length"
     clearable
     class="TagSelect"
-    @clear="handleChange([])"
+    @clear="handleClear"
   >
     <template #prepend>
       <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingTag = !isAddingTag">
@@ -77,6 +77,9 @@ export default defineComponent({
     function handleChange(newValue: string[]) {
       emit('update:modelValue', newValue)
     }
+    function handleClear(...args: any) {
+      emit('clear', ...args)
+    }
 
     const toast = inject<Function>('toast')
     const [runAsync] = useAsyncWrapper()
@@ -95,6 +98,7 @@ export default defineComponent({
 
       tags,
       handleChange,
+      handleClear,
       handleRemoveTag,
     }
   },
