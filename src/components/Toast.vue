@@ -94,6 +94,7 @@ export default defineComponent({
 <style lang="scss">
 .ToastContainer {
   z-index: 110;
+  max-width: 100%;
 
   .anim-fade-up {
     animation-delay: 0ms;
