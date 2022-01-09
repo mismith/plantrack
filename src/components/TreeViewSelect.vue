@@ -3,6 +3,7 @@
     v-bind="{ ...$attrs, ...$props, value: valueChunks.length }"
     :modelValue="modelValue"
     @update:modelValue="handleChange"
+    @clear="handleClear"
     class="TreeViewSelect" 
   >
     <template #value>
@@ -41,10 +42,14 @@ export default defineComponent({
     function handleChange(v: any) {
       emit('update:modelValue', v)
     }
+    function handleClear() {
+      emit('clear')
+    }
 
     return {
       valueChunks,
       handleChange,
+      handleClear,
     }
   }
 })

@@ -6,9 +6,9 @@
     @toggle="handleToggle"
   >
     <slot name="summary">
-      <summary aria-haspopup="true" style="cursor: inherit;">
+      <summary aria-haspopup="true" class="d-flex" style="cursor: inherit;">
         <slot name="trigger">
-          <div class="form-control form-select width-full">
+          <div class="form-control form-select width-full flex-auto mr-0">
             <template v-if="value">
               <slot name="value">
                 {{value}}
@@ -20,6 +20,11 @@
               </slot>
             </template>
           </div>
+        </slot>
+        <slot v-if="clearable" name="clearable">
+          <button type="button" class="btn-octicon" @click="handleClear">
+            <Octicon name="x-circle-fill" />
+          </button>
         </slot>
       </summary>
     </slot>
@@ -34,8 +39,13 @@
 <script lang="ts">
 import { defineComponent, ref, toRefs, watch } from 'vue'
 
+import Octicon from './Octicon.vue'
+
 export default defineComponent({
   name: 'Select',
+  components: {
+    Octicon,
+  },
   props: {
     modelValue: {
       default: false,
@@ -46,6 +56,10 @@ export default defineComponent({
     placeholder: {
       type: String,
       default: '',
+    },
+    clearable: {
+      type: Boolean,
+      default: false,
     },
   },
   setup(props, { emit }) {
@@ -63,9 +77,14 @@ export default defineComponent({
       emit('update:modelValue', detailsRef.value?.open)
     }
 
+    function handleClear() {
+      emit('clear')
+    }
+
     return {
       detailsRef,
       handleToggle,
+      handleClear,
     }
   }
 })

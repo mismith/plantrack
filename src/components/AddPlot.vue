@@ -14,6 +14,8 @@
         <TreeViewSelect
           v-model="isParentPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === parentPlotIds?.[0])?.name || ''"
+          clearable
+          @clear="parentPlotIds = []"
         >
           <PlantTreeView
             v-model="parentPlotIds"
@@ -21,7 +23,6 @@
             selectable-type="plot"
           />
         </TreeViewSelect>
-        <!-- @TODO: allow clearing if isEditing -->
       </fieldset>
     </div>
 
