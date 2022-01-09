@@ -80,21 +80,21 @@ export interface Event {
 export const events: Event[] = [
   {
     id: 'seed',
-    color: 'yellow',
+    color: 'gold',
     featured: true,
   },
   {
     id: 'sprout',
-    color: 'greenyellow',
+    color: 'lime',
     featured: true,
   },
   {
     id: 'leaf',
-    color: 'lime',
+    color: 'forestgreen',
   },
   {
     id: 'flower',
-    color: 'forestgreen',
+    color: 'darkorange',
   },
   {
     id: 'fruit',

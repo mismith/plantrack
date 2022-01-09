@@ -267,6 +267,7 @@ export default defineComponent({
     height: 1em;
     vertical-align: middle;
     border-radius: 1em;
+    flex-shrink: 0;
   }
 }
 </style>
