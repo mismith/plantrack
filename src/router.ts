@@ -15,7 +15,7 @@ export const routes = [
     path: '/plotter',
     component: Plotter,
     meta: {
-      title: 'Plotter',
+      // title: 'Plotter',
     },
   },
   {
