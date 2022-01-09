@@ -260,6 +260,9 @@ body,
 input[type="file"] {
   line-height: 1rem;
 }
+select.form-control {
+  -webkit-appearance: none;
+}
 
 .btn-triangle {
   appearance: none;
