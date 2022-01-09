@@ -5,7 +5,7 @@
         <header class="form-group-header">
           <label>Crop</label>
 
-          <button type="button" class="btn btn-sm" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
+          <button type="button" class="btn btn-sm" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
         </header>
 
         <select v-model="cropId" required class="form-control form-select width-full">

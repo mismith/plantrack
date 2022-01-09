@@ -5,7 +5,7 @@
         <header class="form-group-header">
           <label>Crop(s)</label>
 
-          <button type="button" class="btn btn-sm" :class="{ active: isAddingCrop }" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
+          <button type="button" class="btn btn-sm" @click="isAddingCrop = !isAddingCrop">Add Crop</button>
           <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
         <TreeViewSelectMenu

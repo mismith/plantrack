@@ -12,7 +12,7 @@
         <header class="form-group-header">
           <label>Plot</label>
 
-          <button type="button" class="btn btn-sm" :class="{ active: isAddingPlot }" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
+          <button type="button" class="btn btn-sm" @click="isAddingPlot = !isAddingPlot">Add Plot</button>
         </header>
         <TreeViewSelectMenu
           v-model="isPlotIdsSelectOpen"

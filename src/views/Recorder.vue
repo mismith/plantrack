@@ -5,8 +5,8 @@
         <header class="form-group-header">
           <label>Plant(s)</label>
 
-          <button type="button" class="btn btn-sm" :class="{ active: isAddingPlant }" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
-          <button type="button" class="btn btn-sm" :class="{ active: isAddingBed }" @click="isAddingBed = !isAddingBed">Add Bed</button>
+          <button type="button" class="btn btn-sm" @click="isAddingPlant = !isAddingPlant">Add Plant</button>
+          <button type="button" class="btn btn-sm" @click="isAddingBed = !isAddingBed">Add Bed</button>
           <button type="reset" class="btn btn-sm" @click="handleReset">Reset</button>
         </header>
         <TreeViewSelectMenu
