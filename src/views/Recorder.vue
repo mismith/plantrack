@@ -162,11 +162,12 @@
             </template>
             <template #value>
               <span
-                v-for="tagId in tagIds"
-                :key="tagId"
-                class="Label"
+                v-for="tag in tagIds.map(tagId => tags.find(({ id }) => id === tagId)).filter(Boolean)"
+                :key="tag.id"
+                class="Label mr-1"
+                :style="{ color: tag.color, borderColor: tag.color && 'currentColor' }"
               >
-                {{tags.find(({ id }) => id === tagId)?.name || ''}}
+                {{tag.name}}
               </span>
             </template>
             <div class="SelectMenu-list">
@@ -180,7 +181,15 @@
                 @click="tagIds = tagIds.includes(tag.id) ? tagIds.filter(tagId => tagId !== tag.id) : tagIds.concat(tag.id)"
               >
                 <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
-                <span class="Label Label--large">{{tag.name}}</span>
+                <span
+                  class="Label Label--large mr-auto"
+                  :style="{ color: tag.color, borderColor: tag.color && 'currentColor' }"
+                >
+                  {{tag.name}}
+                </span>
+                <span class="circle btn-octicon p-1 ml-3 mr-n2" @click.stop="isEditingTag = tag">
+                  <Octicon name="pencil" />
+                </span>
               </button>
             </div>
           </SelectMenu>
@@ -490,6 +499,7 @@ export default defineComponent({
       isAddingPlant: inject('isAddingPlant'),
       isAddingBed: inject('isAddingBed'),
       isAddingTag: inject('isAddingTag'),
+      isEditingTag: inject('isEditingTag'),
 
       plants,
       plantIds,

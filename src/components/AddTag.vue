@@ -7,6 +7,30 @@
         </header>
         <input type="text" v-model="name" required class="form-control width-full" />
       </fieldset>
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>Color</label>
+        </header>
+        <div class="d-flex">
+          <div class="input-group flex-auto">
+            <span class="input-group-button">
+              <Button :style="{ backgroundColor: color }">
+                &nbsp;
+                <input
+                  type="color"
+                  v-model="color"
+                  class="position-absolute height-full width-full"
+                  style="inset: 0; opacity: 0; cursor: inherit;"
+                />
+              </Button>
+            </span>
+            <input type="text" v-model="color" class="form-control width-full mr-0" />
+          </div>
+          <button type="button" class="btn-octicon" @click="color = undefined">
+            <Octicon name="x-circle-fill" />
+          </button>
+        </div>
+      </fieldset>
     </div>
 
     <footer class="Box-footer">
@@ -25,11 +49,13 @@ import { database, getUserRefPath, keyField, ServerValue } from '../services/fir
 import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
+import Octicon from './Octicon.vue'
 
 export default defineComponent({
   name: 'AddTag',
   components: {
     Button,
+    Octicon,
   },
   props: {
     tag: {
@@ -42,6 +68,7 @@ export default defineComponent({
     const isEditing = computed(() => Boolean(tag.value))
 
     const name = ref(tag.value?.name)
+    const color = ref(tag.value?.color)
     const isValid = computed(() => Boolean(name.value))
 
     const toast = inject<Function>('toast')
@@ -53,6 +80,7 @@ export default defineComponent({
         if (isEditing.value && tag.value?.[keyField]) {
           const updatedTag: UpdatedEntity<Tag> = {
             name: name.value!,
+            color: color.value || null,
             updatedAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath(`/tags/${tag.value?.[keyField]}`)).update(updatedTag)
@@ -61,6 +89,7 @@ export default defineComponent({
         } else {
           const newTag: NewEntity<Tag> = {
             name: name.value!,
+            color: color.value || null,
             createdAt: ServerValue.TIMESTAMP,
           }
           database.ref(getUserRefPath('/tags')).push(newTag)
@@ -70,10 +99,12 @@ export default defineComponent({
       })
 
       name.value = undefined
+      color.value = undefined
     }
 
     return {
       name,
+      color,
 
       isEditing,
       isValid,

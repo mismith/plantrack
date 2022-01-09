@@ -69,6 +69,7 @@ export interface Plot extends Entity {
 }
 export interface Tag extends Entity {
   name: string
+  color?: string
 }
 
 export interface Event {
