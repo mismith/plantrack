@@ -11,14 +11,12 @@
       </button>
     </template>
     <template #value>
-      <span
-        v-for="tag in modelValue.map(tagId => tags.find(({ id }) => id === tagId)).filter(Boolean)"
-        :key="tag.id"
-        class="Label mr-1"
-        :style="{ color: tag.color, borderColor: tag.color && 'currentColor' }"
-      >
-        {{tag.name}}
-      </span>
+      <Tag
+        v-for="tagId in modelValue"
+        :key="tagId"
+        :tag-id="tagId"
+        class="mr-1"
+      />
     </template>
     <div class="SelectMenu-list">
       <button
@@ -31,16 +29,18 @@
         @click="handleChange(modelValue.includes(tag.id) ? modelValue.filter(tagId => tagId !== tag.id) : modelValue.concat(tag.id))"
       >
         <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
-        <span
-          class="Label Label--large mr-auto"
-          :style="{ color: tag.color, borderColor: tag.color && 'currentColor' }"
-        >
-          {{tag.name}}
-        </span>
-        <span class="circle btn-octicon p-1 ml-3 mr-n2" @click.stop="isEditingTag = tag">
+        <Tag
+          :tag-id="tag.id"
+          class="Label--large mr-auto"
+        />
+        <span class="circle btn-octicon py-1 px-2 ml-3" @click.stop="isEditingTag = tag">
           <Octicon name="pencil" />
         </span>
+        <span class="circle btn-octicon btn-octicon-danger py-1 px-2 ml-0 mr-n3" @click.stop="handleRemoveTag(tag, $event.shiftKey)">
+          <Octicon name="trash" />
+        </span>
       </button>
+      <!-- @TODO: add fallback -->
     </div>
   </SelectMenu>
 </template>
@@ -48,11 +48,14 @@
 <script lang="ts">
 import { defineComponent, inject, PropType } from 'vue'
 
-import { useTags } from '../services/data'
+import { Tag as ITag, useTags } from '../services/data'
+import { useAsyncWrapper } from '../services/errors'
 
 import Button from '../components/Button.vue'
 import Octicon from '../components/Octicon.vue'
 import SelectMenu from '../components/SelectMenu.vue'
+import { database, getUserRefPath } from '../services/firebase'
+import Tag from './Tag.vue'
 
 export default defineComponent({
   name: 'TagSelect',
@@ -60,6 +63,7 @@ export default defineComponent({
     Button,
     Octicon,
     SelectMenu,
+    Tag,
   },
   props: {
     modelValue: {
@@ -74,12 +78,24 @@ export default defineComponent({
       emit('update:modelValue', newValue)
     }
 
+    const toast = inject<Function>('toast')
+    const [runAsync] = useAsyncWrapper()
+    async function handleRemoveTag(tag: ITag, skipConfirm = false) {
+      if (skipConfirm || window.confirm('Are you sure?')) {
+        runAsync(async () => {
+          await database.ref(getUserRefPath(`/tags/${tag.id}`)).remove()
+          toast?.(`Tag deleted successfully`, 'success')
+        })
+      }
+    }
+
     return {
       isAddingTag: inject('isAddingTag'),
       isEditingTag: inject('isEditingTag'),
 
       tags,
       handleChange,
+      handleRemoveTag,
     }
   },
 })
