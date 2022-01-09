@@ -149,49 +149,7 @@
           <header class="form-group-header">
             <label>Tag(s)</label>
           </header>
-          <SelectMenu
-            :value="tagIds.length"
-            clearable
-            @clear="tagIds = []; isShowing.tagIds = false;"
-          >
-            <template #prepend>
-              <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingTag = !isAddingTag">
-                <Octicon name="plus-circle" />
-              </button>
-            </template>
-            <template #value>
-              <span
-                v-for="tag in tagIds.map(tagId => tags.find(({ id }) => id === tagId)).filter(Boolean)"
-                :key="tag.id"
-                class="Label mr-1"
-                :style="{ color: tag.color, borderColor: tag.color && 'currentColor' }"
-              >
-                {{tag.name}}
-              </span>
-            </template>
-            <div class="SelectMenu-list">
-              <button
-                v-for="tag in tags"
-                :key="tag.id"
-                type="button"
-                role="menuitemcheckbox"
-                :aria-checked="tagIds.includes(tag.id)"
-                class="SelectMenu-item"
-                @click="tagIds = tagIds.includes(tag.id) ? tagIds.filter(tagId => tagId !== tag.id) : tagIds.concat(tag.id)"
-              >
-                <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
-                <span
-                  class="Label Label--large mr-auto"
-                  :style="{ color: tag.color, borderColor: tag.color && 'currentColor' }"
-                >
-                  {{tag.name}}
-                </span>
-                <span class="circle btn-octicon p-1 ml-3 mr-n2" @click.stop="isEditingTag = tag">
-                  <Octicon name="pencil" />
-                </span>
-              </button>
-            </div>
-          </SelectMenu>
+          <TagSelect v-model="tagIds" />
         </fieldset>
       </TransitionExpand>
 
@@ -233,6 +191,7 @@ import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 import Button from '../components/Button.vue'
 import Octicon from '../components/Octicon.vue'
 import SelectMenu from '../components/SelectMenu.vue'
+import TagSelect from '../components/TagSelect.vue'
 import Blip from '../components/Blip.vue'
 
 const WEIGHT_SPLIT = {
@@ -376,6 +335,7 @@ export default defineComponent({
     Button,
     Octicon,
     SelectMenu,
+    TagSelect,
     Blip,
   },
   setup() {
@@ -509,8 +469,6 @@ export default defineComponent({
       WEIGHT_SPLIT,
       isAddingPlant: inject('isAddingPlant'),
       isAddingBed: inject('isAddingBed'),
-      isAddingTag: inject('isAddingTag'),
-      isEditingTag: inject('isEditingTag'),
 
       plants,
       plantIds,
@@ -529,7 +487,6 @@ export default defineComponent({
       weightUnit,
       weightSplit,
       cullToo,
-      tags,
       tagIds,
 
       isShowing,
