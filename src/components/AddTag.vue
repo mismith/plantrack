@@ -15,7 +15,7 @@
           <div class="input-group flex-auto">
             <span class="input-group-button">
               <Button :style="{ backgroundColor: color }">
-                &nbsp;
+                <Octicon name="paintbrush" class="mr-0" />
                 <input
                   type="color"
                   v-model="color"
@@ -26,7 +26,7 @@
             </span>
             <input type="text" v-model="color" class="form-control width-full mr-0" />
           </div>
-          <button type="button" class="btn-octicon" @click="color = undefined">
+          <button v-if="color" type="button" class="btn-octicon" @click="color = undefined">
             <Octicon name="x-circle-fill" />
           </button>
         </div>
