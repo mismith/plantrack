@@ -107,7 +107,7 @@ export default defineComponent({
             updatedAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath(`/plants/${plant.value?.[keyField]}`)).update(updatedPlant)
-          emit('update', updatedPlant);
+          emit('update', updatedPlant)
           toast?.('Plant saved successfully', 'success')
         } else {
           const newPlant: NewEntity<Plant> = {
@@ -117,7 +117,7 @@ export default defineComponent({
             createdAt: ServerValue.TIMESTAMP,
           }
           database.ref(getUserRefPath('/plants')).push(newPlant)
-          emit('create', newPlant);
+          emit('create', newPlant)
           toast?.('Plant added successfully', 'success')
         }
       })

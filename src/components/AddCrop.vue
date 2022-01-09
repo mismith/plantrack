@@ -65,7 +65,7 @@ export default defineComponent({
             updatedAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath(`/crops/${crop.value?.[keyField]}`)).update(updatedCrop)
-          emit('update', updatedCrop);
+          emit('update', updatedCrop)
           toast?.('Crop saved successfully', 'success')
         } else {
           const newCrop: NewEntity<Crop> = {
@@ -74,7 +74,7 @@ export default defineComponent({
             createdAt: ServerValue.TIMESTAMP,
           }
           database.ref(getUserRefPath('/crops')).push(newCrop)
-          emit('create', newCrop);
+          emit('create', newCrop)
           toast?.('Crop added successfully', 'success')
         }
       })

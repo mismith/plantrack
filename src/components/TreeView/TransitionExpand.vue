@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { Transition, TransitionGroup } from 'vue';
+import { Transition, TransitionGroup } from 'vue'
 
 export default {
   name: 'TransitionExpand',
@@ -30,39 +30,39 @@ export default {
   setup() {
     return {
       onAfterEnter(element) {
-        element.style.height = 'auto';
+        element.style.height = 'auto'
       },
       onEnter(element) {
-        const { width } = getComputedStyle(element);
-        element.style.width = width;
-        element.style.position = 'absolute';
-        element.style.visibility = 'hidden';
-        element.style.height = 'auto';
-        const { height } = getComputedStyle(element);
-        element.style.width = null;
-        element.style.position = null;
-        element.style.visibility = null;
-        element.style.height = 0;
+        const { width } = getComputedStyle(element)
+        element.style.width = width
+        element.style.position = 'absolute'
+        element.style.visibility = 'hidden'
+        element.style.height = 'auto'
+        const { height } = getComputedStyle(element)
+        element.style.width = null
+        element.style.position = null
+        element.style.visibility = null
+        element.style.height = 0
         // Force repaint to make sure the
         // animation is triggered correctly.
-        getComputedStyle(element).height;
+        getComputedStyle(element).height
         requestAnimationFrame(() => {
-          element.style.height = height;
-        });
+          element.style.height = height
+        })
       },
       onLeave(element) {
-        const { height } = getComputedStyle(element);
-        element.style.height = height;
+        const { height } = getComputedStyle(element)
+        element.style.height = height
         // Force repaint to make sure the
         // animation is triggered correctly.
-        getComputedStyle(element).height;
+        getComputedStyle(element).height
         requestAnimationFrame(() => {
-          element.style.height = 0;
-        });
+          element.style.height = 0
+        })
       },
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>

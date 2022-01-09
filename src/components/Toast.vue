@@ -56,7 +56,7 @@ export default defineComponent({
         success: 'check',
         warning: 'alert',
         error: 'stop',
-      };
+      }
       return icons[type.value] || 'info'
     })
     const color = computed(() => {
@@ -64,7 +64,7 @@ export default defineComponent({
         success: 'success',
         warning: 'attention',
         error: 'danger',
-      };
+      }
       return icons[type.value] || 'accent'
     })
 

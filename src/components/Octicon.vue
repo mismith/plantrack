@@ -26,5 +26,5 @@ export default defineComponent({
       innerHTML: octicon.value.heights[size.value].path,
     })
   },
-});
+})
 </script>

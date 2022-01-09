@@ -172,7 +172,7 @@ export default defineComponent({
       const checkNode = (node: ITreeNode) => {
         const containsDescendent = walkDescendents(node, checkNode).filter(Boolean).length
         if (node.id === modelValue.value?.[0]) {
-          return true;
+          return true
         } else if (containsDescendent) {
           treeState.expanded = set(treeState.expanded, node, true)
           return true

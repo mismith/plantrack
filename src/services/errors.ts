@@ -1,4 +1,4 @@
-import { inject, ref } from 'vue';
+import { inject, ref } from 'vue'
 
 export function useAsyncWrapper(): [typeof wrapper, typeof isLoading] {
   const toastError = inject<Function>('toastError')

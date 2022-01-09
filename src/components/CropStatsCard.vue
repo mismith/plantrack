@@ -49,7 +49,7 @@ export default defineComponent({
     const crop = computed(() => crops.value?.find(({ id }) => id === cropId.value))
     const isShowingPlants = ref(false)
     const expectedDaysToHarvest = computed(() => {
-      const { daysToHarvest } = crop.value || {};
+      const { daysToHarvest } = crop.value || {}
       if (daysToHarvest) {
         const [_, min, max] = /^(\d+)\s*-\s*(\d+)$/.exec(String(daysToHarvest)) as any || []
         if (min && max) {

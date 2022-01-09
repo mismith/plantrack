@@ -59,7 +59,7 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const { plot } = toRefs(props);
+    const { plot } = toRefs(props)
     const isEditing = computed(() => Boolean(plot.value))
 
     const name = ref(plot.value?.name)
@@ -87,7 +87,7 @@ export default defineComponent({
             updatedAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath(`/plots/${plot.value?.[keyField]}`)).update(updatedPlot)
-          emit('update', updatedPlot);
+          emit('update', updatedPlot)
           toast?.('Plot saved successfully', 'success')
         } else {
           const newPlot: NewEntity<Plot> = {
@@ -96,7 +96,7 @@ export default defineComponent({
             createdAt: ServerValue.TIMESTAMP,
           }
           await database.ref(getUserRefPath('/plots')).push(newPlot)
-          emit('create', newPlot);
+          emit('create', newPlot)
           toast?.('Plot added successfully', 'success')
         }
       })
