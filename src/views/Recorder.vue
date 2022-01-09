@@ -37,6 +37,7 @@
               :key="event.id"
               type="button"
               class="BtnGroup-item btn btn-sm px-1"
+              :class="{ 'btn-outline': eventId === event.id }"
               style="flex: auto;"
               :aria-selected="eventId === event.id"
               @click="eventId = event.id"
