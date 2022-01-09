@@ -23,18 +23,18 @@
           </a>
         </template>
         <template v-else>
-          <div style="display: inline-flex; flex-direction: column;">
-            <span>{{node.name || node.id}}</span>
+          <div class="d-flex flex-column">
+            <div class="d-flex flex-items-center" style="gap: 4px;">
+              <span>{{node.name || node.id}}</span>
+              <span v-if="node.children?.length" class="Counter Counter--secondary">{{node.children.length}}</span>
+              <Blip
+                v-if="node.type === 'plant' && node.children?.length" 
+                :title="getLatestEntryEvent(node)?.id"
+                :color="getLatestEntryEvent(node)?.color"
+              />
+            </div>
             <small v-if="node.cropId" style="font-size: 0.75em;">{{crops?.find(({ id }) => id === node.cropId)?.nickname}}</small>
           </div>
-
-          <span
-            v-if="node.type === 'plant' && node.children?.length" 
-            class="eventId"
-            :title="getLatestEntryEvent(node)?.id"
-            :style="`background-color: ${getLatestEntryEvent(node)?.color || 'currentColor'}`"
-          />
-          <span v-if="node.children?.length" class="Counter Counter--secondary">{{node.children.length}}</span>
         </template>
       </div>
     </template>
@@ -95,6 +95,7 @@ import { useAsyncWrapper } from '../services/errors'
 import { Booleanable, ITreeNode, set, tools, walkDescendents } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
 import Octicon from './Octicon.vue'
+import Blip from './Blip.vue'
 
 function isOrHasDescendent(type: string) {
   return (node: ITreeNode) => node.type !== type && !tools.walkDescendents(
@@ -108,6 +109,7 @@ export default defineComponent({
   components: {
     TreeView,
     Octicon,
+    Blip,
   },
   props: {
     modelValue: {
@@ -261,13 +263,8 @@ export default defineComponent({
 
 <style lang="scss">
 .PlantTreeView {
-  .eventId {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    vertical-align: middle;
-    border-radius: 1em;
-    flex-shrink: 0;
+  .TreeNodeLeaf {
+    align-items: flex-start;
   }
 }
 </style>

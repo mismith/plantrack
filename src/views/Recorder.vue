@@ -44,7 +44,7 @@
               :aria-selected="eventId === event.id"
               @click="eventId = event.id"
             >
-              <span :style="`display: inline-block; width: 1em; height: 1em; background-color: ${event.color}; vertical-align: middle; border: solid 1px currentColor; border-radius: 1em;`" />
+              <Blip :color="event.color" />
               {{event.id}}
             </button>
           </div>
@@ -233,6 +233,7 @@ import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 import Button from '../components/Button.vue'
 import Octicon from '../components/Octicon.vue'
 import SelectMenu from '../components/SelectMenu.vue'
+import Blip from '../components/Blip.vue'
 
 const WEIGHT_SPLIT = {
   ALL: 'total',
@@ -375,6 +376,7 @@ export default defineComponent({
     Button,
     Octicon,
     SelectMenu,
+    Blip,
   },
   setup() {
     const plantIds = ref<string[]>([])
