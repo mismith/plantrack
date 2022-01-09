@@ -138,7 +138,7 @@
           </header>
           <div class="d-flex">
             <input ref="attachmentsRef" type="file" multiple class="form-control width-full mr-0" @change="files = $event.target.files" />
-            <button type="button" class="btn-octicon" @click="files = undefined; attachmentsRef.value = null; isShowing.attachments = false;">
+            <button type="button" class="btn-octicon" @click="files = undefined; isShowing.attachments = false;">
               <Octicon name="x-circle-fill" />
             </button>
           </div>
@@ -146,14 +146,14 @@
       </TransitionExpand>
 
       <TransitionExpand>
-        <fieldset v-if="isShowing.tags" ref="tagIdsRef" class="form-group">
+        <fieldset v-if="isShowing.tagIds" ref="tagIdsRef" class="form-group">
           <header class="form-group-header">
             <label>Tag(s)</label>
           </header>
           <SelectMenu
             :value="tagIds.length"
             clearable
-            @clear="tagIds = []; isShowing.tags = false;"
+            @clear="tagIds = []; isShowing.tagIds = false;"
           >
             <template #prepend>
               <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingTag = !isAddingTag">
@@ -205,7 +205,7 @@
           <Octicon name="plus-circle" class="mr-2" />
           Add Attachment(s)
         </Button>
-        <Button v-if="!isShowing.tags" class="flex-auto" @click="handleShowTags">
+        <Button v-if="!isShowing.tagIds" class="flex-auto" @click="handleShowTags">
           <Octicon name="plus-circle" class="mr-2" />
           Add Tag(s)
         </Button>
@@ -406,11 +406,16 @@ export default defineComponent({
     const isShowing = reactive({
       at: false,
       attachments: false,
-      tags: false,
+      tagIds: false,
     })
     const atRef = ref<HTMLInputElement>()
     const attachmentsRef = ref<HTMLInputElement>()
     const tagIdsRef = ref<HTMLInputElement>()
+    watch(files, (v) => {
+      if (!v?.length) {
+        attachmentsRef.value = undefined; 
+      }
+    })
     function handleShowAt() {
       isShowing.at = true
       window.setTimeout(() => atRef.value?.focus?.())
@@ -420,7 +425,7 @@ export default defineComponent({
       window.setTimeout(() => attachmentsRef.value?.click?.())
     }
     function handleShowTags() {
-      isShowing.tags = true
+      isShowing.tagIds = true
       if (tags.value?.length) {
         window.setTimeout(() => tagIdsRef.value?.querySelector('summary')?.click())
       }
@@ -450,6 +455,9 @@ export default defineComponent({
       note.value = undefined
       tagIds.value = []
       files.value = undefined
+      isShowing.at = false
+      isShowing.attachments = false
+      isShowing.tagIds = false
       formRef.value?.reset()
     }
     const toast = inject<Function>('toast')
