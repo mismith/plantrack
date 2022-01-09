@@ -41,7 +41,7 @@
     <template #node-append="{ node, parents }">
       <div class="TreeNodeActions">
         <button
-          v-if="node.type === 'plot'"
+          v-if="node.type === 'plot' && node.id !== 'system'"
           type="button"
           class="btn-octicon"
           @click.stop="isEditingPlot = node"
@@ -49,7 +49,7 @@
           <Octicon name="pencil" />
         </button>
         <button
-          v-if="node.type === 'bed'"
+          v-if="node.type === 'bed' && node.plotId !== 'system'"
           type="button"
           class="btn-octicon"
           @click.stop="isEditingBed = node"
@@ -73,7 +73,7 @@
           <Octicon name="trash" />
         </button>
         <button
-          v-else
+          v-else-if="node.id !== 'system' && node.plotId !== 'system'"
           type="button"
           class="btn-octicon btn-octicon-danger"
           @click.stop="handleRemoveNode(node, $event.shiftKey)"
