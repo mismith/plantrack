@@ -1,14 +1,14 @@
 <template>
-  <details
-    v-bind="$attrs"
-    ref="detailsRef"
-    class="SelectMenuContainer details-reset details-overlay position-relative" 
-    @toggle="handleToggle"
-  >
-    <slot name="summary">
-      <summary aria-haspopup="true" class="d-flex" style="cursor: inherit;">
-        <slot name="prepend" />
-        <slot name="trigger">
+  <div class="SelectMenuContainer d-flex width-full position-relative">
+    <slot name="prepend" />
+    <details
+      v-bind="$attrs"
+      ref="detailsRef"
+      class="details-reset details-overlay flex-auto" 
+      @toggle="handleToggle"
+    >
+      <slot name="summary">
+        <summary aria-haspopup="true" style="cursor: inherit;">
           <div class="form-control form-select width-full flex-auto mr-0">
             <template v-if="value">
               <slot name="value">
@@ -21,20 +21,20 @@
               </slot>
             </template>
           </div>
-        </slot>
-        <slot v-if="clearable" name="clearable">
-          <button type="button" class="btn-octicon anim-scale-in" @click="handleClear">
-            <Octicon name="x-circle-fill" />
-          </button>
-        </slot>
-      </summary>
-    </slot>
-    <div class="SelectMenu position-fixed">
-      <div class="SelectMenu-modal width-full overflow-auto">
-        <slot />
+        </summary>
+      </slot>
+      <div class="SelectMenu position-fixed">
+        <div class="SelectMenu-modal width-full overflow-auto">
+          <slot />
+        </div>
       </div>
-    </div>
-  </details>
+    </details>
+    <slot v-if="clearable" name="clearable">
+      <button type="button" class="btn-octicon anim-scale-in" @click="handleClear">
+        <Octicon name="x-circle-fill" />
+      </button>
+    </slot>
+  </div>
 </template>
 
 <script lang="ts">
