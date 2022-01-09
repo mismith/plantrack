@@ -36,6 +36,14 @@
                 >
                   <Octicon name="pencil" />
                 </button>
+                <button
+                  v-if="node.name"
+                  type="button"
+                  class="btn-octicon btn-octicon-danger"
+                  @click.stop="handleRemoveNode(node, $event.shiftKey)"
+                >
+                  <Octicon name="trash" />
+                </button>
               </div>
             </template>
           </TreeView>
@@ -69,6 +77,7 @@ import TreeView from '../components/TreeView/TreeView.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
 import { ITreeNode } from '../components/TreeView'
 import Octicon from '../components/Octicon.vue'
+import { useAsyncWrapper } from '../services/errors'
 
 export default defineComponent({
   name: 'Analyzer',
@@ -108,6 +117,17 @@ export default defineComponent({
       return []
     })
     const treeView = useTreeViewProps(cropIds, { checkable: { recurse: true } }, (cropId) => crops.value?.find(({ id }) => id === cropId))
+
+    const toast = inject<Function>('toast')
+    const [runAsync] = useAsyncWrapper()
+    async function handleRemoveNode(node: ITreeNode, skipConfirm = false) {
+      if (skipConfirm || window.confirm('Are you sure?')) {
+        runAsync(async () => {
+          await database.ref(getUserRefPath(`/crops/${node.id}`)).remove()
+          toast?.(`Crop deleted successfully`, 'success')
+        })
+      }
+    }
 
     const importInputRef = ref<HTMLInputElement | null>(null)
     async function handleImport(event: any) {
@@ -157,6 +177,7 @@ export default defineComponent({
 
       nodes,
       treeView,
+      handleRemoveNode,
 
       importInputRef,
       handleImport,
