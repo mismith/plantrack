@@ -104,24 +104,49 @@
 
       <fieldset class="form-group">
         <header class="form-group-header">
-          <label>When</label>
-        </header>
-        <input type="datetime-local" v-model="at" class="form-control width-full" />
-      </fieldset>
-
-      <fieldset class="form-group">
-        <header class="form-group-header">
           <label>Note</label>
         </header>
         <textarea v-model="note" class="form-control width-full"></textarea>
       </fieldset>
 
-      <fieldset class="form-group">
-        <header class="form-group-header">
-          <label>Attachment(s)</label>
-        </header>
-        <input type="file" multiple class="form-control width-full" @change="files = $event.target.files" />
-      </fieldset>
+      <TransitionExpand>
+        <fieldset v-if="isShowing.at" class="form-group">
+          <header class="form-group-header">
+            <label>When</label>
+          </header>
+          <div class="d-flex">
+            <input ref="atRef" type="datetime-local" v-model="at" class="form-control width-full mr-0" />
+            <button type="button" class="btn-octicon" @click="at = undefined; isShowing.at = false;">
+              <Octicon name="x-circle-fill" />
+            </button>
+          </div>
+        </fieldset>
+      </TransitionExpand>
+
+      <TransitionExpand>
+        <fieldset v-if="isShowing.attachments" class="form-group">
+          <header class="form-group-header">
+            <label>Attachment(s)</label>
+          </header>
+          <div class="d-flex">
+            <input ref="attachmentsRef" type="file" multiple class="form-control width-full mr-0" @change="files = $event.target.files" />
+            <button type="button" class="btn-octicon" @click="files = undefined; attachmentsRef.value = null; isShowing.attachments = false;">
+              <Octicon name="x-circle-fill" />
+            </button>
+          </div>
+        </fieldset>
+      </TransitionExpand>
+
+      <aside class="d-flex flex-wrap flex-justify-center mb-3" style="gap: 8px;">
+        <Button v-if="!isShowing.at" class="flex-auto" @click="handleShowAt">
+          <Octicon name="plus-circle" class="mr-2" />
+          Use Specific Date/Time
+        </Button>
+        <Button v-if="!isShowing.attachments" class="flex-auto" @click="handleShowAttachments">
+          <Octicon name="plus-circle" class="mr-2" />
+          Add Attachment(s)
+        </Button>
+      </aside>
 
       <footer class="color-bg-default p-3 mb-n3 ml-n3 mr-n3 border-top" style="position: sticky; bottom: 0;">
         <div class="form-group my-0">
@@ -134,7 +159,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref, watch } from 'vue'
+import { computed, defineComponent, inject, reactive, ref, watch } from 'vue'
 
 import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds } from '../services/data'
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
@@ -143,6 +168,8 @@ import { useAsyncWrapper } from '../services/errors'
 import TreeViewSelectMenu from '../components/TreeViewSelectMenu.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
+import Button from '../components/Button.vue'
+import Octicon from '../components/Octicon.vue'
 
 const WEIGHT_SPLIT = {
   ALL: 'total',
@@ -277,15 +304,13 @@ export default defineComponent({
     TreeViewSelectMenu,
     PlantTreeView,
     TransitionExpand,
+    Button,
+    Octicon,
   },
   setup() {
     const plantIds = ref<string[]>([])
     const eventId = ref<string>()
-    const at = ref<string>()
     const note = ref<string>()
-    const files = ref<FileList>()
-    const formRef = ref<HTMLFormElement>()
-
     const beds = useBeds()
     const newBedIds = ref<string[]>([])
     const isNewBedIdsSelectOpen = ref(false)
@@ -299,12 +324,29 @@ export default defineComponent({
     const crops = useCrops()
     const cropId = computed(() => plants.value?.find(({ id }) => id === plantIds.value?.[0])?.cropId)
     const newNamePlaceholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
-
     const weight = ref<string>()
     const weightUnit = ref<string>('g')
     const weightSplit = ref<string>(WEIGHT_SPLIT.ALL)
     const cullToo = ref(false)
+    const at = ref<string>()
+    const files = ref<FileList>()
 
+    const isShowing = reactive({
+      at: false,
+      attachments: false,
+    })
+    const atRef = ref<HTMLInputElement>()
+    const attachmentsRef = ref<HTMLInputElement>()
+    function handleShowAt() {
+      isShowing.at = true
+      window.setTimeout(() => atRef.value?.focus?.())
+    }
+    function handleShowAttachments() {
+      isShowing.attachments = true
+      window.setTimeout(() => attachmentsRef.value?.click?.())
+    }
+
+    const formRef = ref<HTMLFormElement>()
     const isValid = computed(() => {
       const requireds = plantIds.value.length && eventId.value
       const conditionals = (() => {
@@ -316,7 +358,6 @@ export default defineComponent({
       })()
       return Boolean(requireds && conditionals)
     })
-
     function handleReset() {
       plantIds.value = []
       eventId.value = undefined
@@ -330,7 +371,6 @@ export default defineComponent({
       files.value = undefined
       formRef.value?.reset()
     }
-
     const toast = inject<Function>('toast')
     const [runAsync, isLoading] = useAsyncWrapper()
     async function handleSubmit() {
@@ -379,11 +419,9 @@ export default defineComponent({
       plants,
       plantIds,
       eventId,
-      at,
       note,
+      at,
       files,
-      formRef,
-
       events,
       featuredEvents: events.filter(({ featured }) => featured),
       beds,
@@ -396,6 +434,13 @@ export default defineComponent({
       weightSplit,
       cullToo,
 
+      isShowing,
+      atRef,
+      attachmentsRef,
+      handleShowAt,
+      handleShowAttachments,
+
+      formRef,
       isValid,
       isLoading,
 
