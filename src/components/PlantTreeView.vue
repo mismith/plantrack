@@ -10,17 +10,12 @@
       <div class="TreeNodeName">
         <template v-if="node.type === 'entry'">
           <span>{{entryToString(node, { beds, plants })}}</span>
-          <a
+          <AttachmentLink
             v-for="attachment in node.attachments"
             :key="attachment.id"
-            href="#"
-            target="_blank"
-            :title="attachment.name"
-            class="btn-octicon"
-            @click.stop="handleAttachmentClick($event, attachment)"
-          >
-            <Octicon name="image" />
-          </a>
+            :attachment="attachment"
+            class="btn-octicon px-2"
+          />
         </template>
         <template v-else>
           <div class="d-flex flex-column">
@@ -88,12 +83,13 @@
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue'
 
-import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops, Attachment } from '../services/data'
-import { database, getUserRefPath, storage } from '../services/firebase'
+import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops } from '../services/data'
+import { database, getUserRefPath } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
 import { Booleanable, ITreeNode, set, tools, walkDescendents } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
+import AttachmentLink from './AttachmentLink.vue'
 import Octicon from './Octicon.vue'
 import Blip from './Blip.vue'
 
@@ -108,6 +104,7 @@ export default defineComponent({
   name: 'PlantTreeView',
   components: {
     TreeView,
+    AttachmentLink,
     Octicon,
     Blip,
   },
@@ -204,14 +201,6 @@ export default defineComponent({
         })
       }
     }
-    async function handleAttachmentClick(event: any, attachment: Attachment) {
-      runAsync(async () => {
-        event.preventDefault()
-        const ref = storage.ref(getUserRefPath(`/attachments/${attachment.id}`))
-        const href = await ref.getDownloadURL()
-        window.open(href, event.target.target || '_blank')
-      })
-    }
     function handleChange(changes: Record<string, any>) {
       Object.assign(treeState, changes)
 
@@ -251,7 +240,6 @@ export default defineComponent({
       isEditingPlant: inject('isEditingPlant'),
       handleRemoveEntry,
       handleRemoveNode,
-      handleAttachmentClick,
       handleChange,
     }
   },
