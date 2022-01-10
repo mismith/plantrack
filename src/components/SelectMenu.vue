@@ -8,19 +8,17 @@
       @toggle="handleToggle"
     >
       <slot name="summary">
-        <summary aria-haspopup="true" style="cursor: inherit;">
-          <div class="form-control form-select width-full flex-auto mr-0">
-            <template v-if="value">
-              <slot name="value">
-                {{value}}
-              </slot>
-            </template>
-            <template v-else>
-              <slot name="placeholder">
-                <span class="color-fg-subtle">{{placeholder}}</span>
-              </slot>
-            </template>
-          </div>
+        <summary aria-haspopup="true" class="form-control form-select width-full flex-auto mr-0" style="cursor: inherit;">
+          <template v-if="value">
+            <slot name="value">
+              {{value}}
+            </slot>
+          </template>
+          <template v-else>
+            <slot name="placeholder">
+              <span class="color-fg-subtle">{{placeholder}}</span>
+            </slot>
+          </template>
         </summary>
       </slot>
       <div class="SelectMenu position-fixed">
