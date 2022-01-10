@@ -16,6 +16,7 @@
             </button>
           </template>
           <TreeView
+            v-if="crops?.length"
             :nodes="nodes"
             v-bind="treeView.bind"
             v-on="treeView.on"

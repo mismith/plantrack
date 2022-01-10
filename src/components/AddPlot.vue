@@ -7,7 +7,7 @@
         </header>
         <input type="text" v-model="name" required class="form-control width-full" />
       </fieldset>
-      <fieldset class="form-group">
+      <fieldset v-if="plots?.length" class="form-group">
         <header class="form-group-header">
           <label>Parent Plot</label>
         </header>

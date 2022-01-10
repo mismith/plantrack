@@ -15,7 +15,11 @@
               <Octicon name="plus-circle" />
             </button>
           </template>
-          <PlantTreeView v-if="!isLoading" v-model="plantIds" multiple />
+          <PlantTreeView
+            v-if="!isLoading && plants?.length"
+            v-model="plantIds"
+            multiple
+          />
         </TreeViewSelectMenu>
       </fieldset>
 
@@ -66,6 +70,7 @@
               </button>
             </template>
             <PlantTreeView
+              v-if="beds?.length"
               v-model="newBedIds"
               :filter="node => node.type !== 'entry' && node.id !== 'system'"
             />

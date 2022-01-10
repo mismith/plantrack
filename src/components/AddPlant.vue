@@ -35,6 +35,7 @@
             </button>
           </template>
           <PlantTreeView
+            v-if="beds?.length"
             v-model="bedIds"
             :filter="node => node.type !== 'entry' && node.id !== 'system'"
           />

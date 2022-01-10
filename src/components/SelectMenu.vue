@@ -23,7 +23,13 @@
       </slot>
       <div class="SelectMenu position-fixed">
         <div class="SelectMenu-modal width-full overflow-auto">
-          <slot />
+          <slot>
+            <div class="SelectMenu-list">
+              <button type="button" disabled class="SelectMenu-item">
+                <Octicon name="circle-slash" class="SelectMenu-icon" /> No items
+              </button>
+            </div>
+          </slot>
         </div>
       </div>
     </details>
@@ -88,3 +94,11 @@ export default defineComponent({
   }
 })
 </script>
+
+<style lang="scss">
+.SelectMenu {
+  .SelectMenu-modal {
+    font-size: 1rem;
+  }
+}
+</style>

@@ -18,7 +18,7 @@
         class="mr-1"
       />
     </template>
-    <div class="SelectMenu-list">
+    <div v-if="tags.length" class="SelectMenu-list">
       <button
         v-for="tag in tags"
         :key="tag.id"

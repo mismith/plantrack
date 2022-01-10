@@ -58,11 +58,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss">
-.TreeViewSelectMenu {
-  .SelectMenu-modal {
-    font-size: 1rem;
-  }
-}
-</style>

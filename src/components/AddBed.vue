@@ -22,6 +22,7 @@
             </button>
           </template>
           <PlantTreeView
+            v-if="plots?.length"
             v-model="plotIds"
             :filter="node => node.type !== 'entry' && node.id !== 'system'"
             selectable-type="plot"
