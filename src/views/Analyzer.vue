@@ -22,8 +22,8 @@
           >
             <template #node-name="{ node }">
               <div class="TreeNodeName">
-                {{node.nickname || node.id}}
-                <small v-if="node.name">({{node.name}})</small>
+                {{node.nickname || node.name || node.id}}
+                <small v-if="node.name && node.nickname">({{node.name}})</small>
               </div>
             </template>
             <template #node-append="{ node }">
@@ -164,9 +164,9 @@ export default defineComponent({
       }))
 
       if (importInputRef.value) {
-        importInputRef.value.value = ""
+        importInputRef.value.value = ''
       }
-      window.alert(`Imported ${imported.length} crops successfully`)
+      toast?.(`Imported ${imported.length} crops successfully`, 'success')
     }
 
     return {
