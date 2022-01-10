@@ -42,6 +42,7 @@ export interface Crop extends Entity {
   numSeeds?: number
 }
 export interface Entry extends Entity {
+  batchId?: string
   eventId: string
   at: Timestamp
   payload?: Record<string, any>

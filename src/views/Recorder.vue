@@ -204,12 +204,11 @@ function round(number: number, numDecimals: number = 2) {
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-async function uploadAttachment(file: File): Promise<Attachment> {
+async function uploadAttachment(file: File, id: string = database.ref().push().key!): Promise<Attachment> {
   if (file.size > MAX_FILE_SIZE) {
     throw new Error(`Attachment must be under 10MB (${file.name})`)
   }
   // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
-  const id = database.ref().push().key!
   const ref = storage.ref(getUserRefPath(`/attachments/${id}`))
   await ref.put(file)
 
@@ -224,6 +223,7 @@ async function uploadAttachment(file: File): Promise<Attachment> {
 }
 
 async function addPlantEntry({
+  batchId,
   plantId,
   eventId,
   newBedId,
@@ -235,6 +235,7 @@ async function addPlantEntry({
   attachments,
   tagIds,
 }: {
+  batchId?: string,
   plantId: string,
   eventId?: string,
   newBedId?: string,
@@ -273,7 +274,7 @@ async function addPlantEntry({
     }
     case 'splice': {
       const { oldBedId } = await transplant()
-      const newPlantId = database.ref().push().key
+      const newPlantId = database.ref().push().key!
       payload = {
         oldBedId,
         newBedId,
@@ -305,6 +306,7 @@ async function addPlantEntry({
   }
 
   const newEntry: NewEntity<Entry> = {
+    batchId: batchId || null,
     eventId,
     at: at ? new Date(at).valueOf() : ServerValue.TIMESTAMP,
     payload: payload || null,
@@ -433,9 +435,11 @@ export default defineComponent({
           )
           : undefined
 
-        const attachments = await Promise.all(Array.from(files.value || []).map(uploadAttachment))
+        const batchId = plantIds.value.length > 1 ? database.ref().push().key! : undefined
+        const attachments = await Promise.all(Array.from(files.value || []).map((file) => uploadAttachment(file, batchId)))
         await Promise.all(plantIds.value.map(async (plantId) => {
           const params = {
+            batchId,
             plantId,
             eventId: eventId.value,
             newBedId: newBedIds.value?.[0],
