@@ -19,7 +19,7 @@
         >
           <PlantTreeView
             v-model="parentPlotIds"
-            :filter="node => node.type !== 'entry'"
+            :filter="node => node.type !== 'entry' && node.id !== 'system'"
             selectable-type="plot"
           />
         </TreeViewSelectMenu>

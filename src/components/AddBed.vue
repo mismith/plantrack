@@ -23,7 +23,7 @@
           </template>
           <PlantTreeView
             v-model="plotIds"
-            :filter="node => node.type !== 'entry'"
+            :filter="node => node.type !== 'entry' && node.id !== 'system'"
             selectable-type="plot"
           />
         </TreeViewSelectMenu>

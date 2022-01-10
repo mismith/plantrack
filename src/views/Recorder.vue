@@ -67,7 +67,7 @@
             </template>
             <PlantTreeView
               v-model="newBedIds"
-              :filter="node => node.type !== 'entry'"
+              :filter="node => node.type !== 'entry' && node.id !== 'system'"
             />
           </TreeViewSelectMenu>
         </fieldset>
