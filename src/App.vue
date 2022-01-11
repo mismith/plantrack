@@ -211,7 +211,6 @@ export default defineComponent({
     fill: currentColor;
   }
 }
-
 .form-group {
   textarea.form-control {
     min-height: 64px;
@@ -409,6 +408,7 @@ select.form-control {
     display: flex;
     align-items: center;
     flex: auto;
+    min-width: 128px;
     gap: 4px;
   }
   .TreeNodeActions {
