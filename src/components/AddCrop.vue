@@ -12,7 +12,7 @@
         <header class="form-group-header">
           <label>Name</label>
         </header>
-        <input type="text" v-model="nickname" class="form-control width-full" />
+        <input type="text" v-model="nickname" :placeholder="name" class="form-control width-full" />
       </fieldset>
     </div>
 
