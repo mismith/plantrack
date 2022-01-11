@@ -2,9 +2,10 @@
   <SelectMenu
     v-bind="{ ...$attrs, ...$props, value: valueChunks.length }"
     :modelValue="modelValue"
-    @update:modelValue="handleChange"
-    @clear="handleClear"
     class="TreeViewSelectMenu" 
+    @update:modelValue="handleChange"
+    @create="handleCreate"
+    @clear="handleClear"
   >
     <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
       <slot :name="slot" v-bind="scope" />
@@ -25,6 +26,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, toRefs } from 'vue'
+
 import SelectMenu from './SelectMenu.vue'
 
 export default defineComponent({
@@ -46,6 +48,9 @@ export default defineComponent({
     function handleChange(v: any) {
       emit('update:modelValue', v)
     }
+    function handleCreate() {
+      emit('create')
+    }
     function handleClear() {
       emit('clear')
     }
@@ -53,6 +58,7 @@ export default defineComponent({
     return {
       valueChunks,
       handleChange,
+      handleCreate,
       handleClear,
     }
   }

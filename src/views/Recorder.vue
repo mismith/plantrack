@@ -7,14 +7,12 @@
         </header>
         <TreeViewSelectMenu
           :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
+          createable
+          createable-type="plant"
           :clearable="Boolean(plantIds.length)"
+          @create="isAddingPlant = true"
           @clear="plantIds = []"
         >
-          <template #prepend>
-            <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingPlant = !isAddingPlant">
-              <Octicon name="plus-circle" />
-            </button>
-          </template>
           <PlantTreeView
             v-if="!isLoading && plants?.length"
             v-model="plantIds"
@@ -63,12 +61,10 @@
           <TreeViewSelectMenu
             v-model="isNewBedIdsSelectOpen"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
+            createable
+            createable-type="bed"
+            @create="isAddingBed = true"
           >
-            <template #prepend>
-              <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingBed = !isAddingBed">
-                <Octicon name="plus-circle" />
-              </button>
-            </template>
             <PlantTreeView
               v-if="beds?.length"
               v-model="newBedIds"

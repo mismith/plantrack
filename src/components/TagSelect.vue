@@ -1,15 +1,13 @@
 <template>
   <SelectMenu
     :value="modelValue.length"
+    createable
+    createable-type="tag"
     clearable
     class="TagSelect"
+    @create="isAddingTag = true"
     @clear="handleClear"
   >
-    <template #prepend>
-      <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingTag = !isAddingTag">
-        <Octicon name="plus-circle" />
-      </button>
-    </template>
     <template #value>
       <Tag
         v-for="tagId in modelValue"

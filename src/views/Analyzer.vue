@@ -7,14 +7,12 @@
         </header>
         <TreeViewSelectMenu
           :value="cropIds.length > 1 ? `${cropIds.length} crops selected` : cropIds.map((cropId) => crops.find(({ id }) => id === cropId)?.nickname).filter(Boolean)"
+          createable
+          createable-type="crop"
           :clearable="Boolean(cropIds.length)"
+          @create="isAddingCrop = true"
           @clear="cropIds = []"
         >
-          <template #prepend>
-            <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingCrop = !isAddingCrop">
-              <Octicon name="plus-circle" />
-            </button>
-          </template>
           <TreeView
             v-if="crops?.length"
             :nodes="nodes"

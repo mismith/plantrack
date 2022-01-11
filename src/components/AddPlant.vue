@@ -6,7 +6,7 @@
           <label>Crop</label>
         </header>
         <div class="d-flex">
-          <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingCrop = !isAddingCrop">
+          <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingCrop = true">
             <Octicon name="plus-circle" />
           </button>
           <select v-model="cropId" required class="form-control form-select width-full mr-0">
@@ -28,12 +28,10 @@
         <TreeViewSelectMenu
           v-model="isBedIdsSelectOpen"
           :value="beds?.find(({ id }) => id === bedIds?.[0])?.name || ''"
+          createable
+          createable-type="bed"
+          @create="isAddingBed = true"
         >
-          <template #prepend>
-            <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingBed = !isAddingBed">
-              <Octicon name="plus-circle" />
-            </button>
-          </template>
           <PlantTreeView
             v-if="beds?.length"
             v-model="bedIds"

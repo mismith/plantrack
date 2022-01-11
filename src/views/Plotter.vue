@@ -126,9 +126,9 @@
 
     <footer>
       <nav class="PlotterActions">
-        <button @click="isAddingPlot = !isAddingPlot">Add Plot</button>
-        <button @click="isAddingBed = !isAddingBed">Add Bed</button>
-        <button @click="isAddingCrop = !isAddingCrop">Add Crop</button>
+        <button @click="isAddingPlot = true">Add Plot</button>
+        <button @click="isAddingBed = true">Add Bed</button>
+        <button @click="isAddingCrop = true">Add Crop</button>
         <!-- <button>Open</button> -->
       </nav>
     </footer>

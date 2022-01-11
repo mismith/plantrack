@@ -15,12 +15,10 @@
         <TreeViewSelectMenu
           v-model="isPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === plotIds?.[0])?.name || ''"
+          createable
+          createable-type="plot"
+          @create="isAddingPlot = true"
         >
-          <template #prepend>
-            <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingPlot = !isAddingPlot">
-              <Octicon name="plus-circle" />
-            </button>
-          </template>
           <PlantTreeView
             v-if="plots?.length"
             v-model="plotIds"

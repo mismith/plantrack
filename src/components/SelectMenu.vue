@@ -1,6 +1,11 @@
 <template>
   <div class="SelectMenuContainer d-flex width-full position-relative">
     <slot name="prepend" />
+    <slot v-if="createable" name="createable">
+      <button type="button" :title="`New ${createableType}`" class="btn-octicon ml-0 mr-1" @click="handleCreate">
+        <Octicon name="plus-circle" />
+      </button>
+    </slot>
     <details
       v-bind="$attrs"
       ref="detailsRef"
@@ -25,9 +30,16 @@
         <div class="SelectMenu-modal width-full overflow-auto">
           <slot>
             <div class="SelectMenu-list">
-              <button type="button" disabled class="SelectMenu-item">
-                <Octicon name="circle-slash" class="SelectMenu-icon" /> No items
-              </button>
+              <slot name="empty">
+                <div class="SelectMenu-blankslate">
+                  <Octicon name="circle-slash" :size="24" class="mt-n1" />
+                  <h4 class="mt-3">No {{createableType}}s yet</h4>
+                  <button v-if="createable" type="button" class="btn btn-sm btn-primary d-inline-flex flex-items-center mt-3" @click="handleCreate">
+                    <Octicon name="plus-circle" class="mr-2" />
+                    New {{createableType}}
+                  </button>
+                </div>
+              </slot>
             </div>
           </slot>
         </div>
@@ -62,6 +74,14 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    createable: {
+      type: Boolean,
+      default: false,
+    },
+    createableType: {
+      type: String,
+      default: 'item',
+    },
     clearable: {
       type: Boolean,
       default: false,
@@ -82,6 +102,9 @@ export default defineComponent({
       emit('update:modelValue', detailsRef.value?.open)
     }
 
+    function handleCreate() {
+      emit('create')
+    }
     function handleClear() {
       emit('clear')
     }
@@ -89,6 +112,7 @@ export default defineComponent({
     return {
       detailsRef,
       handleToggle,
+      handleCreate,
       handleClear,
     }
   }
