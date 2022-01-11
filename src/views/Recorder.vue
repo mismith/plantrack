@@ -58,7 +58,7 @@
       <TransitionExpand>
         <fieldset v-if="eventId === 'transplant' || eventId === 'splice'" class="form-group required">
           <header class="form-group-header">
-            <label>Where To</label>
+            <label>New Bed</label>
           </header>
           <TreeViewSelectMenu
             v-model="isNewBedIdsSelectOpen"
