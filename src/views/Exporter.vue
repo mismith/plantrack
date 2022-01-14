@@ -11,66 +11,23 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 
-import { Bed, Crop, Plant, Plot } from '../services/data'
-import { downloadCSVRowsAsFile } from '../services/exporter'
-import { database, getUserRefPath, useRtdbObject } from '../services/firebase'
+import { downloadCSVRowsAsFile, useExportableData } from '../services/exporter'
 
 export default defineComponent({
   name: 'Exporter',
   setup() {
-    const plots = useRtdbObject<Record<string, Plot>>(database.ref(getUserRefPath('/plots')))
-    const beds = useRtdbObject<Record<string, Bed>>(database.ref(getUserRefPath('/beds')))
-    const crops = useRtdbObject<Record<string, Crop>>(database.ref(getUserRefPath('/crops')))
-    const plants = useRtdbObject<Record<string, Plant>>(database.ref(getUserRefPath('/plants')))
+    const { entries, flatEntries } = useExportableData()
 
-    const bedsWithPlot = computed(() => Object.entries(beds.value || {}).reduce((acc, [bedId, bed]) => {
-      acc[bedId] = {
-        $plot: plots.value?.[bed.plotId],
-        ...bed,
-      }
-      return acc
-    }, {} as Record<string, any>))
-    const plantsWithBedAndCrop = computed(() => Object.entries(plants.value || {}).reduce((acc, [plantId, plant]) => {
-      acc[plantId] = {
-        $bed: bedsWithPlot.value?.[plant.bedId],
-        $crop: crops.value?.[plant.cropId],
-        ...plant,
-      }
-      return acc
-    }, {} as Record<string, any>))
-    const entries = computed(() => Object.entries(plantsWithBedAndCrop.value || {}).flatMap(([plantId, { entries, ...plant }]) => Object.entries(entries || {}).map(([entryId, entry]) => ({
-      $plant: plant,
-      plantId,
-      ...(entry as any),
-      id: entryId,
-    }))))
-
-    const flatEntries = computed(() => entries.value?.map(entry => [
-      entry.$plant?.$bed?.$plot?.name || entry.$plant?.$bed?.plotId,
-      entry.$plant?.$bed?.name || entry.$plant?.bedId,
-      entry.$plant?.$crop?.name || entry.$plant?.cropId,
-      entry.$plant?.$crop?.nickname,
-      entry.$plant?.name,
-      entry.eventId,
-      entry.at && new Date(entry.at).toISOString(),
-      entry.createdAt && new Date(entry.createdAt).toISOString(),
-      entry.payload?.weight?.value,
-      entry.payload?.weight?.unit,
-      entry.id,
-    ]))
-    // const csv = computed(() => transformDataToCSVRows(data.value || {}))
+    async function handleDownload() {
+      await downloadCSVRowsAsFile(flatEntries.value)
+    }
 
     return {
-      plants,
-      bedsWithPlot,
-      plantsWithBedAndCrop,
       entries,
       flatEntries,
-      async handleDownload() {
-        await downloadCSVRowsAsFile(flatEntries.value)
-      },
+      handleDownload,
     }
   },
 })

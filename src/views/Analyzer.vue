@@ -59,6 +59,13 @@
         </header>
         <input ref="importInputRef" type="file" accept="text/csv" class="form-control width-full" @change="handleImport" />
       </fieldset>
+
+      <fieldset class="form-group">
+        <header class="form-group-header">
+          <label>Export Entries</label>
+        </header>
+        <Button @click="handleExport">Download CSV</Button>
+      </fieldset>
     </form>
   </div>
 </template>
@@ -69,6 +76,8 @@ import set from 'lodash.set'
 
 import { useCrops, useTreeViewProps } from '../services/data'
 import { database, getUserRefPath, toKeyFieldArray } from '../services/firebase'
+import { useAsyncWrapper } from '../services/errors'
+import { downloadCSVRowsAsFile, useExportableData } from '../services/exporter'
 
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 import TreeViewSelectMenu from '../components/TreeViewSelectMenu.vue'
@@ -76,7 +85,7 @@ import TreeView from '../components/TreeView/TreeView.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
 import { ITreeNode } from '../components/TreeView'
 import Octicon from '../components/Octicon.vue'
-import { useAsyncWrapper } from '../services/errors'
+import Button from '../components/Button.vue'
 
 export default defineComponent({
   name: 'Analyzer',
@@ -86,6 +95,7 @@ export default defineComponent({
     TreeView,
     CropStatsCard,
     Octicon,
+    Button,
   },
   setup() {
     const crops = useCrops()
@@ -168,6 +178,12 @@ export default defineComponent({
       toast?.(`Imported ${imported.length} crops successfully`, 'success')
     }
 
+
+    const { flatEntries } = useExportableData()
+    async function handleExport() {
+      await downloadCSVRowsAsFile(flatEntries.value)
+    }
+
     return {
       isAddingCrop: inject('isAddingCrop'),
       isEditingCrop: inject('isEditingCrop'),
@@ -180,6 +196,8 @@ export default defineComponent({
 
       importInputRef,
       handleImport,
+
+      handleExport,
     }
   },
 })
