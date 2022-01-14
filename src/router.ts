@@ -1,3 +1,4 @@
+import { h } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import Plotter from './views/Plotter.vue'
@@ -39,6 +40,12 @@ export const routes = [
   {
     path: '/exporter',
     component: Exporter,
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: {
+      render: () => h('h1', { class: 'd-flex', innerHTML: '<h1 class="m-auto">Not Found</h1>' }),
+    },
   },
 ]
 
