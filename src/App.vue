@@ -44,7 +44,21 @@
   </nav>
 
   <router-view v-if="user" class="flex-auto" />
-  <Auth v-else />
+  <div v-else class="Box d-flex flex-column m-auto">
+    <div class="Box-header d-flex flex-column flex-items-center text-center pt-3 px-6 pb-6">
+      <Logo class="logo" style="max-width: 200px; height: auto;" />
+      <div class="m-3">
+        <Octicon name="workflow" :size="24" />
+        <span class="AnimatedEllipsis m-2" style="vertical-align: middle;" />
+        <Octicon name="repo" :size="24" />
+        <span class="AnimatedEllipsis m-2" style="vertical-align: middle;" />
+        <Octicon name="graph" :size="24" />
+      </div>
+      <h3>Plan your garden. <br />Record your data. <br />Track your results.</h3>
+    </div>
+
+    <Auth />
+  </div>
 
   <Dialog :model-value="Boolean(isEditingPlant)" @update:model-value="isEditingPlant = undefined">
     <AddPlant :plant="isEditingPlant" @update="isEditingPlant = undefined" />

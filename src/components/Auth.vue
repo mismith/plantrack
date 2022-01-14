@@ -1,6 +1,6 @@
 <template>
-  <form class="Auth Box m-auto" @submit.prevent="handleSignInWithEmailLink">
-    <div class="Box-row d-flex flex-column" style="gap: 8px;">
+  <form class="Auth" @submit.prevent="handleSignInWithEmailLink">
+    <div class="Box-row d-flex flex-column" style="gap: 8px; border-top-left-radius: 0; border-top-right-radius: 0;">
       <input type="email" name="email" v-model="email" required placeholder="Email" aria-label="Email" class="form-control" />
       <Button type="submit" :loading="isLoading === 'email'" :disabled="!isValid" class="btn-primary btn-block">
         Sign in with email link
