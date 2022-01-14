@@ -1,5 +1,5 @@
 <template>
-  <div class="Analyzer">
+  <div class="Analyzer width-full mx-auto" style="max-width: 600px;">
     <form @submit.prevent class="p-3">
       <fieldset class="form-group">
         <header class="form-group-header">
