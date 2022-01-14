@@ -10,27 +10,31 @@ import Exporter from './views/Exporter.vue'
 export const routes = [
   {
     path: '/',
-    redirect: '/recorder',
+    redirect: '/record',
   },
   {
-    path: '/plotter',
+    path: '/plot',
     component: Plotter,
     meta: {
-      // title: 'Plotter',
+      // title: 'Plot',
     },
   },
   {
-    path: '/recorder',
+    path: '/recorder', // @DEPRECATED
+    redirect: '/record',
+  },
+  {
+    path: '/record',
     component: Recorder,
     meta: {
-      title: 'Recorder',
+      title: 'Record',
     },
   },
   {
-    path: '/analyzer',
+    path: '/track',
     component: Analyzer,
     meta: {
-      title: 'Analyzer',
+      title: 'Track',
     },
   },
   {
@@ -38,7 +42,7 @@ export const routes = [
     component: OldTracker,
   },
   {
-    path: '/exporter',
+    path: '/export',
     component: Exporter,
   },
   {
