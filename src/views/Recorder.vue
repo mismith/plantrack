@@ -10,7 +10,7 @@
           createable
           createable-type="plant"
           :clearable="Boolean(plantIds.length)"
-          @create="isAddingPlant = true"
+          @create="isAddingPlant = (newPlant) => plantIds.push(newPlant.id)"
           @clear="plantIds = []"
         >
           <PlantTreeView
@@ -63,7 +63,7 @@
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
             createable
             createable-type="bed"
-            @create="isAddingBed = true"
+            @create="isAddingBed = (newBed) => { newBedIds = [newBed.id]; isAddingBed = false; }"
           >
             <PlantTreeView
               v-if="beds?.length"

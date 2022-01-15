@@ -95,8 +95,8 @@ export default defineComponent({
             parentPlotId: parentPlotIds.value?.[0] || null,
             createdAt: ServerValue.TIMESTAMP,
           }
-          await database.ref(getUserRefPath('/plots')).push(newPlot)
-          emit('create', newPlot)
+          const plotId = (await database.ref(getUserRefPath('/plots')).push(newPlot)).key
+          emit('create', { [keyField]: plotId, ...newPlot })
           toast?.('Plot added successfully', 'success')
         }
       })

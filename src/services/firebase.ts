@@ -53,7 +53,7 @@ export function toKeyFieldArray<T extends object>(obj: Record<string, T>, theKey
   }))
 }
 export function useRtdbArray<T extends object>(reference: firebase.database.Reference) {
-  const arr = ref<T[]>()
+  const arr = ref<T[]>([])
   const handler = (snapshot: firebase.database.DataSnapshot) => {
     arr.value = toKeyFieldArray(snapshot.val())
   }

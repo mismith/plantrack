@@ -5,7 +5,7 @@
     createable-type="tag"
     clearable
     class="TagSelect"
-    @create="isAddingTag = true"
+    @create="handleCreate"
     @clear="handleClear"
   >
     <template #value>
@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, PropType } from 'vue'
+import { defineComponent, inject, PropType, Ref, toRefs } from 'vue'
 
 import { Tag as ITag, useTags } from '../services/data'
 import { useAsyncWrapper } from '../services/errors'
@@ -70,10 +70,18 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
+    const { modelValue } = toRefs(props)
     const tags = useTags()
 
+    const isAddingTag = inject<Ref>('isAddingTag')!
     function handleChange(newValue: string[]) {
       emit('update:modelValue', newValue)
+    }
+    function handleCreate() {
+      isAddingTag.value = (newTag: ITag) => {
+        handleChange(modelValue.value.concat(newTag.id))
+        isAddingTag.value = false
+      }
     }
     function handleClear(...args: any) {
       emit('clear', ...args)
@@ -91,11 +99,12 @@ export default defineComponent({
     }
 
     return {
-      isAddingTag: inject('isAddingTag'),
+      isAddingTag,
       isEditingTag: inject('isEditingTag'),
 
       tags,
       handleChange,
+      handleCreate,
       handleClear,
       handleRemoveTag,
     }

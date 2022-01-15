@@ -92,8 +92,8 @@ export default defineComponent({
             color: color.value || null,
             createdAt: ServerValue.TIMESTAMP,
           }
-          database.ref(getUserRefPath('/tags')).push(newTag)
-          emit('create', newTag)
+          const tagId = (await database.ref(getUserRefPath('/tags')).push(newTag)).key
+          emit('create', { [keyField]: tagId, ...newTag })
           toast?.('Tag added successfully', 'success')
         }
       })

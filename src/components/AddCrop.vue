@@ -73,8 +73,8 @@ export default defineComponent({
             nickname: nickname.value || null,
             createdAt: ServerValue.TIMESTAMP,
           }
-          database.ref(getUserRefPath('/crops')).push(newCrop)
-          emit('create', newCrop)
+          const cropId = (await database.ref(getUserRefPath('/crops')).push(newCrop)).key
+          emit('create', { [keyField]: cropId, ...newCrop })
           toast?.('Crop added successfully', 'success')
         }
       })

@@ -6,7 +6,7 @@
           <label>Crop</label>
         </header>
         <div class="d-flex">
-          <button type="button" class="btn-octicon ml-0 mr-1" @click="isAddingCrop = true">
+          <button type="button" class="btn-octicon ml-0 mr-1" @click="handleCropCreate">
             <Octicon name="plus-circle" />
           </button>
           <select v-model="cropId" required class="form-control form-select width-full mr-0">
@@ -15,7 +15,7 @@
               :key="crop.id"
               :value="crop.id"
             >
-              {{crop.name}}: {{crop.nickname}}
+              {{crop.name}}<template v-if="crop.nickname">: {{crop.nickname}}</template>
             </option>
           </select>
         </div>
@@ -30,7 +30,7 @@
           :value="beds?.find(({ id }) => id === bedIds?.[0])?.name || ''"
           createable
           createable-type="bed"
-          @create="isAddingBed = true"
+          @create="handleBedCreate"
         >
           <PlantTreeView
             v-if="beds?.length"
@@ -57,9 +57,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, ref, toRefs, watch } from 'vue'
+import { computed, defineComponent, inject, PropType, Ref, ref, toRefs, watch } from 'vue'
 
-import { getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree } from '../services/data'
+import { Bed, Crop, getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
@@ -87,8 +87,17 @@ export default defineComponent({
     const isEditing = computed(() => Boolean(plant.value))
 
     const { nodes, beds, plants } = usePlantDataTree()
+
     const crops = useCrops()
     const cropId = ref(plant.value?.cropId || crops.value?.[0]?.id)
+    const isAddingCrop = inject<Ref>('isAddingCrop')!
+    function handleCropCreate() {
+      isAddingCrop.value = (newCrop: Crop) => {
+        cropId.value = newCrop.id
+        isAddingCrop.value = false
+      }
+    }
+
     const bedIds = ref([plant.value?.bedId || beds.value?.[0]?.id].filter(Boolean))
     const name = ref(plant.value?.name)
     const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
@@ -100,6 +109,13 @@ export default defineComponent({
         isBedIdsSelectOpen.value = false
       }
     })
+    const isAddingBed = inject<Ref>('isAddingBed')!
+    function handleBedCreate() {
+      isAddingBed.value = (newBed: Bed) => {
+        bedIds.value = [newBed.id]
+        isAddingBed.value = false
+      }
+    }
 
     const toast = inject<Function>('toast')
     const [runAsync, isLoading] = useAsyncWrapper()
@@ -124,8 +140,8 @@ export default defineComponent({
             bedId: bedIds.value[0]!,
             createdAt: ServerValue.TIMESTAMP,
           }
-          database.ref(getUserRefPath('/plants')).push(newPlant)
-          emit('create', newPlant)
+          const plantId = (await database.ref(getUserRefPath('/plants')).push(newPlant)).key
+          emit('create', { [keyField]: plantId, ...newPlant })
           toast?.('Plant added successfully', 'success')
         }
       })
@@ -138,13 +154,17 @@ export default defineComponent({
 
     return {
       nodes,
-      beds,
-      isBedIdsSelectOpen,
 
-      isAddingCrop: inject('isAddingCrop'),
-      isAddingBed: inject('isAddingBed'),
       crops,
       cropId,
+      isAddingCrop,
+      handleCropCreate,
+
+      beds,
+      isBedIdsSelectOpen,
+      isAddingBed,
+      handleBedCreate,
+
       bedIds,
       name,
       placeholder,

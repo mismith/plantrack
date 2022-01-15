@@ -17,7 +17,7 @@
           :value="plots?.find(({ id }) => id === plotIds?.[0])?.name || ''"
           createable
           createable-type="plot"
-          @create="isAddingPlot = true"
+          @create="handlePlotCreate"
         >
           <PlantTreeView
             v-if="plots?.length"
@@ -38,9 +38,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, ref, toRefs, watch } from 'vue'
+import { computed, defineComponent, inject, PropType, Ref, ref, toRefs, watch } from 'vue'
 
-import { Bed, NewEntity, UpdatedEntity, usePlots } from '../services/data'
+import { Bed, NewEntity, Plot, UpdatedEntity, usePlots } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
@@ -78,6 +78,13 @@ export default defineComponent({
         isPlotIdsSelectOpen.value = false
       }
     })
+    const isAddingPlot = inject<Ref>('isAddingPlot')!
+    function handlePlotCreate() {
+      isAddingPlot.value = (newPlot: Plot) => {
+        plotIds.value = [newPlot.id]
+        isAddingPlot.value = false
+      }
+    }
 
     const toast = inject<Function>('toast')
     const [runAsync, isLoading] = useAsyncWrapper()
@@ -100,8 +107,8 @@ export default defineComponent({
             plotId: plotIds.value[0]!,
             createdAt: ServerValue.TIMESTAMP,
           }
-          database.ref(getUserRefPath('/beds')).push(newBed)
-          emit('create', newBed)
+          const bedId = (await database.ref(getUserRefPath('/beds')).push(newBed)).key
+          emit('create', { [keyField]: bedId, ...newBed })
           toast?.('Bed added successfully', 'success')
         }
       })
@@ -112,11 +119,13 @@ export default defineComponent({
     }
 
     return {
-      isAddingPlot: inject('isAddingPlot'),
       name,
+
       plots,
       plotIds,
       isPlotIdsSelectOpen,
+      isAddingPlot,
+      handlePlotCreate,
 
       isEditing,
       isValid,

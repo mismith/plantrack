@@ -75,11 +75,21 @@
   <Dialog :model-value="Boolean(isEditingTag)" @update:model-value="isEditingTag = undefined">
     <AddTag :tag="isEditingTag" @update="isEditingTag = undefined" />
   </Dialog>
-  <Dialog v-model="isAddingPlant"><AddPlant /></Dialog>
-  <Dialog v-model="isAddingCrop"><AddCrop /></Dialog>
-  <Dialog v-model="isAddingBed"><AddBed /></Dialog>
-  <Dialog v-model="isAddingPlot"><AddPlot /></Dialog>
-  <Dialog v-model="isAddingTag"><AddTag /></Dialog>
+  <Dialog :model-value="Boolean(isAddingPlant)" @update:model-value="isAddingPlant = undefined">
+    <AddPlant @create="newPlant => typeof isAddingPlant === 'function' && isAddingPlant(newPlant)" />
+  </Dialog>
+  <Dialog :model-value="Boolean(isAddingCrop)" @update:model-value="isAddingCrop = undefined">
+    <AddCrop @create="newCrop => typeof isAddingCrop === 'function' && isAddingCrop(newCrop)" />
+  </Dialog>
+  <Dialog :model-value="Boolean(isAddingBed)" @update:model-value="isAddingBed = undefined">
+    <AddBed @create="newBed => typeof isAddingBed === 'function' && isAddingBed(newBed)" />
+  </Dialog>
+  <Dialog :model-value="Boolean(isAddingPlot)" @update:model-value="isAddingPlot = undefined">
+    <AddPlot @create="newPlot => typeof isAddingPlot === 'function' && isAddingPlot(newPlot)" />
+  </Dialog>
+  <Dialog :model-value="Boolean(isAddingTag)" @update:model-value="isAddingTag = undefined">
+    <AddTag @create="newTag => typeof isAddingTag === 'function' && isAddingTag(newTag)" />
+  </Dialog>
 
   <Toast v-model="toastState.isOpen" :type="toastState.type">
     {{toastState.message}}
