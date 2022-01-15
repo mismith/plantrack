@@ -22,7 +22,7 @@
             <template #node-name="{ node }">
               <div class="TreeNodeName">
                 {{node.nickname || node.name || node.id}}
-                <small v-if="node.name && node.nickname">({{node.name}})</small>
+                <small v-if="node.name !== node.nickname">({{node.name}})</small>
               </div>
             </template>
             <template #node-append="{ node }">
@@ -110,10 +110,10 @@ export default defineComponent({
     }
     const nodes = computed(() => {
       if (crops.value) {
-        const ordered = [...crops.value].sort((a, b) => a.nickname?.localeCompare(b.nickname || '') || 0)
+        const ordered = [...crops.value].sort((a, b) => (a.nickname || a.name)?.localeCompare(b.nickname || b.name || '') || 0)
         const nested = {}
         ordered.forEach((crop) => {
-          const chunks = (crop.nickname || '').split(/ [-/] /)
+          const chunks = (crop.nickname || crop.name || '').split(/ [-/] /)
           const path = chunks.reduce((acc, chunk, index) => {
             if (index >= 1) acc.push('children')
             acc.push(chunk)
