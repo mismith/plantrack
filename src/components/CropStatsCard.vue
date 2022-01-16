@@ -7,8 +7,7 @@
     <TransitionExpand>
       <TreeView
         v-if="isShowingPlants"
-        v-bind="treeView.bind"
-        v-on="treeView.on"
+        v-bind="treeViewProps"
         :nodes="nodes"
         class="Box mt-1"
         @click.stop
@@ -77,7 +76,13 @@ export default defineComponent({
     }
 
     const nodes = cropPlants
-    const treeView = useTreeViewProps(cropPlantIds, { checkable: true })
+    const treeViewProps = useTreeViewProps(
+      cropPlantIds,
+      (v) => {
+        cropPlantIds.value = v
+      },
+      { checkable: true },
+    )
 
     return {
       cropId,
@@ -91,7 +96,7 @@ export default defineComponent({
 
       filteredCropPlants,
       nodes,
-      treeView,
+      treeViewProps,
     }
   },
 })

@@ -13,39 +13,11 @@
           @create="isAddingCrop = true"
           @clear="cropIds = []"
         >
-          <TreeView
+          <CropTreeView
             v-if="crops?.length"
-            :nodes="nodes"
-            v-bind="treeView.bind"
-            v-on="treeView.on"
-          >
-            <template #node-name="{ node }">
-              <div class="TreeNodeName">
-                {{node.nickname || node.name || node.id}}
-                <small v-if="node.name !== node.nickname">({{node.name}})</small>
-              </div>
-            </template>
-            <template #node-append="{ node }">
-              <div class="TreeNodeActions">
-                <button
-                  v-if="node.name"
-                  type="button"
-                  class="btn-octicon"
-                  @click.stop="isEditingCrop = crops.find(({ id }) => id === node.id)"
-                >
-                  <Octicon name="pencil" />
-                </button>
-                <button
-                  v-if="node.name"
-                  type="button"
-                  class="btn-octicon btn-octicon-danger"
-                  @click.stop="handleRemoveNode(node, $event.shiftKey)"
-                >
-                  <Octicon name="trash" />
-                </button>
-              </div>
-            </template>
-          </TreeView>
+            v-model="cropIds"
+            multiple
+          />
         </SelectMenu>
       </fieldset>
 
@@ -71,28 +43,25 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref } from 'vue'
-import set from 'lodash.set'
+import { defineComponent, inject, ref } from 'vue'
 
-import { useCrops, useTreeViewProps } from '../services/data'
-import { database, getUserRefPath, toKeyFieldArray } from '../services/firebase'
-import { useAsyncWrapper } from '../services/errors'
+import { useCrops } from '../services/data'
+import { database, getUserRefPath } from '../services/firebase'
 import { downloadCSVRowsAsFile, useExportableData } from '../services/exporter'
 
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
-import TreeView from '../components/TreeView/TreeView.vue'
 import SelectMenu from '../components/SelectMenu.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
-import { ITreeNode } from '../components/TreeView'
 import Octicon from '../components/Octicon.vue'
 import Button from '../components/Button.vue'
+import CropTreeView from '../components/CropTreeView.vue'
 
 export default defineComponent({
   name: 'Analyzer',
   components: {
     TransitionExpand,
-    TreeView,
     SelectMenu,
+    CropTreeView,
     CropStatsCard,
     Octicon,
     Button,
@@ -100,43 +69,6 @@ export default defineComponent({
   setup() {
     const crops = useCrops()
     const cropIds = ref([])
-
-    function nestedToNodes(nested: Record<string, ITreeNode>): ITreeNode[] {
-      const nodes = toKeyFieldArray(nested)
-      return nodes.map((node) => ({
-        ...node,
-        children: nestedToNodes(node.children as any),
-      }))
-    }
-    const nodes = computed(() => {
-      if (crops.value) {
-        const ordered = [...crops.value].sort((a, b) => (a.nickname || a.name)?.localeCompare(b.nickname || b.name || '') || 0)
-        const nested = {}
-        ordered.forEach((crop) => {
-          const chunks = (crop.nickname || crop.name || '').split(/ [-/] /)
-          const path = chunks.reduce((acc, chunk, index) => {
-            if (index >= 1) acc.push('children')
-            acc.push(chunk)
-            return acc
-          }, [] as string[])
-          set(nested, path, { ...crop, nickname: chunks[chunks.length - 1] })
-        })
-        return nestedToNodes(nested)
-      }
-      return []
-    })
-    const treeView = useTreeViewProps(cropIds, { checkable: { recurse: true } }, (cropId) => crops.value?.find(({ id }) => id === cropId))
-
-    const toast = inject<Function>('toast')
-    const [runAsync] = useAsyncWrapper()
-    async function handleRemoveNode(node: ITreeNode, skipConfirm = false) {
-      if (skipConfirm || window.confirm('Are you sure?')) {
-        runAsync(async () => {
-          await database.ref(getUserRefPath(`/crops/${node.id}`)).remove()
-          toast?.(`Crop deleted successfully`, 'success')
-        })
-      }
-    }
 
     const importInputRef = ref<HTMLInputElement | null>(null)
     async function handleImport(event: any) {
@@ -189,10 +121,6 @@ export default defineComponent({
       isEditingCrop: inject('isEditingCrop'),
       crops,
       cropIds,
-
-      nodes,
-      treeView,
-      handleRemoveNode,
 
       importInputRef,
       handleImport,

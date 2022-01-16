@@ -244,6 +244,7 @@ export function getSuggestedPlantName(cropId?: string, crops?: Crop[], plants?: 
 
 export function useTreeViewProps(
   ref: Ref,
+  handleChange: (v: any) => any = (v) => (ref.value = v),
   config: { selectable?: Booleanable, checkable?: Booleanable } = { selectable: true },
   predicate: (value: any, index: number, obj: any[]) => unknown = Boolean,
 ) {
@@ -265,23 +266,20 @@ export function useTreeViewProps(
     }
   }, { immediate: true })
 
-  function change(changes: Record<string, any>) {
+  function onChange(changes: Record<string, any>) {
     Object.assign(state, changes)
-
+    
     if (changes.selected) {
-      ref.value = state.selected.find(predicate)
+      handleChange(state.selected.find(predicate))
     }
     if (changes.checked) {
-      ref.value = state.checked.filter(predicate)
+      handleChange(state.checked.filter(predicate))
     }
   }
+
   return {
-    bind: {
-      state,
-      options,
-    },
-    on: {
-      change,
-    },
+    state,
+    options,
+    onChange,
   }
 }
