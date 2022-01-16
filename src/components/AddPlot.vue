@@ -12,16 +12,18 @@
           <label>Parent Plot</label>
         </header>
         <SelectMenu
-          v-model="isParentPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === parentPlotIds?.[0])?.name || ''"
           :clearable="Boolean(parentPlotIds.length)"
           @clear="parentPlotIds = []"
         >
-          <PlantTreeView
-            v-model="parentPlotIds"
-            :filter="node => node.type !== 'entry' && node.id !== 'system'"
-            selectable-type="plot"
-          />
+          <template #default="{ close }">
+            <PlantTreeView
+              v-model="parentPlotIds"
+              :filter="node => node.type !== 'entry' && node.id !== 'system'"
+              selectable-type="plot"
+              @update:model-value="close()"
+            />
+          </template>
         </SelectMenu>
       </fieldset>
     </div>
@@ -67,13 +69,6 @@ export default defineComponent({
     const plots = usePlots()
     const isValid = computed(() => Boolean(name.value))
 
-    const isParentPlotIdsSelectOpen = ref(false)
-    watch(parentPlotIds, (v) => {
-      if (v.length) {
-        isParentPlotIdsSelectOpen.value = false
-      }
-    })
-
     const toast = inject<Function>('toast')
     const [runAsync, isLoading] = useAsyncWrapper()
     async function handleSubmit() {
@@ -109,7 +104,6 @@ export default defineComponent({
     return {
       name,
       parentPlotIds,
-      isParentPlotIdsSelectOpen,
       plots: plots.value?.filter((p) => p[keyField] !== plot.value?.[keyField]),
 
       isEditing,

@@ -59,17 +59,19 @@
             <label>New Bed</label>
           </header>
           <SelectMenu
-            v-model="isNewBedIdsSelectOpen"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
             createable
             createable-type="bed"
             @create="isAddingBed = (newBed) => { newBedIds = [newBed.id]; isAddingBed = false; }"
           >
-            <PlantTreeView
-              v-if="beds?.length"
-              v-model="newBedIds"
-              :filter="node => node.type !== 'entry' && node.id !== 'system'"
-            />
+            <template #default="{ close }">
+              <PlantTreeView
+                v-if="beds?.length"
+                v-model="newBedIds"
+                :filter="node => node.type !== 'entry' && node.id !== 'system'"
+                @update:model-value="close()"
+              />
+            </template>
           </SelectMenu>
         </fieldset>
       </TransitionExpand>
@@ -345,12 +347,6 @@ export default defineComponent({
     const note = ref<string>()
     const beds = useBeds()
     const newBedIds = ref<string[]>([])
-    const isNewBedIdsSelectOpen = ref(false)
-    watch(newBedIds, (v) => {
-      if (v.length) {
-        isNewBedIdsSelectOpen.value = false
-      }
-    })
     const newName = ref<string>()
     const plants = usePlants()
     const crops = useCrops()
@@ -483,7 +479,6 @@ export default defineComponent({
       featuredEvents: events.filter(({ featured }) => featured),
       beds,
       newBedIds,
-      isNewBedIdsSelectOpen,
       newName,
       newNamePlaceholder,
       weight,

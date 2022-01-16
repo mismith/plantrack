@@ -28,7 +28,7 @@
       </slot>
       <div class="SelectMenu position-fixed">
         <div class="SelectMenu-modal width-full overflow-auto">
-          <slot>
+          <slot v-bind="slotProps">
             <div class="SelectMenu-list">
               <slot name="empty">
                 <div class="SelectMenu-blankslate">
@@ -65,9 +65,11 @@ export default defineComponent({
   },
   props: {
     modelValue: {
+      // type: any,
       default: false,
     },
     value: {
+      // type: any,
       required: false,
     },
     placeholder: {
@@ -91,15 +93,33 @@ export default defineComponent({
     const { modelValue } = toRefs(props)
 
     const detailsRef = ref()
-    watch(modelValue, (v) => {
+    function open() {
+      detailsRef.value?.setAttribute('open', true)
+      emit('open')
+    }
+    function close() {
+      detailsRef.value?.removeAttribute('open')
+      emit('close')
+    }
+    function get() {
+      return Boolean(detailsRef.value?.open)
+    }
+    function set(v: any) {
       if (v) {
-        detailsRef.value?.setAttribute('open', true)
+        open()
       } else {
-        detailsRef.value?.removeAttribute('open')
+        close()
       }
+    }
+    watch(modelValue, (v) => {
+      set(v)
     }, { immediate: true })
+    function handleChange(v: any) {
+      set(v)
+      emit('update:modelValue', v)
+    }
     function handleToggle() {
-      emit('update:modelValue', detailsRef.value?.open)
+      handleChange(get())
     }
 
     function handleCreate() {
@@ -109,9 +129,20 @@ export default defineComponent({
       emit('clear')
     }
 
+    const slotProps = {
+      open,
+      close,
+      get,
+      set,
+    }
+
     return {
+      slotProps,
+
       detailsRef,
+      handleChange,
       handleToggle,
+
       handleCreate,
       handleClear,
     }

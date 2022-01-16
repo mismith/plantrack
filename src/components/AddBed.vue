@@ -13,18 +13,20 @@
           <label>Plot</label>
         </header>
         <SelectMenu
-          v-model="isPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === plotIds?.[0])?.name || ''"
           createable
           createable-type="plot"
           @create="handlePlotCreate"
         >
-          <PlantTreeView
-            v-if="plots?.length"
-            v-model="plotIds"
-            :filter="node => node.type !== 'entry' && node.id !== 'system'"
-            selectable-type="plot"
-          />
+          <template #default="{ close }">
+            <PlantTreeView
+              v-if="plots?.length"
+              v-model="plotIds"
+              :filter="node => node.type !== 'entry' && node.id !== 'system'"
+              selectable-type="plot"
+              @update:model-value="close()"
+            />
+          </template>
         </SelectMenu>
       </fieldset>
     </div>
@@ -72,12 +74,6 @@ export default defineComponent({
     const plotIds = ref([bed.value?.plotId || plots.value?.[0]?.id].filter(Boolean))
     const isValid = computed(() => Boolean(name.value && plotIds.value?.[0]))
 
-    const isPlotIdsSelectOpen = ref(false)
-    watch(plotIds, (v) => {
-      if (v.length) {
-        isPlotIdsSelectOpen.value = false
-      }
-    })
     const isAddingPlot = inject<Ref>('isAddingPlot')!
     function handlePlotCreate() {
       isAddingPlot.value = (newPlot: Plot) => {
@@ -123,7 +119,6 @@ export default defineComponent({
 
       plots,
       plotIds,
-      isPlotIdsSelectOpen,
       isAddingPlot,
       handlePlotCreate,
 

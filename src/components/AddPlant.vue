@@ -26,17 +26,19 @@
           <label>Bed</label>
         </header>
         <SelectMenu
-          v-model="isBedIdsSelectOpen"
           :value="beds?.find(({ id }) => id === bedIds?.[0])?.name || ''"
           createable
           createable-type="bed"
           @create="handleBedCreate"
         >
-          <PlantTreeView
-            v-if="beds?.length"
-            v-model="bedIds"
-            :filter="node => node.type !== 'entry' && node.id !== 'system'"
-          />
+          <template #default="{ close }">
+            <PlantTreeView
+              v-if="beds?.length"
+              v-model="bedIds"
+              :filter="node => node.type !== 'entry' && node.id !== 'system'"
+              @update:model-value="close()"
+            />
+          </template>
         </SelectMenu>
       </fieldset>
 
@@ -103,12 +105,6 @@ export default defineComponent({
     const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
     const isValid = computed(() => Boolean(cropId.value && bedIds.value?.[0]))
 
-    const isBedIdsSelectOpen = ref(false)
-    watch(bedIds, (v) => {
-      if (v.length) {
-        isBedIdsSelectOpen.value = false
-      }
-    })
     const isAddingBed = inject<Ref>('isAddingBed')!
     function handleBedCreate() {
       isAddingBed.value = (newBed: Bed) => {
@@ -161,7 +157,6 @@ export default defineComponent({
       handleCropCreate,
 
       beds,
-      isBedIdsSelectOpen,
       isAddingBed,
       handleBedCreate,
 
