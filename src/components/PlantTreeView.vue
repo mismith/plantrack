@@ -83,7 +83,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, PropType, reactive, toRefs, watch } from 'vue'
 
-import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops } from '../services/data'
+import { usePlantDataTree, Entry, events, Plant, entryToString, useCrops, useRestoreKey } from '../services/data'
 import { database, getUserRefPath } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
@@ -125,9 +125,13 @@ export default defineComponent({
       type: String,
       default: 'bed',
     },
+    restoreKey: {
+      type: String,
+      required: false,
+    },
   },
   setup(props, { emit }) {
-    const { modelValue, multiple, filter, selectableType } = toRefs(props)
+    const { modelValue, multiple, filter, selectableType, restoreKey } = toRefs(props)
     const { nodes, plants, beds, plots } = usePlantDataTree({ filter: filter.value })
     const crops = useCrops()
 
@@ -218,6 +222,17 @@ export default defineComponent({
       if (value) {
         emit('update:modelValue', value)
       }
+    }
+
+    if (restoreKey.value) { // @TODO: what if this value changes post-init?
+      const restore = useRestoreKey(restoreKey.value, 'PlantTreeView')
+      const v = restore.load()
+      if (Array.isArray(v)) {
+        treeState.expanded = v
+      }
+      watch(() => treeState.expanded, (v) => {
+        restore.save(v)
+      })
     }
 
     return {

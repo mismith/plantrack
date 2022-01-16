@@ -26,7 +26,11 @@
         </summary>
       </slot>
       <div class="SelectMenu position-fixed">
-        <div class="SelectMenu-modal width-full overflow-auto">
+        <div
+          ref="scrollerRef"
+          class="SelectMenu-modal width-full overflow-auto"
+          @scroll="({ target }) => scrollTop = target.scrollTop"
+        >
           <slot v-bind="slotProps">
             <div class="SelectMenu-list">
               <slot name="empty">
@@ -54,6 +58,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, toRefs, watch } from 'vue'
+import { useRestoreKey } from '../services/data'
 
 import Octicon from './Octicon.vue'
 
@@ -87,21 +92,28 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    restoreKey: {
+      type: String,
+      required: false,
+    },
   },
   setup(props, { emit }) {
-    const { modelValue } = toRefs(props)
+    const { modelValue, restoreKey } = toRefs(props)
 
     const detailsRef = ref()
+    function get() {
+      return Boolean(detailsRef.value?.open)
+    }
+    const isOpen = ref(get())
     function open() {
+      isOpen.value = true
       detailsRef.value?.setAttribute('open', true)
       emit('open')
     }
     function close() {
+      isOpen.value = false
       detailsRef.value?.removeAttribute('open')
       emit('close')
-    }
-    function get() {
-      return Boolean(detailsRef.value?.open)
     }
     function set(v: any) {
       if (v) {
@@ -110,6 +122,13 @@ export default defineComponent({
         close()
       }
     }
+    const slotProps = {
+      open,
+      close,
+      get,
+      set,
+    }
+
     watch(modelValue, (v) => {
       set(v)
     }, { immediate: true })
@@ -128,22 +147,33 @@ export default defineComponent({
       emit('clear')
     }
 
-    const slotProps = {
-      open,
-      close,
-      get,
-      set,
+    const scrollerRef = ref()
+    const scrollTop = ref(0)
+    if (restoreKey.value) { // @TODO: what if this value changes post-init?
+      const restore = useRestoreKey(restoreKey.value, 'SelectMenu')
+      watch(isOpen, (v) => {
+        if (v) {
+          if (scrollerRef.value) {
+            scrollerRef.value.scrollTop = restore.load()
+          }
+        } else {
+          restore.save(scrollTop.value)
+        }
+      })
     }
 
     return {
+      detailsRef,
       slotProps,
 
-      detailsRef,
       handleChange,
       handleToggle,
 
       handleCreate,
       handleClear,
+
+      scrollerRef,
+      scrollTop,
     }
   }
 })

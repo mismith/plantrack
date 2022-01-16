@@ -283,3 +283,19 @@ export function useTreeViewProps(
     onChange,
   }
 }
+
+export function useRestoreKey(key: string, prefix?: string) {
+  return {
+    save(v: any) {
+      window.localStorage.setItem(`plantrack.restoreKey.${prefix}.${key}`, JSON.stringify(v))
+    },
+    load() {
+      try {
+        return JSON.parse(window.localStorage.getItem(`plantrack.restoreKey.${prefix}.${key}`)!)
+      } catch (error) {
+        console.error(error)
+        return undefined
+      }
+    },
+  }
+}

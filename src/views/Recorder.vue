@@ -6,6 +6,7 @@
           <label>Plant(s)</label>
         </header>
         <SelectMenu
+          restore-key="Recorder.plantIds"
           :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
           createable
           createable-type="plant"
@@ -16,6 +17,7 @@
           <PlantTreeView
             v-if="!isLoading && plants?.length"
             v-model="plantIds"
+            restore-key="Recorder.plantIds"
             multiple
           />
         </SelectMenu>
@@ -59,6 +61,7 @@
             <label>New Bed</label>
           </header>
           <SelectMenu
+            restore-key="Recorder.newBedIds"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
             createable
             createable-type="bed"
@@ -68,6 +71,7 @@
               <PlantTreeView
                 v-if="beds?.length"
                 v-model="newBedIds"
+                restore-key="Recorder.newBedIds"
                 :filter="node => node.type !== 'entry' && node.id !== 'system'"
                 @update:model-value="close()"
               />
