@@ -1,6 +1,5 @@
 <template>
   <div class="SelectMenuContainer d-flex width-full position-relative">
-    <slot name="prepend" />
     <slot v-if="createable" name="createable">
       <button type="button" :title="`New ${createableType}`" class="btn-octicon ml-0 mr-1" @click="handleCreate">
         <Octicon name="plus-circle" />
