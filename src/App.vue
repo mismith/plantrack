@@ -44,6 +44,9 @@
   </nav>
 
   <router-view v-if="user" class="flex-auto" />
+  <div v-else-if="user === undefined" class="flex-auto d-flex">
+    <Spinner :size="32" class="m-auto" />
+  </div>
   <div v-else class="Box d-flex flex-column m-auto">
     <div class="Box-header d-flex flex-column flex-items-center text-center pt-3 px-6 pb-6">
       <Logo class="logo" style="max-width: 200px; height: auto;" />
@@ -117,6 +120,7 @@ import AddPlot from './components/AddPlot.vue'
 import AddTag from './components/AddTag.vue'
 import Toast from './components/Toast.vue'
 import Octicon from './components/Octicon.vue'
+import Spinner from './components/Spinner.vue'
 
 export default defineComponent({
   name: 'App',
@@ -134,6 +138,7 @@ export default defineComponent({
     AddTag,
     Toast,
     Octicon,
+    Spinner,
   },
   setup() {
     const user = useUser()

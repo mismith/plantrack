@@ -33,7 +33,7 @@ if (window.location.hostname === 'localhost') {
 }
 
 export function useUser() {
-  const user = ref<firebase.User | null>(auth.currentUser)
+  const user = ref<firebase.User | null>()
 
   auth.onIdTokenChanged(authUser => {
     user.value = authUser
