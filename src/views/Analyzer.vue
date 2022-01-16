@@ -5,7 +5,7 @@
         <header class="form-group-header">
           <label>Crop(s)</label>
         </header>
-        <TreeViewSelectMenu
+        <SelectMenu
           :value="cropIds.length > 1 ? `${cropIds.length} crops selected` : cropIds.map((cropId) => crops.find(({ id }) => id === cropId)?.nickname).filter(Boolean)"
           createable
           createable-type="crop"
@@ -46,7 +46,7 @@
               </div>
             </template>
           </TreeView>
-        </TreeViewSelectMenu>
+        </SelectMenu>
       </fieldset>
 
       <TransitionExpand group>
@@ -80,8 +80,8 @@ import { useAsyncWrapper } from '../services/errors'
 import { downloadCSVRowsAsFile, useExportableData } from '../services/exporter'
 
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
-import TreeViewSelectMenu from '../components/TreeViewSelectMenu.vue'
 import TreeView from '../components/TreeView/TreeView.vue'
+import SelectMenu from '../components/SelectMenu.vue'
 import CropStatsCard from '../components/CropStatsCard.vue'
 import { ITreeNode } from '../components/TreeView'
 import Octicon from '../components/Octicon.vue'
@@ -91,8 +91,8 @@ export default defineComponent({
   name: 'Analyzer',
   components: {
     TransitionExpand,
-    TreeViewSelectMenu,
     TreeView,
+    SelectMenu,
     CropStatsCard,
     Octicon,
     Button,

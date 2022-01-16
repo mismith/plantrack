@@ -25,7 +25,7 @@
         <header class="form-group-header">
           <label>Bed</label>
         </header>
-        <TreeViewSelectMenu
+        <SelectMenu
           v-model="isBedIdsSelectOpen"
           :value="beds?.find(({ id }) => id === bedIds?.[0])?.name || ''"
           createable
@@ -37,7 +37,7 @@
             v-model="bedIds"
             :filter="node => node.type !== 'entry' && node.id !== 'system'"
           />
-        </TreeViewSelectMenu>
+        </SelectMenu>
       </fieldset>
 
       <fieldset class="form-group">
@@ -64,7 +64,7 @@ import { database, getUserRefPath, keyField, ServerValue } from '../services/fir
 import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
-import TreeViewSelectMenu from './TreeViewSelectMenu.vue'
+import SelectMenu from './SelectMenu.vue'
 import PlantTreeView from './PlantTreeView.vue'
 import Octicon from './Octicon.vue'
 
@@ -72,7 +72,7 @@ export default defineComponent({
   name: 'AddPlant',
   components: {
     Button,
-    TreeViewSelectMenu,
+    SelectMenu,
     PlantTreeView,
     Octicon,
   },

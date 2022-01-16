@@ -11,7 +11,7 @@
         <header class="form-group-header">
           <label>Parent Plot</label>
         </header>
-        <TreeViewSelectMenu
+        <SelectMenu
           v-model="isParentPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === parentPlotIds?.[0])?.name || ''"
           :clearable="Boolean(parentPlotIds.length)"
@@ -22,7 +22,7 @@
             :filter="node => node.type !== 'entry' && node.id !== 'system'"
             selectable-type="plot"
           />
-        </TreeViewSelectMenu>
+        </SelectMenu>
       </fieldset>
     </div>
 
@@ -42,14 +42,14 @@ import { database, getUserRefPath, keyField, ServerValue } from '../services/fir
 import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
-import TreeViewSelectMenu from './TreeViewSelectMenu.vue'
+import SelectMenu from './SelectMenu.vue'
 import PlantTreeView from './PlantTreeView.vue'
 
 export default defineComponent({
   name: 'AddPlot',
   components: {
     Button,
-    TreeViewSelectMenu,
+    SelectMenu,
     PlantTreeView,
   },
   props: {

@@ -5,7 +5,7 @@
         <header class="form-group-header">
           <label>Plant(s)</label>
         </header>
-        <TreeViewSelectMenu
+        <SelectMenu
           :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
           createable
           createable-type="plant"
@@ -18,7 +18,7 @@
             v-model="plantIds"
             multiple
           />
-        </TreeViewSelectMenu>
+        </SelectMenu>
       </fieldset>
 
       <fieldset class="form-group required">
@@ -58,7 +58,7 @@
           <header class="form-group-header">
             <label>New Bed</label>
           </header>
-          <TreeViewSelectMenu
+          <SelectMenu
             v-model="isNewBedIdsSelectOpen"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
             createable
@@ -70,7 +70,7 @@
               v-model="newBedIds"
               :filter="node => node.type !== 'entry' && node.id !== 'system'"
             />
-          </TreeViewSelectMenu>
+          </SelectMenu>
         </fieldset>
       </TransitionExpand>
       <TransitionExpand>
@@ -186,12 +186,11 @@ import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants,
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
-import TreeViewSelectMenu from '../components/TreeViewSelectMenu.vue'
+import SelectMenu from '../components/SelectMenu.vue'
 import PlantTreeView from '../components/PlantTreeView.vue'
 import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
 import Button from '../components/Button.vue'
 import Octicon from '../components/Octicon.vue'
-import SelectMenu from '../components/SelectMenu.vue'
 import TagSelect from '../components/TagSelect.vue'
 import Blip from '../components/Blip.vue'
 
@@ -332,12 +331,11 @@ async function addPlantEntry({
 export default defineComponent({
   name: 'Recorder',
   components: {
-    TreeViewSelectMenu,
+    SelectMenu,
     PlantTreeView,
     TransitionExpand,
     Button,
     Octicon,
-    SelectMenu,
     TagSelect,
     Blip,
   },

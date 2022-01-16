@@ -14,9 +14,9 @@
     >
       <slot name="summary">
         <summary aria-haspopup="true" class="form-control form-select width-full flex-auto mr-0" style="cursor: inherit;">
-          <template v-if="value">
+          <template v-if="Array.isArray(value) ? value.length : value">
             <slot name="value">
-              {{value}}
+              {{(Array.isArray(value) ? value : [value]).join(', ')}}
             </slot>
           </template>
           <template v-else>

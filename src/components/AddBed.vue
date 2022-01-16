@@ -12,7 +12,7 @@
         <header class="form-group-header">
           <label>Plot</label>
         </header>
-        <TreeViewSelectMenu
+        <SelectMenu
           v-model="isPlotIdsSelectOpen"
           :value="plots?.find(({ id }) => id === plotIds?.[0])?.name || ''"
           createable
@@ -25,7 +25,7 @@
             :filter="node => node.type !== 'entry' && node.id !== 'system'"
             selectable-type="plot"
           />
-        </TreeViewSelectMenu>
+        </SelectMenu>
       </fieldset>
     </div>
 
@@ -45,7 +45,7 @@ import { database, getUserRefPath, keyField, ServerValue } from '../services/fir
 import { useAsyncWrapper } from '../services/errors'
 
 import Button from './Button.vue'
-import TreeViewSelectMenu from './TreeViewSelectMenu.vue'
+import SelectMenu from './SelectMenu.vue'
 import PlantTreeView from './PlantTreeView.vue'
 import Octicon from './Octicon.vue'
 
@@ -53,7 +53,7 @@ export default defineComponent({
   name: 'AddBed',
   components: {
     Button,
-    TreeViewSelectMenu,
+    SelectMenu,
     PlantTreeView,
     Octicon,
   },
