@@ -5,20 +5,20 @@
         <header class="form-group-header">
           <label>Crop</label>
         </header>
-        <div class="d-flex">
-          <button type="button" class="btn-octicon ml-0 mr-1" @click="handleCropCreate">
-            <Octicon name="plus-circle" />
-          </button>
-          <select v-model="cropId" required class="form-control form-select width-full mr-0">
-            <option
-              v-for="crop in crops"
-              :key="crop.id"
-              :value="crop.id"
-            >
-              {{crop.name}}<template v-if="crop.nickname">: {{crop.nickname}}</template>
-            </option>
-          </select>
-        </div>
+        <SelectMenu
+          :value="crops?.find(({ id }) => id === cropIds?.[0])?.name || ''"
+          createable
+          createable-type="crop"
+          @create="handleCropCreate"
+        >
+          <template #default="{ close }">
+            <CropTreeView
+              v-if="crops?.length"
+              v-model="cropIds"
+              @update:model-value="close()"
+            />
+          </template>
+        </SelectMenu>
       </fieldset>
 
       <fieldset class="form-group required">
@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, PropType, Ref, ref, toRefs, watch } from 'vue'
+import { computed, defineComponent, inject, PropType, Ref, ref, toRefs } from 'vue'
 
 import { Bed, Crop, getSuggestedPlantName, NewEntity, Plant, UpdatedEntity, useCrops, usePlantDataTree } from '../services/data'
 import { database, getUserRefPath, keyField, ServerValue } from '../services/firebase'
@@ -69,12 +69,14 @@ import Button from './Button.vue'
 import SelectMenu from './SelectMenu.vue'
 import PlantTreeView from './PlantTreeView.vue'
 import Octicon from './Octicon.vue'
+import CropTreeView from './CropTreeView.vue'
 
 export default defineComponent({
   name: 'AddPlant',
   components: {
     Button,
     SelectMenu,
+    CropTreeView,
     PlantTreeView,
     Octicon,
   },
@@ -91,19 +93,19 @@ export default defineComponent({
     const { nodes, beds, plants } = usePlantDataTree()
 
     const crops = useCrops()
-    const cropId = ref(plant.value?.cropId || crops.value?.[0]?.id)
+    const cropIds = ref([plant.value?.cropId || crops.value?.[0]?.id])
     const isAddingCrop = inject<Ref>('isAddingCrop')!
     function handleCropCreate() {
       isAddingCrop.value = (newCrop: Crop) => {
-        cropId.value = newCrop.id
+        cropIds.value = [newCrop.id]
         isAddingCrop.value = false
       }
     }
 
     const bedIds = ref([plant.value?.bedId || beds.value?.[0]?.id].filter(Boolean))
     const name = ref(plant.value?.name)
-    const placeholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
-    const isValid = computed(() => Boolean(cropId.value && bedIds.value?.[0]))
+    const placeholder = computed(() => getSuggestedPlantName(cropIds.value?.[0], crops.value, plants.value))
+    const isValid = computed(() => Boolean(cropIds.value?.[0] && bedIds.value?.[0]))
 
     const isAddingBed = inject<Ref>('isAddingBed')!
     function handleBedCreate() {
@@ -122,7 +124,7 @@ export default defineComponent({
         if (isEditing.value && plant.value?.[keyField]) {
           const updatedPlant: UpdatedEntity<Plant> = {
             name: name.value || placeholder.value,
-            cropId: cropId.value!,
+            cropId: cropIds.value[0]!,
             bedId: bedIds.value[0]!,
             updatedAt: ServerValue.TIMESTAMP,
           }
@@ -132,7 +134,7 @@ export default defineComponent({
         } else {
           const newPlant: NewEntity<Plant> = {
             name: name.value || placeholder.value,
-            cropId: cropId.value!,
+            cropId: cropIds.value[0]!,
             bedId: bedIds.value[0]!,
             createdAt: ServerValue.TIMESTAMP,
           }
@@ -152,7 +154,7 @@ export default defineComponent({
       nodes,
 
       crops,
-      cropId,
+      cropIds,
       isAddingCrop,
       handleCropCreate,
 
