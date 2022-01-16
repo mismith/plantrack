@@ -459,9 +459,9 @@ export default defineComponent({
         }))
 
         toast?.('Entry added successfully', 'success')
-      })
 
-      handleReset()
+        handleReset()
+      })
     }
 
     return {
