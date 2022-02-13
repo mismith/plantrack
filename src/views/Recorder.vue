@@ -15,7 +15,7 @@
           @clear="plantIds = []"
         >
           <PlantTreeView
-            v-if="!isLoading && plants?.length"
+            v-if="!isSubmitting && plants?.length"
             v-model="plantIds"
             restore-key="Recorder.plantIds"
             multiple
@@ -177,8 +177,8 @@
 
       <footer class="color-bg-default p-3 mb-n3 ml-n3 mr-n3 border-top" style="position: sticky; bottom: 0;">
         <div class="form-group my-0">
-          <button type="submit" :disabled="!isValid || isLoading" class="btn btn-primary btn-block">Add Entry</button>
-          <progress v-if="isLoading" style="width: 100%;" />
+          <button type="submit" :disabled="!isValid || isSubmitting" class="btn btn-primary btn-block">Add Entry</button>
+          <progress v-if="isSubmitting" style="width: 100%;" />
         </div>
       </footer>
     </form>
@@ -423,7 +423,7 @@ export default defineComponent({
       formRef.value?.reset()
     }
     const toast = inject<Function>('toast')
-    const [runAsync, isLoading] = useAsyncWrapper()
+    const [runAsync, isSubmitting] = useAsyncWrapper()
     async function handleSubmit() {
       await runAsync(async () => {
         const individualWeight = weight.value
@@ -501,7 +501,7 @@ export default defineComponent({
 
       formRef,
       isValid,
-      isLoading,
+      isSubmitting,
 
       handleReset,
       handleSubmit,
