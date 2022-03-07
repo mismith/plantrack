@@ -47,20 +47,22 @@
   <div v-else-if="user === undefined" class="flex-auto d-flex">
     <Spinner :size="32" class="m-auto" />
   </div>
-  <div v-else class="Box d-flex flex-column m-auto">
-    <div class="Box-header d-flex flex-column flex-items-center text-center pt-3 px-6 pb-6">
-      <Logo class="logo" style="max-width: 200px; height: auto;" />
-      <div class="m-3">
-        <Octicon name="workflow" :size="24" />
-        <span class="AnimatedEllipsis m-2" style="vertical-align: middle;" />
-        <Octicon name="repo" :size="24" />
-        <span class="AnimatedEllipsis m-2" style="vertical-align: middle;" />
-        <Octicon name="graph" :size="24" />
+  <div v-else class="d-flex flex-items-center flex-align-center p-6">
+    <div class="Box d-flex flex-column m-auto">
+      <div class="Box-header d-flex flex-column flex-items-center text-center pt-3 px-6 pb-6">
+        <Logo class="logo" style="max-width: 200px; height: auto;" />
+        <div class="m-3">
+          <Octicon name="workflow" :size="24" />
+          <span class="AnimatedEllipsis m-2" style="vertical-align: middle;" />
+          <Octicon name="repo" :size="24" />
+          <span class="AnimatedEllipsis m-2" style="vertical-align: middle;" />
+          <Octicon name="graph" :size="24" />
+        </div>
+        <h3>Plan your garden. <br />Record your data. <br />Track your results.</h3>
       </div>
-      <h3>Plan your garden. <br />Record your data. <br />Track your results.</h3>
-    </div>
 
-    <Auth />
+      <Auth />
+    </div>
   </div>
 
   <Dialog :model-value="Boolean(isEditingPlant)" @update:model-value="isEditingPlant = undefined">
@@ -227,6 +229,10 @@ export default defineComponent({
 @import '@primer/css/index.scss';
 @import '@primer/octicons/index.scss';
 
+body {
+  padding-bottom: env(safe-area-inset-bottom) !important;
+}
+
 :root {
   --color-plantrack-primary: #99CF26;
 }
@@ -248,7 +254,10 @@ export default defineComponent({
 }
 
 .Header {
-  min-height: 48px;
+  min-height: calc(48px + env(safe-area-inset-top));
+  border-top: solid env(safe-area-inset-top) var(--color-header-bg);
+  border-left: solid env(safe-area-inset-left) var(--color-header-bg);
+  border-right: solid env(safe-area-inset-right) var(--color-header-bg);
 
   .Header-item {
     margin-right: 0;

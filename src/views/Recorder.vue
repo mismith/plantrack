@@ -143,7 +143,14 @@
             <label>Attachment(s)</label>
           </header>
           <div class="d-flex">
-            <input ref="attachmentsRef" type="file" multiple class="form-control width-full mr-0" @change="files = $event.target.files" />
+            <input
+              ref="attachmentsRef"
+              type="file"
+              multiple
+              accept="*/*"
+              class="form-control width-full mr-0"
+              @change="files = $event.target.files"
+            />
             <button type="button" class="btn-octicon" @click="files = undefined; isShowing.attachments = false;">
               <Octicon name="x-circle-fill" />
             </button>
