@@ -124,20 +124,6 @@
       </fieldset>
 
       <TransitionExpand>
-        <fieldset v-if="isShowing.at" class="form-group">
-          <header class="form-group-header">
-            <label>When</label>
-          </header>
-          <div class="d-flex">
-            <input ref="atRef" type="datetime-local" v-model="at" class="form-control width-full mr-0" />
-            <button type="button" class="btn-octicon" @click="at = undefined; isShowing.at = false;">
-              <Octicon name="x-circle-fill" />
-            </button>
-          </div>
-        </fieldset>
-      </TransitionExpand>
-
-      <TransitionExpand>
         <fieldset v-if="isShowing.attachments" class="form-group">
           <header class="form-group-header">
             <label>Attachment(s)</label>
@@ -166,18 +152,36 @@
         </fieldset>
       </TransitionExpand>
 
+      <TransitionExpand>
+        <fieldset v-if="isShowing.at" class="form-group">
+          <header class="form-group-header">
+            <label>When</label>
+          </header>
+          <div class="d-flex">
+            <input ref="atRef" type="datetime-local" v-model="at" class="form-control width-full mr-0" />
+            <button type="button" class="btn-octicon" @click="at = undefined; isShowing.at = false;">
+              <Octicon name="x-circle-fill" />
+            </button>
+          </div>
+        </fieldset>
+      </TransitionExpand>
+
       <aside class="d-flex flex-wrap flex-justify-center mb-3" style="gap: 8px;">
-        <Button v-if="!isShowing.at" class="flex-auto" @click="handleShowAt">
+        <Button v-if="!isShowing.attachments && isCaptureSupported" class="flex-auto" @click="handleShowAttachments(true)">
           <Octicon name="plus-circle" class="mr-2" />
-          Use Specific Date/Time
+          Add Photo
         </Button>
-        <Button v-if="!isShowing.attachments" class="flex-auto" @click="handleShowAttachments">
+        <Button v-if="!isShowing.attachments" class="flex-auto" @click="handleShowAttachments()">
           <Octicon name="plus-circle" class="mr-2" />
           Add Attachment(s)
         </Button>
         <Button v-if="!isShowing.tagIds" class="flex-auto" @click="handleShowTags">
           <Octicon name="plus-circle" class="mr-2" />
           Add Tag(s)
+        </Button>
+        <Button v-if="!isShowing.at" class="flex-auto" @click="handleShowAt">
+          <Octicon name="plus-circle" class="mr-2" />
+          Use Specific Date/Time
         </Button>
       </aside>
 
@@ -384,13 +388,28 @@ export default defineComponent({
         attachmentsRef.value = undefined; 
       }
     })
+    const isCaptureSupported = (() => {
+      const el = document.createElement('input')
+      return el.capture !== undefined
+    })()
     function handleShowAt() {
       isShowing.at = true
       window.setTimeout(() => atRef.value?.focus?.())
     }
-    function handleShowAttachments() {
+    function handleShowAttachments(isCamera = false) {
       isShowing.attachments = true
-      window.setTimeout(() => attachmentsRef.value?.click?.())
+      window.setTimeout(() => {
+        const input = attachmentsRef.value
+        if (!input) return
+
+        if (isCamera) {
+          input.setAttribute('capture', '')
+        }
+        input.click?.()
+        if (isCamera) {
+          input.removeAttribute('capture')
+        }
+      })
     }
     function handleShowTags() {
       isShowing.tagIds = true
@@ -501,6 +520,7 @@ export default defineComponent({
       atRef,
       attachmentsRef,
       tagIdsRef,
+      isCaptureSupported,
       handleShowAt,
       handleShowAttachments,
       handleShowTags,
