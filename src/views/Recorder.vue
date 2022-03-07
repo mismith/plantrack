@@ -147,7 +147,7 @@
               ref="attachmentsRef"
               type="file"
               multiple
-              accept="*/*"
+              accept="image/*,video/*"
               class="form-control width-full mr-0"
               @change="files = $event.target.files"
             />
