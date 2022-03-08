@@ -294,10 +294,12 @@ body,
   font-family: sans-serif;
 }
 
-input[type="file"] {
-  line-height: 1rem;
-}
+input[type="file"].form-control,
+input[type="datetime-local"].form-control,
 select.form-control {
+  min-height: 32px;
+}
+input[type="datetime-local"].form-control {
   -webkit-appearance: none;
 }
 
