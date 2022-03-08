@@ -7,17 +7,23 @@
         </header>
         <SelectMenu
           :value="cropIds.length > 1 ? `${cropIds.length} crops selected` : cropIds.map((cropId) => crops.find(({ id }) => id === cropId)?.nickname).filter(Boolean)"
+          title="Crops"
           createable
           createable-type="crop"
           :clearable="Boolean(cropIds.length)"
+          editable
           @create="isAddingCrop = true"
           @clear="cropIds = []"
         >
-          <CropTreeView
-            v-if="crops?.length"
-            v-model="cropIds"
-            multiple
-          />
+          <template #header v-if="!crops?.length"><div /></template>
+          <template #default="{ edit }">
+            <CropTreeView
+              v-if="crops?.length"
+              v-model="cropIds"
+              :editable="edit()"
+              multiple
+            />
+          </template>
         </SelectMenu>
       </fieldset>
 
@@ -70,6 +76,7 @@ export default defineComponent({
     const crops = useCrops()
     const cropIds = ref([])
 
+    const toast = inject<Function>('toast')
     const importInputRef = ref<HTMLInputElement | null>(null)
     async function handleImport(event: any) {
       const [file] = event.target.files

@@ -13,14 +13,18 @@
         </header>
         <SelectMenu
           :value="plots?.find(({ id }) => id === parentPlotIds?.[0])?.name || ''"
+          title="Plots"
           :clearable="Boolean(parentPlotIds.length)"
+          editable
           @clear="parentPlotIds = []"
         >
-          <template #default="{ close }">
+          <template #header v-if="!plots?.length"><div /></template>
+          <template #default="{ edit, close }">
             <PlantTreeView
               v-model="parentPlotIds"
               :filter="node => node.type !== 'entry' && node.id !== 'system'"
               selectable-type="plot"
+              :editable="edit()"
               @update:model-value="close()"
             />
           </template>

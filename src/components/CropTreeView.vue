@@ -11,7 +11,7 @@
       </div>
     </template>
     <template #node-append="{ node }">
-      <div class="TreeNodeActions">
+      <div v-if="editable" class="TreeNodeActions">
         <button
           v-if="node.name"
           type="button"
@@ -56,9 +56,13 @@ export default defineComponent({
       type: Array as PropType<string[]>,
       required: true,
     },
+    editable: {
+      type: Boolean,
+      required: false,
+    },
     multiple: {
       type: Boolean,
-      default: false,
+      required: false,
     },
   },
   setup(props, { emit }) {

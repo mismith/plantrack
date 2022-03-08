@@ -8,18 +8,24 @@
         <SelectMenu
           restore-key="Recorder.plantIds"
           :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
+          title="Plants"
           createable
           createable-type="plant"
           :clearable="Boolean(plantIds.length)"
+          editable
           @create="isAddingPlant = (newPlant) => plantIds.push(newPlant.id)"
           @clear="plantIds = []"
         >
-          <PlantTreeView
-            v-if="!isSubmitting && plants?.length"
-            v-model="plantIds"
-            restore-key="Recorder.plantIds"
-            multiple
-          />
+          <template #header v-if="!plants?.length"><div /></template>
+          <template #default="{ edit }">
+            <PlantTreeView
+              v-if="!isSubmitting && plants?.length"
+              v-model="plantIds"
+              restore-key="Recorder.plantIds"
+              multiple
+              :editable="edit()"
+            />
+          </template>
         </SelectMenu>
       </fieldset>
 
@@ -106,16 +112,20 @@
           <SelectMenu
             restore-key="Recorder.newBedIds"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
+            title="Beds"
             createable
             createable-type="bed"
+            editable
             @create="isAddingBed = (newBed) => { newBedIds = [newBed.id]; isAddingBed = false; }"
           >
-            <template #default="{ close }">
+            <template #header v-if="!beds?.length"><div /></template>
+            <template #default="{ edit, close }">
               <PlantTreeView
                 v-if="beds?.length"
                 v-model="newBedIds"
                 restore-key="Recorder.newBedIds"
                 :filter="node => node.type !== 'entry' && node.id !== 'system'"
+                :editable="edit()"
                 @update:model-value="close()"
               />
             </template>

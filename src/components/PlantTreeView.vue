@@ -34,7 +34,7 @@
       </div>
     </template>
     <template #node-append="{ node, parents }">
-      <div class="TreeNodeActions">
+      <div v-if="editable" class="TreeNodeActions">
         <button
           v-if="node.type === 'plot' && node.id !== 'system'"
           type="button"
@@ -114,6 +114,10 @@ export default defineComponent({
       required: true,
     },
     multiple: {
+      type: Boolean,
+      required: false,
+    },
+    editable: {
       type: Boolean,
       required: false,
     },

@@ -47,7 +47,7 @@
   <div v-else-if="user === undefined" class="flex-auto d-flex">
     <Spinner :size="32" class="m-auto" />
   </div>
-  <div v-else class="d-flex flex-items-center flex-align-center p-6">
+  <div v-else class="d-flex flex-items-center flex-align-center px-2 py-6">
     <div class="Box d-flex flex-column m-auto">
       <div class="Box-header d-flex flex-column flex-items-center text-center pt-3 px-6 pb-6">
         <Logo class="logo" style="max-width: 200px; height: auto;" />

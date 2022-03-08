@@ -7,14 +7,18 @@
         </header>
         <SelectMenu
           :value="crops?.find(({ id }) => id === cropIds?.[0])?.name || ''"
+          title="Crops"
           createable
           createable-type="crop"
+          editable
           @create="handleCropCreate"
         >
-          <template #default="{ close }">
+          <template #header v-if="!crops?.length"><div /></template>
+          <template #default="{ edit, close }">
             <CropTreeView
               v-if="crops?.length"
               v-model="cropIds"
+              :editable="edit()"
               @update:model-value="close()"
             />
           </template>
@@ -27,15 +31,19 @@
         </header>
         <SelectMenu
           :value="beds?.find(({ id }) => id === bedIds?.[0])?.name || ''"
+          title="Beds"
           createable
           createable-type="bed"
+          editable
           @create="handleBedCreate"
         >
-          <template #default="{ close }">
+          <template #header v-if="!beds?.length"><div /></template>
+          <template #default="{ edit, close }">
             <PlantTreeView
               v-if="beds?.length"
               v-model="bedIds"
               :filter="node => node.type !== 'entry' && node.id !== 'system'"
+              :editable="edit()"
               @update:model-value="close()"
             />
           </template>
