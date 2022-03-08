@@ -25,45 +25,43 @@
           </template>
         </summary>
       </slot>
-      <div class="SelectMenu position-fixed">
+      <div class="SelectMenu position-fixed" style="min-width: 300px;">
         <div
           ref="scrollerRef"
           class="SelectMenu-modal width-full overflow-auto"
           @scroll="({ target }) => scrollTop = target.scrollTop"
         >
           <slot name="header" v-bind="slotProps">
-            <header v-if="title || editable" class="SelectMenu-header">
-              <h3 class="SelectMenu-title">
-                <slot name="title">{{ title }}</slot>
+            <header v-if="title || editable" class="SelectMenu-header" style="gap: 4px;">
+              <h3 class="SelectMenu-title mr-3">
+                <slot name="title" v-bind="slotProps">{{ title }}</slot>
               </h3>
-              <button
+              <slot name="header-content" v-bind="slotProps" />
+              <Button
                 v-if="editable"
-                type="button"
-                class="btn-octicon"
-                :class="slotProps.edit() ? 'h6' : 'f6'"
-                @click="slotProps.edit(!slotProps.edit())"
+                class="btn-invisible px-2"
+                @click="edit(!edit())"
               >
-                {{ slotProps.edit() ? 'Done' : 'Edit' }}
-              </button>
+                <strong v-if="edit()">Done</strong>
+                <span v-else>Edit</span>
+              </Button>
             </header>
           </slot>
           <slot v-bind="slotProps">
             <div class="SelectMenu-list">
-              <slot name="empty">
-                <div class="SelectMenu-blankslate">
-                  <Octicon name="circle-slash" :size="24" class="mt-n1" />
-                  <h4 class="mt-3">No {{createableType}}s yet</h4>
-                  <button
-                    v-if="createable"
-                    type="button"
-                    class="btn btn-sm btn-primary d-inline-flex flex-items-center mt-3"
-                    @click="handleCreate"
-                  >
-                    <Octicon name="plus-circle" class="mr-2" />
-                    New {{createableType}}
-                  </button>
-                </div>
-              </slot>
+              <div class="SelectMenu-blankslate">
+                <Octicon name="circle-slash" :size="24" class="mt-n1" />
+                <h4 class="mt-3">No {{createableType}}s yet</h4>
+                <button
+                  v-if="createable"
+                  type="button"
+                  class="btn btn-sm btn-primary d-inline-flex flex-items-center mt-3"
+                  @click="handleCreate"
+                >
+                  <Octicon name="plus-circle" class="mr-2" />
+                  New {{createableType}}
+                </button>
+              </div>
             </div>
           </slot>
         </div>
@@ -81,11 +79,13 @@
 import { defineComponent, ref, toRefs, watch } from 'vue'
 import { useRestoreKey } from '../services/data'
 
+import Button from './Button.vue'
 import Octicon from './Octicon.vue'
 
 export default defineComponent({
   name: 'SelectMenu',
   components: {
+    Button,
     Octicon,
   },
   props: {
@@ -201,6 +201,7 @@ export default defineComponent({
     }
 
     return {
+      edit,
       detailsRef,
       slotProps,
 

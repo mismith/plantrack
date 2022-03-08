@@ -34,6 +34,16 @@
             title="Events"
             editable
           >
+            <template #header-content="{ edit }">
+              <Button
+                v-if="edit()"
+                :disabled="isDefaultBookmarkedEventIds"
+                class="btn-invisible px-2"
+                @click="resetBookmarkedEventIds()"
+              >
+                Reset
+              </Button>
+            </template>
             <template #default="{ edit, close }">
               <div class="SelectMenu-list">
                 <div
@@ -47,13 +57,9 @@
                   <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
                   <Blip :color="event.color" class="mr-2" />
                   <span class="flex-auto">{{event.id}}</span>
-                  <button
-                    type="button"
-                    class="btn-octicon ml-3 mr-md-n2 mt-n1 mb-n1"
-                    :style="{
-                      visibility: edit() || bookmarkedEventIds.includes(event.id) ? undefined : 'hidden',
-                      pointerEvents: !edit() && bookmarkedEventIds.includes(event.id) ? 'none' : undefined,
-                    }"
+                  <Button
+                    v-if="edit()"
+                    class="btn-invisible px-2 ml-3 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
                     @click.stop="handleBookmarkedEventIdToggle(event.id)"
                   >
                     <Octicon
@@ -62,7 +68,15 @@
                       width="16"
                       height="16"
                     />
-                  </button>
+                  </Button>
+                  <Octicon
+                    v-else-if="bookmarkedEventIds.includes(event.id)"
+                    name="bookmark-fill"
+                    :size="24"
+                    width="16"
+                    height="16"
+                    class="mx-2"
+                  />
                 </div>
               </div>
             </template>
@@ -72,7 +86,7 @@
               v-for="event in bookmarkedEvents"
               :key="event.id"
               type="button"
-              class="btn btn-sm px-1 flex-auto"
+              class="btn px-2 flex-auto"
               :class="{ 'btn-outline': eventId === event.id }"
               :aria-selected="eventId === event.id"
               @click="eventId = event.id"
@@ -216,7 +230,7 @@
 
       <footer class="color-bg-default p-3 mb-n3 ml-n3 mr-n3 border-top" style="position: sticky; bottom: 0;">
         <div class="form-group my-0">
-          <button type="submit" :disabled="!isValid || isSubmitting" class="btn btn-primary btn-block">Add Entry</button>
+          <button type="submit" :disabled="!isValid || isSubmitting" class="btn btn-primary btn-block btn-large f4">Add Entry</button>
           <progress v-if="isSubmitting" style="width: 100%;" />
         </div>
       </footer>
@@ -404,15 +418,23 @@ export default defineComponent({
     const tags = useTags()
     const tagIds = ref<string[]>([])
 
-    const restore = useRestoreKey('bookmarkedEventIds', 'Recorder')
-    if (!restore.load()) restore.save(['seed', 'sprout', 'harvest', 'cull', 'other'])
-    const bookmarkedEventIds = ref<string[]>(restore.load())
-    watch(bookmarkedEventIds, (v) => restore.save(v))
+    const restoreBookmarkedEventIds = useRestoreKey('bookmarkedEventIds', 'Recorder')
+    const defaultBookmarkedEventIds = ['seed', 'sprout', 'harvest', 'cull', 'other']
+    if (!restoreBookmarkedEventIds.load()) restoreBookmarkedEventIds.save(defaultBookmarkedEventIds)
+    const bookmarkedEventIds = ref<string[]>(restoreBookmarkedEventIds.load())
+    watch(bookmarkedEventIds, (v) => restoreBookmarkedEventIds.save(v))
+    const isDefaultBookmarkedEventIds = computed(() => defaultBookmarkedEventIds.length === bookmarkedEventIds.value.length
+      && defaultBookmarkedEventIds.every(id => bookmarkedEventIds.value.includes(id)))
     const bookmarkedEvents = computed(() => events.filter(({ id }) => bookmarkedEventIds.value.includes(id)))
+    function resetBookmarkedEventIds() {
+      if (window.confirm('Are you sure?')) {
+        bookmarkedEventIds.value = defaultBookmarkedEventIds
+      }
+    }
     function handleBookmarkedEventIdToggle(eventId: string) {
       bookmarkedEventIds.value = bookmarkedEventIds.value.includes(eventId)
-        ? bookmarkedEventIds.value.filter(i => i !== eventId)
-        : [ ...bookmarkedEventIds.value, eventId ]
+        ? bookmarkedEventIds.value.filter(id => id !== eventId)
+        : [...bookmarkedEventIds.value, eventId]
     }
 
     const isShowing = reactive({
@@ -555,8 +577,11 @@ export default defineComponent({
       cullToo,
       tagIds,
 
+      defaultBookmarkedEventIds,
       bookmarkedEventIds,
       bookmarkedEvents,
+      isDefaultBookmarkedEventIds,
+      resetBookmarkedEventIds,
       handleBookmarkedEventIdToggle,
 
       isShowing,
