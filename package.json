@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/lodash.set": "^4.3.6",
+    "@types/primer__octicons": "^16.1.0",
     "@vitejs/plugin-vue": "^1.9.0",
     "@vue/compiler-sfc": "^3.2.14",
     "@vuedx/typecheck": "^0.4.1",
