@@ -434,15 +434,6 @@ input[type="datetime-local"].form-control {
       }
     }
   }
-
-  .btn-octicon {
-    display: inline-flex;
-    align-items: center;
-    height: 100%;
-    background-color: transparent;
-    padding: 0 0.5em;
-    margin: 0;
-  }
   
   .TreeNodeName {
     display: flex;

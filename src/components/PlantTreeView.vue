@@ -14,7 +14,7 @@
             v-for="attachment in node.attachments"
             :key="attachment.id"
             :attachment="attachment"
-            class="btn-octicon px-2"
+            class="btn btn-invisible px-2"
           />
         </template>
         <template v-else>
@@ -35,46 +35,41 @@
     </template>
     <template #node-append="{ node, parents }">
       <div v-if="editable" class="TreeNodeActions">
-        <button
+        <Button
           v-if="node.type === 'plot' && node.id !== 'system'"
-          type="button"
-          class="btn-octicon"
+          class="btn-invisible px-2 m-0 anim-scale-in"
           @click.stop="isEditingPlot = node"
         >
           <Octicon name="pencil" />
-        </button>
-        <button
+        </Button>
+        <Button
           v-if="node.type === 'bed' && node.plotId !== 'system'"
-          type="button"
-          class="btn-octicon"
+          class="btn-invisible px-2 m-0 anim-scale-in"
           @click.stop="isEditingBed = node"
         >
           <Octicon name="pencil" />
-        </button>
-        <button
+        </Button>
+        <Button
           v-if="node.type === 'plant'"
-          type="button"
-          class="btn-octicon"
+          class="btn-invisible px-2 m-0 anim-scale-in"
           @click.stop="isEditingPlant = node"
         >
           <Octicon name="pencil" />
-        </button>
-        <button
+        </Button>
+        <Button
           v-if="node.type === 'entry'"
-          type="button"
-          class="btn-octicon btn-octicon-danger"
+          class="btn-invisible btn-danger px-2 m-0 anim-scale-in"
           @click.stop="handleRemoveEntry(node, parents, $event.shiftKey)"
         >
           <Octicon name="trash" />
-        </button>
-        <button
+        </Button>
+        <Button
           v-else-if="node.id !== 'system' && node.plotId !== 'system'"
-          type="button"
-          class="btn-octicon btn-octicon-danger"
+          class="btn-invisible btn-danger px-2 m-0 anim-scale-in"
           @click.stop="handleRemoveNode(node, $event.shiftKey)"
         >
           <Octicon name="trash" />
-        </button>
+        </Button>
       </div>
     </template>
   </TreeView>
@@ -90,6 +85,7 @@ import { useAsyncWrapper } from '../services/errors'
 import { Booleanable, ITreeNode, set, tools, walkDescendents } from './TreeView'
 import TreeView from './TreeView/TreeView.vue'
 import AttachmentLink from './AttachmentLink.vue'
+import Button from './Button.vue'
 import Octicon from './Octicon.vue'
 import Blip from './Blip.vue'
 
@@ -105,6 +101,7 @@ export default defineComponent({
   components: {
     TreeView,
     AttachmentLink,
+    Button,
     Octicon,
     Blip,
   },

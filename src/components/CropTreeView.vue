@@ -12,22 +12,20 @@
     </template>
     <template #node-append="{ node }">
       <div v-if="editable" class="TreeNodeActions">
-        <button
+        <Button
           v-if="node.name"
-          type="button"
-          class="btn-octicon"
+          class="btn-invisible px-2 m-0 anim-scale-in"
           @click.stop="isEditingCrop = crops.find(({ id }) => id === node.id)"
         >
           <Octicon name="pencil" />
-        </button>
-        <button
+        </Button>
+        <Button
           v-if="node.name"
-          type="button"
-          class="btn-octicon btn-octicon-danger"
+          class="btn-invisible btn-danger px-2 m-0 anim-scale-in"
           @click.stop="handleRemoveNode(node, $event.shiftKey)"
         >
           <Octicon name="trash" />
-        </button>
+        </Button>
       </div>
     </template>
   </TreeView>
@@ -43,12 +41,14 @@ import { useAsyncWrapper } from '../services/errors'
 
 import TreeView from '../components/TreeView/TreeView.vue'
 import { ITreeNode } from '../components/TreeView'
+import Button from '../components/Button.vue'
 import Octicon from '../components/Octicon.vue'
 
 export default defineComponent({
   name: 'Analyzer',
   components: {
     TreeView,
+    Button,
     Octicon,
   },
   props: {
