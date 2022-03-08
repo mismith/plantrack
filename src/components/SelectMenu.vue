@@ -31,13 +31,34 @@
           class="SelectMenu-modal width-full overflow-auto"
           @scroll="({ target }) => scrollTop = target.scrollTop"
         >
+          <slot name="header" v-bind="slotProps">
+            <header v-if="title || editable" class="SelectMenu-header">
+              <h3 class="SelectMenu-title">
+                <slot name="title">{{ title }}</slot>
+              </h3>
+              <button
+                v-if="editable"
+                type="button"
+                class="btn-octicon"
+                :class="slotProps.edit() ? 'h6' : 'f6'"
+                @click="slotProps.edit(!slotProps.edit())"
+              >
+                {{ slotProps.edit() ? 'Done' : 'Edit' }}
+              </button>
+            </header>
+          </slot>
           <slot v-bind="slotProps">
             <div class="SelectMenu-list">
               <slot name="empty">
                 <div class="SelectMenu-blankslate">
                   <Octicon name="circle-slash" :size="24" class="mt-n1" />
                   <h4 class="mt-3">No {{createableType}}s yet</h4>
-                  <button v-if="createable" type="button" class="btn btn-sm btn-primary d-inline-flex flex-items-center mt-3" @click="handleCreate">
+                  <button
+                    v-if="createable"
+                    type="button"
+                    class="btn btn-sm btn-primary d-inline-flex flex-items-center mt-3"
+                    @click="handleCreate"
+                  >
                     <Octicon name="plus-circle" class="mr-2" />
                     New {{createableType}}
                   </button>
@@ -80,6 +101,10 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    title: {
+      type: String,
+      default: '',
+    },
     createable: {
       type: Boolean,
       default: false,
@@ -87,6 +112,10 @@ export default defineComponent({
     createableType: {
       type: String,
       default: 'item',
+    },
+    editable: {
+      type: Boolean,
+      default: false,
     },
     clearable: {
       type: Boolean,
@@ -100,6 +129,13 @@ export default defineComponent({
   setup(props, { emit }) {
     const { modelValue, restoreKey } = toRefs(props)
 
+    const isEditing = ref(false)
+    function edit(to?: boolean) {
+      if (to !== undefined) {
+        isEditing.value = to
+      }
+      return isEditing.value
+    }
     const detailsRef = ref()
     function get() {
       return Boolean(detailsRef.value?.open)
@@ -113,6 +149,7 @@ export default defineComponent({
     function close() {
       isOpen.value = false
       detailsRef.value?.removeAttribute('open')
+      edit(false)
       emit('close')
     }
     function set(v: any) {
@@ -123,6 +160,7 @@ export default defineComponent({
       }
     }
     const slotProps = {
+      edit,
       open,
       close,
       get,

@@ -76,18 +76,15 @@ export interface Tag extends Entity {
 export interface Event {
   id: string
   color: string
-  featured?: boolean
 }
 export const events: Event[] = [
   {
     id: 'seed',
     color: 'gold',
-    featured: true,
   },
   {
     id: 'sprout',
     color: 'lime',
-    featured: true,
   },
   {
     id: 'leaf',
@@ -104,7 +101,6 @@ export const events: Event[] = [
   {
     id: 'transplant',
     color: 'lightgrey',
-    featured: true,
   },
   {
     id: 'splice',
@@ -125,12 +121,10 @@ export const events: Event[] = [
   {
     id: 'harvest',
     color: 'magenta',
-    featured: true,
   },
   {
     id: 'cull',
     color: 'red',
-    featured: true,
   },
   {
     id: 'other',
@@ -284,7 +278,7 @@ export function useTreeViewProps(
   }
 }
 
-export function useRestoreKey(key: string, prefix?: string) {
+export function useRestoreKey(key: string, prefix: string) {
   return {
     save(v: any) {
       window.localStorage.setItem(`plantrack.restoreKey.${prefix}.${key}`, JSON.stringify(v))

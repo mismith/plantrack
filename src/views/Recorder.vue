@@ -28,23 +28,52 @@
           <label>Event</label>
         </header>
         <div class="form-group-body">
-          <select v-model="eventId" required class="form-control form-select width-full mb-2">
-            <option
-              v-for="event in events"
-              :key="event.id"
-              :value="event.id"
-            >
-              {{event.id}}
-            </option>
-          </select>
-          <div class="BtnGroup d-flex flex-wrap">
+          <SelectMenu
+            restore-key="Recorder.eventId"
+            :value="eventId"
+            title="Events"
+            editable
+          >
+            <template #default="{ edit, close }">
+              <div class="SelectMenu-list">
+                <div
+                  v-for="event in events"
+                  :key="event.id"
+                  role="menuitemcheckbox"
+                  :aria-checked="event.id === eventId"
+                  class="SelectMenu-item"
+                  @click="eventId = event.id; close();"
+                >
+                  <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
+                  <Blip :color="event.color" class="mr-2" />
+                  <span class="flex-auto">{{event.id}}</span>
+                  <button
+                    type="button"
+                    class="btn-octicon ml-3 mr-md-n2 mt-n1 mb-n1"
+                    :style="{
+                      visibility: edit() || bookmarkedEventIds.includes(event.id) ? undefined : 'hidden',
+                      pointerEvents: !edit() && bookmarkedEventIds.includes(event.id) ? 'none' : undefined,
+                    }"
+                    @click.stop="handleBookmarkedEventIdToggle(event.id)"
+                  >
+                    <Octicon
+                      :name="bookmarkedEventIds.includes(event.id) ? 'bookmark-fill' : 'bookmark'"
+                      :size="24"
+                      width="16"
+                      height="16"
+                    />
+                  </button>
+                </div>
+              </div>
+            </template>
+          </SelectMenu>
+          <div v-if="bookmarkedEvents.length" class="d-flex flex-wrap mt-2" style="gap: 4px;">
             <button
-              v-for="event in featuredEvents"
+              v-for="event in bookmarkedEvents"
               :key="event.id"
               type="button"
-              class="BtnGroup-item btn btn-sm px-1"
+              class="btn btn-sm px-1 flex-auto"
               :class="{ 'btn-outline': eventId === event.id }"
-              style="flex: auto;"
               :aria-selected="eventId === event.id"
               @click="eventId = event.id"
             >
@@ -198,7 +227,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, reactive, ref, watch } from 'vue'
 
-import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds, useTags } from '../services/data'
+import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds, useTags, useRestoreKey } from '../services/data'
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
@@ -375,6 +404,17 @@ export default defineComponent({
     const tags = useTags()
     const tagIds = ref<string[]>([])
 
+    const restore = useRestoreKey('bookmarkedEventIds', 'Recorder')
+    if (!restore.load()) restore.save(['seed', 'sprout', 'harvest', 'cull', 'other'])
+    const bookmarkedEventIds = ref<string[]>(restore.load())
+    watch(bookmarkedEventIds, (v) => restore.save(v))
+    const bookmarkedEvents = computed(() => events.filter(({ id }) => bookmarkedEventIds.value.includes(id)))
+    function handleBookmarkedEventIdToggle(eventId: string) {
+      bookmarkedEventIds.value = bookmarkedEventIds.value.includes(eventId)
+        ? bookmarkedEventIds.value.filter(i => i !== eventId)
+        : [ ...bookmarkedEventIds.value, eventId ]
+    }
+
     const isShowing = reactive({
       at: false,
       attachments: false,
@@ -505,7 +545,6 @@ export default defineComponent({
       at,
       files,
       events,
-      featuredEvents: events.filter(({ featured }) => featured),
       beds,
       newBedIds,
       newName,
@@ -515,6 +554,10 @@ export default defineComponent({
       weightSplit,
       cullToo,
       tagIds,
+
+      bookmarkedEventIds,
+      bookmarkedEvents,
+      handleBookmarkedEventIdToggle,
 
       isShowing,
       atRef,
