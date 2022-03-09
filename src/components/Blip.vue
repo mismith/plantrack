@@ -1,5 +1,8 @@
 <template>
-  <span class="Blip" :style="{ backgroundColor: color || 'currentColor' }" />
+  <span
+    class="Blip"
+    :style="{ backgroundColor: color || 'currentColor', width: size, height: size }"
+  />
 </template>
 
 <script lang="ts">
@@ -12,6 +15,10 @@ export default defineComponent({
       type: String,
       required: false,
     },
+    size: {
+      type: [Number, String],
+      default: '0.75rem',
+    },
   },
 })
 </script>
@@ -19,8 +26,6 @@ export default defineComponent({
 <style lang="scss">
 .Blip {
   display: inline-block;
-  width: 0.75rem;
-  height: 0.75rem;
   vertical-align: middle;
   border: solid 1px currentColor;
   border-radius: 1em;
