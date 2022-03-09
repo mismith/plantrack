@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Plotter from './views/Plotter.vue'
 import Recorder from './views/Recorder.vue'
+import Activity from './views/Activity.vue'
 import Analyzer from './views/Analyzer.vue'
 import OldTracker from './views/OldTracker.vue'
 import Exporter from './views/Exporter.vue'
@@ -28,6 +29,13 @@ export const routes = [
     component: Recorder,
     meta: {
       title: 'Record',
+    },
+  },
+  {
+    path: '/activity',
+    component: Activity,
+    meta: {
+      title: 'Activity',
     },
   },
   {

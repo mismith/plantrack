@@ -49,6 +49,8 @@ export interface Entry extends Entity {
   note?: string
   attachments?: Attachment[]
   tagIds?: string[]
+  _plantId?: string
+  _snapshot?: Record<string, any>
 }
 export interface Plant extends Entity {
   name: string

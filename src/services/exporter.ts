@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Bed, Crop, Plant, Plot } from '../services/data'
 import { database, getUserRefPath, useRtdbObject } from '../services/firebase'
 
-export function useExportableData() {
+export function useHydratedEntries() {
   const plots = useRtdbObject<Record<string, Plot>>(database.ref(getUserRefPath('/plots')))
   const beds = useRtdbObject<Record<string, Bed>>(database.ref(getUserRefPath('/beds')))
   const crops = useRtdbObject<Record<string, Crop>>(database.ref(getUserRefPath('/crops')))
@@ -30,7 +30,16 @@ export function useExportableData() {
     ...(entry as any),
     id: entryId,
   }))))
-
+  return {
+    plots,
+    beds,
+    crops,
+    plants,
+    entries,
+  }
+}
+export function useExportableData() {
+  const { entries } = useHydratedEntries()
   const flatEntries = computed(() => [[
     'Entry ID',
     'Plot',

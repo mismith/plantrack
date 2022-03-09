@@ -26,10 +26,10 @@ export const storage = firebase.storage()
 
 export default firebase
 
-if (window.location.hostname === 'localhost') {
-  auth.useEmulator('http://localhost:9099/', { disableWarnings: true })
-  database.useEmulator('localhost', 9000)
-  storage.useEmulator("localhost", 9199)
+if (import.meta.env.DEV) {
+  auth.useEmulator(`http://${window.location.hostname}:9099/`, { disableWarnings: true })
+  database.useEmulator(window.location.hostname, 9000)
+  storage.useEmulator(window.location.hostname, 9199)
 }
 
 export function useUser() {
