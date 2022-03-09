@@ -51,39 +51,37 @@
               </Button>
             </template>
             <template #default="{ edit, close }">
-              <div class="SelectMenu-list">
-                <div
-                  v-for="event in events"
-                  :key="event.id"
-                  role="menuitemcheckbox"
-                  :aria-checked="event.id === eventId"
-                  class="SelectMenu-item"
-                  @click="eventId = event.id; close();"
+              <div
+                v-for="event in events"
+                :key="event.id"
+                role="menuitemcheckbox"
+                :aria-checked="event.id === eventId"
+                class="SelectMenu-item"
+                @click="eventId = event.id; close();"
+              >
+                <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
+                <Blip :color="event.color" class="mr-2" />
+                <span class="flex-auto">{{event.id}}</span>
+                <Button
+                  v-if="edit()"
+                  class="btn-invisible px-2 ml-3 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
+                  @click.stop="handleBookmarkedEventIdToggle(event.id)"
                 >
-                  <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
-                  <Blip :color="event.color" class="mr-2" />
-                  <span class="flex-auto">{{event.id}}</span>
-                  <Button
-                    v-if="edit()"
-                    class="btn-invisible px-2 ml-3 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
-                    @click.stop="handleBookmarkedEventIdToggle(event.id)"
-                  >
-                    <Octicon
-                      :name="bookmarkedEventIds.includes(event.id) ? 'bookmark-fill' : 'bookmark'"
-                      :size="24"
-                      width="16"
-                      height="16"
-                    />
-                  </Button>
                   <Octicon
-                    v-else-if="bookmarkedEventIds.includes(event.id)"
-                    name="bookmark-fill"
+                    :name="bookmarkedEventIds.includes(event.id) ? 'bookmark-fill' : 'bookmark'"
                     :size="24"
                     width="16"
                     height="16"
-                    class="mx-2"
                   />
-                </div>
+                </Button>
+                <Octicon
+                  v-else-if="bookmarkedEventIds.includes(event.id)"
+                  name="bookmark-fill"
+                  :size="24"
+                  width="16"
+                  height="16"
+                  class="mx-2"
+                />
               </div>
             </template>
           </SelectMenu>

@@ -19,37 +19,34 @@
       />
     </template>
     <template #header v-if="!tags.length"><div /></template>
-    <template #default="{ edit }">
-      <div v-if="tags.length" class="SelectMenu-list">
-        <div
-          v-for="tag in tags"
-          :key="tag.id"
-          role="menuitemcheckbox"
-          :aria-checked="modelValue.includes(tag.id)"
-          class="SelectMenu-item"
-          @click="handleChange(modelValue.includes(tag.id) ? modelValue.filter(tagId => tagId !== tag.id) : modelValue.concat(tag.id))"
+    <template v-if="tags.length" #default="{ edit }">
+      <div
+        v-for="tag in tags"
+        :key="tag.id"
+        role="menuitemcheckbox"
+        :aria-checked="modelValue.includes(tag.id)"
+        class="SelectMenu-item"
+        @click="handleChange(modelValue.includes(tag.id) ? modelValue.filter(tagId => tagId !== tag.id) : modelValue.concat(tag.id))"
+      >
+        <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
+        <Tag
+          :tag-id="tag.id"
+          class="Label--large mr-auto"
+        />
+        <Button
+          v-if="edit()"
+          class="btn-invisible px-2 ml-3 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
+          @click.stop="isEditingTag = tag"
         >
-          <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
-          <Tag
-            :tag-id="tag.id"
-            class="Label--large mr-auto"
-          />
-          <Button
-            v-if="edit()"
-            class="btn-invisible px-2 ml-3 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
-            @click.stop="isEditingTag = tag"
-          >
-            <Octicon name="pencil" />
-          </Button>
-          <Button
-            v-if="edit()"
-            class="btn-invisible btn-danger px-2 ml-1 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
-            @click.stop="handleRemoveTag(tag, $event.shiftKey)"
-          >
-            <Octicon name="trash" />
-          </Button>
-        </div>
-        <!-- @TODO: add fallback -->
+          <Octicon name="pencil" />
+        </Button>
+        <Button
+          v-if="edit()"
+          class="btn-invisible btn-danger px-2 ml-1 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
+          @click.stop="handleRemoveTag(tag, $event.shiftKey)"
+        >
+          <Octicon name="trash" />
+        </Button>
       </div>
     </template>
   </SelectMenu>

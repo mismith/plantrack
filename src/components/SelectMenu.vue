@@ -47,21 +47,23 @@
               </Button>
             </header>
           </slot>
-          <slot v-bind="slotProps">
+          <slot name="list" v-bind="slotProps">
             <div class="SelectMenu-list">
-              <div class="SelectMenu-blankslate">
-                <Octicon name="circle-slash" :size="24" class="mt-n1" />
-                <h4 class="mt-3">No {{createableType}}s yet</h4>
-                <button
-                  v-if="createable"
-                  type="button"
-                  class="btn btn-sm btn-primary d-inline-flex flex-items-center mt-3"
-                  @click="handleCreate"
-                >
-                  <Octicon name="plus-circle" class="mr-2" />
-                  New {{createableType}}
-                </button>
-              </div>
+              <slot v-bind="slotProps">
+                <div class="SelectMenu-blankslate">
+                  <Octicon name="circle-slash" :size="24" class="mt-n1" />
+                  <h4 class="mt-3">No {{createableType}}s yet</h4>
+                  <button
+                    v-if="createable"
+                    type="button"
+                    class="btn btn-sm btn-primary d-inline-flex flex-items-center mt-3"
+                    @click="handleCreate"
+                  >
+                    <Octicon name="plus-circle" class="mr-2" />
+                    New {{createableType}}
+                  </button>
+                </div>
+              </slot>
             </div>
           </slot>
         </div>
