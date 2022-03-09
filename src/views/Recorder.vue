@@ -218,20 +218,20 @@
 
       <aside class="d-flex flex-wrap flex-justify-center mb-3" style="gap: 8px;">
         <Button v-if="!isShowing.attachments && isCaptureSupported" class="flex-auto" @click="handleShowAttachments(true)">
-          <Octicon name="plus-circle" class="mr-2" />
+          <Octicon name="image" class="mr-2" />
           Add Photo
         </Button>
         <Button v-if="!isShowing.attachments" class="flex-auto" @click="handleShowAttachments()">
-          <Octicon name="plus-circle" class="mr-2" />
+          <Octicon name="file" class="mr-2" />
           Add Attachment(s)
         </Button>
         <Button v-if="!isShowing.tagIds" class="flex-auto" @click="handleShowTags">
-          <Octicon name="plus-circle" class="mr-2" />
+          <Octicon name="tag" class="mr-2" />
           Add Tag(s)
         </Button>
         <Button v-if="!isShowing.at" class="flex-auto" @click="handleShowAt">
-          <Octicon name="plus-circle" class="mr-2" />
-          Use Specific Date/Time
+          <Octicon name="calendar" class="mr-2" />
+          Set Date/Time
         </Button>
       </aside>
 
