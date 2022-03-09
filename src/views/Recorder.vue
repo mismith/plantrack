@@ -61,10 +61,10 @@
               >
                 <Octicon name="check" class="SelectMenu-icon SelectMenu-icon--check" />
                 <Blip :color="event.color" class="mr-2" />
-                <span class="flex-auto">{{event.id}}</span>
+                <span class="flex-auto">{{ event.id }}</span>
                 <Button
                   v-if="edit()"
-                  class="btn-invisible px-2 ml-3 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
+                  class="btn-invisible px-2 ml-3 mr-n1 mt-n1 mb-n1 anim-scale-in"
                   @click.stop="handleBookmarkedEventIdToggle(event.id)"
                 >
                   <Octicon
@@ -80,24 +80,23 @@
                   :size="24"
                   width="16"
                   height="16"
-                  class="mx-2"
+                  class="ml-3 mr-1"
                 />
               </div>
             </template>
           </SelectMenu>
           <div v-if="bookmarkedEvents.length" class="d-flex flex-wrap mt-2" style="gap: 4px;">
-            <button
+            <Button
               v-for="event in bookmarkedEvents"
               :key="event.id"
-              type="button"
-              class="btn px-2 flex-auto"
+              class="btn-sm px-2 flex-auto"
               :class="{ 'btn-outline': eventId === event.id }"
               :aria-selected="eventId === event.id"
               @click="eventId = event.id"
             >
               <Blip :color="event.color" />
               {{event.id}}
-            </button>
+            </Button>
           </div>
         </div>
       </fieldset>

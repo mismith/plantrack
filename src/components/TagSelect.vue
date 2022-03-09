@@ -35,14 +35,14 @@
         />
         <Button
           v-if="edit()"
-          class="btn-invisible px-2 ml-3 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
+          class="btn-invisible px-2 ml-3 mt-n1 mb-n1 anim-scale-in"
           @click.stop="isEditingTag = tag"
         >
           <Octicon name="pencil" />
         </Button>
         <Button
           v-if="edit()"
-          class="btn-invisible btn-danger px-2 ml-1 mr-md-n2 mt-n1 mb-n1 anim-scale-in"
+          class="btn-invisible btn-danger px-2 mr-n1 mt-n1 mb-n1 anim-scale-in"
           @click.stop="handleRemoveTag(tag, $event.shiftKey)"
         >
           <Octicon name="trash" />

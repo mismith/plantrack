@@ -434,30 +434,37 @@ input[type="datetime-local"].form-control {
       }
     }
   }
-  
+
   .TreeNodeName {
     display: flex;
     align-items: center;
     flex: auto;
     min-width: 128px;
+    min-height: 30px;
     gap: 4px;
   }
   .TreeNodeActions {
     display: flex;
-    align-self: stretch;
-  }
-  @media (pointer: fine) {
-    .TreeNodeLeaf:not(:hover) {
-      .TreeNodeActions {
-        visibility: hidden;
-      }
-    }
+    padding-right: 12px;
   }
   @media (pointer: coarse) {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
 
-    .TreeNodeName {
-      font-size: 0.875rem;
+    > .TreeNode {
+      > .TreeNodeLeaf {
+        min-height: 36px;
+        border-top: solid 1px var(--color-border-muted);
+
+        .TreeNodeExpand {
+          padding: 1em !important;
+        }
+        .TreeNodeIndent {
+          padding: 0.5em !important;
+        }
+        .TreeNodeName {
+          font-size: 1rem;
+        }
+      }
     }
   }
 }
