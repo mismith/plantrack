@@ -17,8 +17,8 @@
         v-else-if="preview && isImage"
         :src="href"
         :alt="attachment.name"
-        class="width-full"
-        style="max-width: 600px; max-height: 600px; vertical-align: middle;"
+        class="container-sm width-full"
+        style="vertical-align: middle;"
         @error="err => isError = err.message || err"
       />
       <Octicon

@@ -50,7 +50,7 @@ function getRelativeDays(at: number) {
 </script>
 
 <template>
-  <div class="Timeline pl-1 pr-3 pl-md-3 pr-md-4">
+  <div class="Timeline container-md pl-1 pr-3 pl-md-3 pr-md-4">
     <div
       v-for="(entries, index) in groupedEntries"
       :key="index"

@@ -1,5 +1,5 @@
 <template>
-  <div class="Recorder width-full mx-auto" style="max-width: 600px;">
+  <div class="Recorder container-md width-full mx-auto">
     <form ref="formRef" @submit.prevent="handleSubmit" class="p-3">
       <fieldset class="form-group required">
         <header class="form-group-header">
