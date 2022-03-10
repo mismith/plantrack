@@ -6,6 +6,8 @@ import { Entry, events, formatAtAsDate } from '../services/data'
 import { useHydratedEntries } from '../services/exporter'
 import Button from '../components/Button.vue'
 import Blip from '../components/Blip.vue'
+import Tag from '../components/Tag.vue'
+import AttachmentLink from '../components/AttachmentLink.vue'
 
 const { entries: entriesRaw, beds, plots } = useHydratedEntries()
 const entries = computed(() => {
@@ -32,7 +34,7 @@ const groupedEntries = computed(() => {
 })
 
 function getPlotNames(entries: any[]) {
-  const plotNames = entries.map((entry) => entry.$plant?.$bed?.$plot.name || entry.$plant?.$bed?.plotId)
+  const plotNames = entries.map((entry) => entry.$plant?.$bed?.$plot?.name || entry.$plant?.$bed?.plotId)
   return plotNames.filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).reverse()
 }
 function getBedNames(entries: any[]) {
@@ -42,6 +44,7 @@ function getBedNames(entries: any[]) {
 function getRelativeDays(at: number) {
   const date = new Date(at)
   const relativeDays = Math.abs(differenceInDays(date, new Date()))
+  if (!relativeDays) return 'Today'
   return `${relativeDays} day${relativeDays === 1 ? '' : 's'} ago`
 }
 </script>
@@ -82,13 +85,32 @@ function getRelativeDays(at: number) {
           {{ getBedNames(entries).length }} beds
         </Button>
 
-        <div v-for="entry in entries" :key="entry.id" class="color-fg-muted">
-          {{ entry.$plant?.name }}: {{ entry.$plant?.$crop?.nickname }}
-        </div>
+        <ul class="color-fg-muted my-2" style="padding-left: 0.85em;">
+          <li v-for="entry in entries" :key="entry.id">
+            {{ entry.$plant?.name }}: {{ entry.$plant?.$crop?.nickname }}
+          </li>
+        </ul>
+
         <div v-if="entries[0].note" class="markdown-body my-2">
           <blockquote class="color-fg-default">
             {{ entries[0].note }}
           </blockquote>
+        </div>
+        <figure class="mx-0 my-2">
+          <AttachmentLink
+            v-for="attachment in entries[0].attachments"
+            :key="attachment.id"
+            :attachment="attachment"
+            preview
+          />
+        </figure>
+        <div class="my-2">
+          <Tag
+            v-for="tagId in entries[0]?.tagIds"
+            :key="tagId"
+            :tag-id="tagId"
+            class="mr-1"
+          />
         </div>
 
         <div class="color-fg-subtle" style="text-align: right;">
