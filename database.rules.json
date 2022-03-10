@@ -1,5 +1,12 @@
 {
   "rules": {
+    "users": {
+      "$userId": {
+        "_entries": {
+          ".indexOn": ["at"]
+        }
+      }
+    },
     ".read": "auth !== null",
     ".write": "auth !== null"
   }

@@ -3,21 +3,24 @@ import { computed } from 'vue'
 import { differenceInDays } from 'date-fns'
 
 import { Entry, events, formatAtAsDate } from '../services/data'
-import { useHydratedEntries } from '../services/exporter'
+import { database, getUserRefPath, useRtdbArray } from '../services/firebase'
 import Button from '../components/Button.vue'
 import Blip from '../components/Blip.vue'
 import Tag from '../components/Tag.vue'
 import AttachmentLink from '../components/AttachmentLink.vue'
+import MultiCrumb from '../components/MultiCrumb.vue'
 
-const { entries: entriesRaw, beds, plots } = useHydratedEntries()
+const _entries = useRtdbArray<Entry>(
+  database.ref(getUserRefPath('/_entries')).orderByChild('at').limitToLast(100) as any,
+)
 const entries = computed(() => {
-  return entriesRaw.value
+  return _entries.value
     ?.sort((a, b) => b.at - a.at)
     .slice(0, 100)
     .map((entry) => {
       return {
         ...entry,
-        $event: events?.find(({ id }) => id === entry.eventId),
+        _event: events?.find(({ id }) => id === entry.eventId),
       }
     })
 })
@@ -33,13 +36,9 @@ const groupedEntries = computed(() => {
     }, [] as Entry[][])
 })
 
-function getPlotNames(entries: any[]) {
-  const plotNames = entries.map((entry) => entry.$plant?.$bed?.$plot?.name || entry.$plant?.$bed?.plotId)
-  return plotNames.filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).reverse()
-}
-function getBedNames(entries: any[]) {
-  const plotNames = entries.map((entry) => entry.$plant?.$bed?.name || entry.$plant?.$bedId)
-  return plotNames.filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).reverse()
+function getAggregated(entries: Entry[], getter: (entry: Entry) => any = Boolean) {
+  const aggregated = entries.map(getter)
+  return aggregated.filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a.localeCompare(b))
 }
 function getRelativeDays(at: number) {
   const date = new Date(at)
@@ -57,37 +56,45 @@ function getRelativeDays(at: number) {
       class="TimelineItem pt-4"
       :class="{ 'TimelineItem--condensed': entries.length <= 1 }"
     >
-      <div
+      <a
+        :href="`#${entries[0].batchId || entries[0].id}`"
         class="TimelineItem-badge"
-        :style="{ boxShadow: entries.length <= 1 ? undefined : `inset 0 0 0 2px ${entries[0].$event?.color}` }"
+        :style="{ boxShadow: entries.length <= 1 ? undefined : `inset 0 0 0 2px ${entries[0]._event?.color}` }"
       >
-        <Blip v-if="entries.length <= 1" :color="entries[0].$event?.color" />
-        <span v-else :style="{ color: entries[0].$event?.color }">{{ entries.length }}</span>
-      </div>
+        <Blip v-if="entries.length <= 1" :color="entries[0]._event?.color" />
+        <span v-else :style="{ color: entries[0]._event?.color }">{{ entries.length }}</span>
+      </a>
 
       <div class="TimelineItem-body color-fg-default">
-        <strong class="mr-1">{{ entries[0].eventId }}</strong>
-
-        <!-- {{ plots?.[beds?.[entries[0].payload?.oldBedId]?.plotId]?.name }}
-        {{ beds?.[entries[0].payload?.oldBedId]?.name }} -->
+        <strong class="mr-2">{{ entries[0].eventId }}</strong>
         
-        <span v-if="getPlotNames(entries).length <= 1" class="color-fg-muted">
-          {{ getPlotNames(entries)[0] }}
-        </span>
-        <Button v-else class="Label Label--secondary tooltipped tooltipped-s tooltipped-no-delay" :aria-label="getPlotNames(entries).join('\n')">
-          {{ getPlotNames(entries).length }} plots
-        </Button>
-        /
-        <span v-if="getBedNames(entries).length <= 1" class="color-fg-muted">
-          {{ getBedNames(entries)[0] }}
-        </span>
-        <Button v-else class="Label Label--secondary tooltipped tooltipped-s tooltipped-no-delay" :aria-label="getBedNames(entries).join('\n')">
-          {{ getBedNames(entries).length }} beds
-        </Button>
+        <template v-if="entries[0].payload?._oldBed">
+          <MultiCrumb
+            :values="getAggregated(entries, (entry) => [entry.payload._oldBed?._plot?.name, entry.payload._oldBed?.name].filter(Boolean).join(' / '))"
+            label="beds"
+          />
+        </template>
+        <template v-if="entries[0].payload?._newBed">
+          &rarr;
+          <MultiCrumb
+            :values="getAggregated(entries, (entry) => [entry.payload._newBed?._plot?.name, entry.payload._newBed?.name].filter(Boolean).join(' / '))"
+            label="beds"
+          />
+        </template>
+        <template v-if="!(entries[0].payload?._oldBed || entries[0].payload?._newBed)">
+          <MultiCrumb
+            :values="getAggregated(entries, (entry) => [entry._plant?._bed?._plot?.name, entry._plant?._bed?.name].filter(Boolean).join(' / '))"
+            label="beds"
+          />
+        </template>
 
-        <ul class="color-fg-muted my-2" style="padding-left: 0.85em;">
+        <ul class="color-fg-muted my-2" style="padding-left: 12px;">
           <li v-for="entry in entries" :key="entry.id">
-            {{ entry.$plant?.name }}: {{ entry.$plant?.$crop?.nickname }}
+            <span v-if="entry.payload?._oldPlant">
+              {{ entry.payload?._oldPlant?.name }}: {{ entry.payload?._oldPlant?._crop?.nickname }}
+              <span class="color-fg-default">&rarr;</span>
+            </span>
+            {{ entry._plant?.name }}: {{ entry._plant?._crop?.nickname }}
           </li>
         </ul>
 

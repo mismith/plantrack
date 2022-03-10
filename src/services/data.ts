@@ -41,26 +41,45 @@ export interface Crop extends Entity {
   cost?: number
   numSeeds?: number
 }
+
+export interface EntryPayload {
+  oldBedId?: string
+  _oldBed?: Bed
+  newBedId?: string
+  _newBed?: Bed
+  oldPlantId?: string
+  _oldPlant?: Plant
+  newPlantId?: string
+  _newPlant?: Plant
+  weight?: {
+    value: number
+    unit: string
+  }
+}
 export interface Entry extends Entity {
+  _plantId?: string
+  _plant?: Plant
   batchId?: string
   eventId: string
   at: Timestamp
-  payload?: Record<string, any>
+  payload?: EntryPayload
   note?: string
   attachments?: Attachment[]
   tagIds?: string[]
-  _plantId?: string
-  _snapshot?: Record<string, any>
+  _tags?: Tag[]
 }
 export interface Plant extends Entity {
   name: string
   cropId: string
+  _crop?: Crop
   bedId: string
+  _bed?: Bed
   entries?: Record<string, Entry>
 }
 export interface Bed extends Entity {
   name: string
   plotId: string
+  _plot?: Plot
   x?: number
   y?: number
   width?: number
@@ -69,6 +88,7 @@ export interface Bed extends Entity {
 export interface Plot extends Entity {
   name: string
   parentPlotId?: string
+  _parentPlot?: Plot
 }
 export interface Tag extends Entity {
   name: string
