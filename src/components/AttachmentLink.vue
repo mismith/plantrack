@@ -7,14 +7,16 @@
     :class="{ 'tooltipped tooltipped-e tooltipped-multiline tooltipped-no-delay color-fg-danger': isError }"
     :aria-label="isError"
   >
-    <slot v-if="!isLoading">
+    <slot v-if="isError" name="error">
       <Octicon
-        v-if="isError"
         name="alert"
         :size="preview ? 24 : undefined"
+        style="color: inherit;"
       />
+    </slot>
+    <slot v-else-if="!isLoading">
       <img
-        v-else-if="preview && isImage"
+        v-if="preview && isImage"
         :src="href"
         :alt="attachment.name"
         class="container-sm width-full"
