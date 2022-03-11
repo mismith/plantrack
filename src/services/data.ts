@@ -302,11 +302,21 @@ export function useTreeViewProps(
   }
 }
 
-const localStorage = {
-  get(path: string, defaultValue?: any) {
+export const memoryStorage = {
+  store: {} as Record<string, string>,
+  getItem(path: string) {
+    return memoryStorage.store[path] || ''
+  },
+  setItem(path: string, value: string) {
+    memoryStorage.store[path] = value
+  },
+}
+export type StorageType = typeof memoryStorage | typeof window.localStorage | typeof window.sessionStorage
+export const persistance = {
+  get(path: string, defaultValue?: any, storageType: StorageType = window.localStorage) {
     const loadedValue = (() => {
       try {
-        return JSON.parse(window.localStorage.getItem(path)!)
+        return JSON.parse(storageType.getItem(path)!)
       } catch (error) {
         console.error(error)
         return undefined
@@ -314,25 +324,25 @@ const localStorage = {
     })()
     return loadedValue || defaultValue
   },
-  set(path: string, value: any) {
-    window.localStorage.setItem(path, JSON.stringify(value))
+  set(path: string, value: any, storageType: StorageType = window.localStorage) {
+    storageType.setItem(path, JSON.stringify(value))
   },
 }
-export function useLocalStorageRef<T extends unknown>(key: string, defaultValue?: T) {
-  const path = `plantrack.localStorageRef.${key}`
+export function usePersistentRef<T extends unknown>(key: string, defaultValue?: T, storageType?: StorageType) {
+  const path = `plantrack.persistentRef.${key}`
   
-  const value = ref<T>(localStorage.get(path, defaultValue))
-  watch(value, (v) => localStorage.set(path, v))
+  const value = ref<T>(persistance.get(path, defaultValue, storageType))
+  watch(value, (v) => persistance.set(path, v, storageType))
   return value
 }
 export function useRestoreKey(key: string, prefix: string) {
   const path = `plantrack.restoreKey.${prefix}.${key}`
   return {
     load() {
-      return localStorage.get(path)
+      return persistance.get(path)
     },
     save(value: any) {
-      localStorage.set(path, value)
+      persistance.set(path, value)
     },
   }
 }

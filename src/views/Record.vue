@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, reactive, ref, watch } from 'vue'
 
-import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds, useTags, useRestoreKey, useLocalStorageRef } from '../services/data'
+import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds, useTags, useRestoreKey, usePersistentRef } from '../services/data'
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 
@@ -167,7 +167,7 @@ const [tags] = useTags()
 const tagIds = ref<string[]>([])
 
 const defaultBookmarkedEventIds = ['seed', 'sprout', 'harvest', 'cull', 'other']
-const bookmarkedEventIds = useLocalStorageRef<string[]>('Record.bookmarkedEventIds', ['seed', 'sprout', 'harvest', 'cull', 'other'])
+const bookmarkedEventIds = usePersistentRef<string[]>('Record.bookmarkedEventIds', ['seed', 'sprout', 'harvest', 'cull', 'other'])
 const isDefaultBookmarkedEventIds = computed(() => defaultBookmarkedEventIds.length === bookmarkedEventIds.value.length
   && defaultBookmarkedEventIds.every(id => bookmarkedEventIds.value.includes(id)))
 const bookmarkedEvents = computed(() => events.filter(({ id }) => bookmarkedEventIds.value.includes(id)))
