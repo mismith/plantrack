@@ -6,18 +6,19 @@
         <Touchicon class="logo d-sm-none" :class="{ 'd-none': !user }" />
       </router-link>
     </div>
-    <div class="Header-item Header-item--full d-flex flex-justify-center" style="overflow-x: auto;">
-      <div v-if="user" class="UnderlineNav">
+    <div class="Header-item Header-item--full tabnav border-0 mb-0 d-flex flex-justify-center flex-items-end">
+      <nav v-if="user" class="tabnav-tabs">
         <router-link
           v-for="route in routes.filter(({ meta }) => meta?.title)"
           :key="route.path"
           :to="route.path"
           role="tab"
-          class="UnderlineNav-item Header-link"
+          :aria-current="$route.path === route.path && 'page'"
+          class="tabnav-tab Header-link"
         >
           {{route.meta?.title}}
         </router-link>
-      </div>
+      </nav>
     </div>
     <div class="Header-item pl-2">
       <button type="button" title="Toggle Dark Mode" class="Header-link close-button circle" @click="isDarkMode = !isDarkMode">
@@ -270,19 +271,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
-  }
-}
-.UnderlineNav {
-  box-shadow: none;
-}
-.UnderlineNav-item {
-  &.selected,
-  &[role=tab][aria-selected=true],
-  &[aria-current]:not([aria-current=false]) {
-    color: var(--color-header-logo);
-    border-bottom-color: var(--color-plantrack-primary);
+    width: 32px;
+    height: 32px;
   }
 }
 
