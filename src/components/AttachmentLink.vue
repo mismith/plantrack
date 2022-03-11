@@ -68,8 +68,12 @@ export default defineComponent({
     const isImage = computed(() => attachment.value?.type.startsWith('image/'))
     const isLoading = ref(false)
     const isError = ref()
+    const attachmentId = ref()
     watch(attachment, async ({ id }) => {
+      if (isLoading.value || attachmentId.value === id) return
+
       isLoading.value = true
+      attachmentId.value = id
       try {
         const ref = storage.ref(getUserRefPath(`/attachments/${id}`))
         href.value = await ref.getDownloadURL()
