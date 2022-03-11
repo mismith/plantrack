@@ -75,7 +75,7 @@
         fill="url(#majorGridlines)"
         :style="{ cursor: panning ? 'grabbing' : 'grab' }"
         @mousedown="handleGridDragStart"
-        @click="e => handleBedClick(e, null)"
+        @click="e => handleBedClick(e, undefined)"
         ref="gridlinesRef"
       />
 
@@ -240,7 +240,7 @@ export default defineComponent({
 
             return { min, max }
           },
-          { min: {}, max: {} } as { min: { x?: number, y?: number }, max: { x?: number, y?: number }},
+          { min: {}, max: {} } as { min: { x: number, y: number }, max: { x: number, y: number }},
         )
       }
     )
@@ -272,7 +272,7 @@ export default defineComponent({
     const handleBedResize = async (bed: Bed, dimensions: { width?: number, height?: number }) => {
       await bedsRef.child(bed.id).update(dimensions)
     }
-    const handleBedClick = (e: MouseEvent, bed: Bed) => {
+    const handleBedClick = (e: MouseEvent, bed?: Bed) => {
       if (e.shiftKey && bed && selectedBed.value) {
         if (bed.id !== selectedBed.value?.id) {
           if (groupedBeds.value.find(({ id }) => id === bed.id)) {

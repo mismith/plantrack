@@ -45,7 +45,6 @@ import Button from '../components/Button.vue'
 import Octicon from '../components/Octicon.vue'
 
 export default defineComponent({
-  name: 'Analyzer',
   components: {
     TreeView,
     Button,

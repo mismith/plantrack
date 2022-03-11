@@ -75,7 +75,7 @@ export default defineComponent({
 
     const name = ref(bed.value?.name)
     const [plots] = usePlots()
-    const plotIds = ref([bed.value?.plotId || plots.value?.[0]?.id].filter(Boolean))
+    const plotIds = ref([bed.value?.plotId || plots.value?.[0]?.id].filter(Boolean) as string[])
     const isValid = computed(() => Boolean(name.value && plotIds.value?.[0]))
 
     const isAddingPlot = inject<Ref>('isAddingPlot')!

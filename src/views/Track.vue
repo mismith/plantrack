@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { differenceInDays } from 'date-fns'
 
-import { Entry, events, formatAtAsDate, useLocalStorageRef } from '../services/data'
+import { Entry, events, formatAtAsDate } from '../services/data'
 import { database, getUserRefPath, useRtdbArray } from '../services/firebase'
 import VPButton from '../components/Button.vue'
 import Blip from '../components/Blip.vue'
@@ -14,8 +14,6 @@ import Octicon from '../components/Octicon.vue'
 const ENTRIES_PAGE_COUNT = 10 // 50
 const numEntries = ref(ENTRIES_PAGE_COUNT)
 const hasLoadedAllEntries = ref(false)
-// const numEntries = useLocalStorageRef('Activity.numEntries', ENTRIES_PAGE_COUNT)
-// const hasLoadedAllEntries = useLocalStorageRef('Activity.hasLoadedAllEntries', false)
 const entriesQuery = computed(() => database.ref(getUserRefPath('/_entries')).orderByChild('at').limitToLast(numEntries.value))
 const [_entries, isLoading] = useRtdbArray<Entry>(entriesQuery, (entry) => ({
   ...entry,
@@ -25,7 +23,7 @@ watch(_entries, (v) => {
   if (v?.length && v.length < numEntries.value) {
     hasLoadedAllEntries.value = true
   }
-})
+}, { immediate: true })
 // const loadMoreRef = ref<HTMLElement>()
 function loadMoreEntries() {
   // const previousLastEntry = loadMoreRef.value?.previousElementSibling
@@ -37,6 +35,7 @@ function loadMoreEntries() {
   //   })
   // }, 300)
 }
+
 const groupedEntries = computed(() => {
   return _entries.value
     ?.sort((a, b) => b.at - a.at)

@@ -15,7 +15,7 @@
           role="tab"
           class="UnderlineNav-item Header-link"
         >
-          {{route.meta.title}}
+          {{route.meta?.title}}
         </router-link>
       </div>
     </div>
@@ -153,11 +153,11 @@ export default defineComponent({
       window.localStorage.setItem(colorSchemeKey, enabled ? 'dark' : 'light')
     }, { immediate: true })
 
-    const isAddingPlant = ref(false)
-    const isAddingCrop = ref(false)
-    const isAddingBed = ref(false)
-    const isAddingPlot = ref(false)
-    const isAddingTag = ref(false)
+    const isAddingPlant = ref<Boolean | Function | undefined>(false)
+    const isAddingCrop = ref<Boolean | Function | undefined>(false)
+    const isAddingBed = ref<Boolean | Function | undefined>(false)
+    const isAddingPlot = ref<Boolean | Function | undefined>(false)
+    const isAddingTag = ref<Boolean | Function | undefined>(false)
     provide('isAddingPlant', isAddingPlant)
     provide('isAddingCrop', isAddingCrop)
     provide('isAddingBed', isAddingBed)

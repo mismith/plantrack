@@ -12,10 +12,10 @@
   </component>
 </template>
 
-<script>
-import { Transition, TransitionGroup } from 'vue'
+<script lang="ts">
+import { defineComponent, Transition, TransitionGroup } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'TransitionExpand',
   components: {
     Transition,
@@ -29,20 +29,20 @@ export default {
   },
   setup() {
     return {
-      onAfterEnter(element) {
+      onAfterEnter(element: HTMLElement) {
         element.style.height = 'auto'
       },
-      onEnter(element) {
+      onEnter(element: HTMLElement) {
         const { width } = getComputedStyle(element)
         element.style.width = width
         element.style.position = 'absolute'
         element.style.visibility = 'hidden'
         element.style.height = 'auto'
         const { height } = getComputedStyle(element)
-        element.style.width = null
-        element.style.position = null
-        element.style.visibility = null
-        element.style.height = 0
+        element.style.width = null as any
+        element.style.position = null as any
+        element.style.visibility = null as any
+        element.style.height = 0 as any
         // Force repaint to make sure the
         // animation is triggered correctly.
         getComputedStyle(element).height
@@ -50,19 +50,19 @@ export default {
           element.style.height = height
         })
       },
-      onLeave(element) {
+      onLeave(element: HTMLElement) {
         const { height } = getComputedStyle(element)
         element.style.height = height
         // Force repaint to make sure the
         // animation is triggered correctly.
         getComputedStyle(element).height
         requestAnimationFrame(() => {
-          element.style.height = 0
+          element.style.height = 0 as any
         })
       },
     }
   },
-}
+})
 </script>
 
 <style scoped>

@@ -101,7 +101,7 @@ export default defineComponent({
     const { nodes, beds, plants } = usePlantDataTree()
 
     const [crops] = useCrops()
-    const cropIds = ref([plant.value?.cropId || crops.value?.[0]?.id])
+    const cropIds = ref([plant.value?.cropId || crops.value?.[0]?.id].filter(Boolean) as string[])
     const isAddingCrop = inject<Ref>('isAddingCrop')!
     function handleCropCreate() {
       isAddingCrop.value = (newCrop: Crop) => {
@@ -110,7 +110,7 @@ export default defineComponent({
       }
     }
 
-    const bedIds = ref([plant.value?.bedId || beds.value?.[0]?.id].filter(Boolean))
+    const bedIds = ref([plant.value?.bedId || beds.value?.[0]?.id].filter(Boolean) as string[])
     const name = ref(plant.value?.name)
     const placeholder = computed(() => getSuggestedPlantName(cropIds.value?.[0], crops.value, plants.value))
     const isValid = computed(() => Boolean(cropIds.value?.[0] && bedIds.value?.[0]))
