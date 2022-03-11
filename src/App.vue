@@ -43,7 +43,11 @@
     </div>
   </nav>
 
-  <router-view v-if="user" class="flex-auto" />
+  <router-view v-if="user" v-slot="{ Component }" class="flex-auto">
+    <KeepAlive>
+      <component :is="Component"></component>
+    </KeepAlive>
+  </router-view>
   <div v-else-if="user === undefined" class="flex-auto d-flex">
     <Spinner :size="32" class="m-auto" />
   </div>
