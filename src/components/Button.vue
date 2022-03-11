@@ -21,7 +21,7 @@ export default defineComponent({
   },
   props: {
     loading: {
-      type: Boolean,
+      type: [String, Boolean, Object],
       default: false,
     },
   },
