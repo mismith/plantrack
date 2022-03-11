@@ -153,6 +153,9 @@ function getRelativeDays(at: number) {
       <div class="TimelineItem-body">
         <VPButton
           :loading="isLoading"
+          :disabled="isLoading"
+          v-infinite-scroll="loadMoreEntries"
+          :infinite-scroll-distance="100"
           class="mt-n1"
           @click="loadMoreEntries()"
         >
