@@ -11,7 +11,7 @@ import AttachmentLink from '../components/AttachmentLink.vue'
 import MultiCrumb from '../components/MultiCrumb.vue'
 import Octicon from '../components/Octicon.vue'
 
-const ENTRIES_PAGE_COUNT = 10 // 50
+const ENTRIES_PAGE_COUNT = 36
 const numEntries = ref(ENTRIES_PAGE_COUNT)
 const hasLoadedAllEntries = ref(false)
 const entriesQuery = computed(() => database.ref(getUserRefPath('/_entries')).orderByChild('at').limitToLast(numEntries.value))
@@ -68,7 +68,7 @@ function getRelativeDays(at: number) {
 </script>
 
 <template>
-  <div class="Timeline container-md pl-1 pr-1">
+  <div class="Timeline container-md width-full pl-1 pr-1">
     <div
       v-for="(entries, index) in groupedEntries"
       :key="index"
