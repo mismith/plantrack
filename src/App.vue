@@ -7,13 +7,13 @@
       </router-link>
     </div>
     <div class="Header-item Header-item--full tabnav border-0 mb-0 d-flex flex-justify-center flex-items-end">
-      <nav v-if="user" class="tabnav-tabs">
+      <nav v-if="user" class="tabnav-tabs mb-0">
         <router-link
           v-for="route in routes.filter(({ meta }) => meta?.title)"
           :key="route.path"
           :to="route.path"
           role="tab"
-          :aria-current="$route.path === route.path && 'page'"
+          :aria-current="$route.path.startsWith(route.path) && 'page'"
           class="tabnav-tab Header-link"
         >
           {{route.meta?.title}}
@@ -21,13 +21,13 @@
       </nav>
     </div>
     <div class="Header-item pl-2">
-      <button type="button" title="Toggle Dark Mode" class="Header-link close-button circle" @click="isDarkMode = !isDarkMode">
-        <Octicon :name="isDarkMode ? 'sun' : 'moon'" />
-      </button>
+      <Button title="Toggle Dark Mode" class="Header-link btn-invisible px-2" @click="isDarkMode = !isDarkMode">
+        <Octicon :name="isDarkMode ? 'sun' : 'moon'" style="color: inherit;" />
+      </Button>
       <Dropdown v-if="user" direction="sw" menu-class="mt-2" class="ml-2">
         <template #summary>
-          <summary title="Account" aria-haspopup="true" class="Header-link close-button circle">
-            <Octicon name="person" />
+          <summary title="Account" aria-haspopup="true" class="Header-link btn btn-invisible px-2">
+            <Octicon name="person" class="mr-0" style="color: inherit;" />
             <span class="dropdown-caret" />
           </summary>
         </template>
@@ -267,12 +267,15 @@ body {
   .Header-item {
     margin-right: 0;
   }
-  .Header-link.circle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
+
+  .btn-invisible {
+    background-color: transparent !important;
+  }
+}
+
+.UnderlineNav {
+  .UnderlineNav-item[aria-current]:not([aria-current=false]) {
+    border-color: var(--color-plantrack-primary);
   }
 }
 
