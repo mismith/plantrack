@@ -427,7 +427,7 @@ const isAddingBed = inject('isAddingBed')
                 v-if="beds?.length"
                 v-model="newBedIds"
                 restore-key="Record.newBedIds"
-                :filter="node => node.type !== 'entry' && node.id !== 'system'"
+                :filter="node => node.type !== 'entry'"
                 :editable="edit()"
                 @update:model-value="close()"
               />

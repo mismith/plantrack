@@ -25,7 +25,7 @@
             <PlantTreeView
               v-if="plots?.length"
               v-model="plotIds"
-              :filter="node => node.type !== 'entry' && node.id !== 'system'"
+              :filter="node => node.type !== 'entry'"
               selectable-type="plot"
               :editable="edit()"
               @update:model-value="close()"

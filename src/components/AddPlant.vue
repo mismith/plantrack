@@ -42,7 +42,7 @@
             <PlantTreeView
               v-if="beds?.length"
               v-model="bedIds"
-              :filter="node => node.type !== 'entry' && node.id !== 'system'"
+              :filter="node => node.type !== 'entry'"
               :editable="edit()"
               @update:model-value="close()"
             />

@@ -185,36 +185,23 @@ export function arrayToNested<T extends { [k: string]: any }>(
   return tree
 }
 
-export const INACTIVE = 'inactive'
 export function usePlantDataTree({ filter = Boolean }: { filter?(node: ITreeNode): boolean } = {}) {
   const [plants] = usePlants()
   const [beds] = useBeds()
   const [plots] = usePlots()
 
-  const nodes = computed(() => ([...plots.value || [], {
-    id: 'system',
-    name: 'System',
-    createdAt: Date.now(),
-  }].map((plot) => ({
+  const nodes = computed(() => ([...plots.value || []].map((plot) => ({
     type: 'plot',
-    children: ([...beds.value || [], {
-      id: INACTIVE,
-      name: 'Inactive',
-      plotId: 'system',
-    }].filter(({ plotId }) => plotId === plot.id).map((bed) => ({
+    children: ([...beds.value || []].filter(({ plotId }) => plotId === plot.id).map((bed) => ({
       type: 'bed',
-      children: (plants.value?.filter(({ bedId }) => (!bedId && bed.id === INACTIVE) || bedId === bed.id).map((plant) => ({
+      children: (plants.value?.filter(({ bedId }) => bedId === bed.id).map((plant) => ({
         type: 'plant',
         children: toKeyFieldArray<Entry>(plant.entries || {}).map((entry) => ({
           type: 'entry',
           ...entry,
         })).filter(filter).sort((a, b) => a.at - b.at),
         ...plant,
-      })) || []).filter(filter).sort(
-        bed.id === INACTIVE
-          ? (a, b) => (a.children[a.children.length - 1]?.at || 0) - (b.children[b.children.length - 1]?.at || 0)
-          : () => 0,
-      ),
+      })) || []).filter(filter),
       ...bed,
     })) || []).filter(filter),
     ...plot,
