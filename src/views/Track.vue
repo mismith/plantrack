@@ -4,7 +4,7 @@
 
 <template>
   <div>
-    <nav class="UnderlineNav color-bg-default" style="position: sticky; top: calc(48px + env(safe-area-inset-top)); z-index: 19;">
+    <nav class="UnderlineNav color-bg-default" style="position: sticky; top: calc(48px + env(safe-area-inset-top)); z-index: 9;">
       <div class="UnderlineNav-body container-md">
         <router-link to="/track/entries" class="UnderlineNav-item">Entries</router-link>
         <router-link to="/track/crops" class="UnderlineNav-item">Crops</router-link>

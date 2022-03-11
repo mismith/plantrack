@@ -72,7 +72,7 @@ watch(groupedEntries, (v) => {
           :loading="isLoading"
           :disabled="isLoading"
           v-infinite-scroll="loadMoreEntries"
-          :infinite-scroll-distance="100"
+          :infinite-scroll-distance="200"
           class="mt-n1"
           @click="loadMoreEntries()"
         >
@@ -80,6 +80,6 @@ watch(groupedEntries, (v) => {
         </VPButton>
       </div>
     </div>
-    <div v-else class="TimelineItem-break ml-0"></div>
+    <div v-else-if="groupedEntries?.length" class="TimelineItem-break ml-0"></div>
   </div>
 </template>

@@ -49,10 +49,10 @@
       <component :is="Component"></component>
     </KeepAlive>
   </router-view>
-  <div v-else-if="user === undefined" class="flex-auto d-flex">
+  <div v-else-if="user === undefined" class="flex-auto d-flex p-6">
     <Spinner :size="32" class="m-auto" />
   </div>
-  <div v-else class="d-flex flex-items-center flex-align-center px-2 py-6">
+  <div v-else class="flex-auto d-flex flex-items-center flex-align-center px-2 pt-2 pb-8">
     <div class="Box d-flex flex-column m-auto">
       <div class="Box-header d-flex flex-column flex-items-center text-center pt-3 px-6 pb-6">
         <Logo class="logo" style="max-width: 200px; height: auto;" />
@@ -234,6 +234,19 @@ export default defineComponent({
 @import '@primer/css/index.scss';
 @import '@primer/octicons/index.scss';
 
+
+html,
+body,
+#app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  font-family: sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
 body {
   padding-bottom: env(safe-area-inset-bottom) !important;
 }
@@ -277,16 +290,6 @@ body {
   .UnderlineNav-item[aria-current]:not([aria-current=false]) {
     border-color: var(--color-plantrack-primary);
   }
-}
-
-html,
-body,
-#app {
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  font-family: sans-serif;
 }
 
 input[type="file"].form-control,
