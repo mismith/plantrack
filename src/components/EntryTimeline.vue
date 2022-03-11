@@ -75,8 +75,8 @@ export default defineComponent({
   },
   setup(props) {
     const { entries, startDate: explicitStartDate, endDate: explicitEndDate } = toRefs(props)
-    const beds = useBeds()
-    const plants = usePlants()
+    const [beds] = useBeds()
+    const [plants] = usePlants()
 
     const startDate = computed(() => explicitStartDate?.value || getStartDate(entries.value))
     const endDate = computed(() => explicitEndDate?.value || getEndDate(entries.value))

@@ -10,26 +10,11 @@ const app = initializeApp()
 if (isEmulator()) {
   functions.app.setEmulatedAdminApp(app)
 }
-
 const db = getDatabase(app)
 
 async function get(userId, collection, id) {
   return (await db.ref(`/users/${userId}/${collection}/${id}`).get()).val()
 }
-// async function getUserCollectionsData(userId) {
-//   const collections = [
-//     'plants',
-//     'beds',
-//     'plots',
-//     'crops',
-//     'tags',
-//   ]
-//   const snaps = collections.map((collection) => db.ref(`/users/${userId}/${collection}`).get())
-//   return (await Promise.all(snaps)).reduce((acc, snap, i) => {
-//     acc[collections[i]] = snap.val()
-//     return acc
-//   }, {} as Record<string, any>)
-// }
 const transforms = {
   async entry(userId, entry) {
     if (!entry) return null

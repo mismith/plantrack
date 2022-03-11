@@ -1,32 +1,46 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { differenceInDays } from 'date-fns'
 
-import { Entry, events, formatAtAsDate } from '../services/data'
+import { Entry, events, formatAtAsDate, useLocalStorageRef } from '../services/data'
 import { database, getUserRefPath, useRtdbArray } from '../services/firebase'
-import Button from '../components/Button.vue'
+import VPButton from '../components/Button.vue'
 import Blip from '../components/Blip.vue'
 import Tag from '../components/Tag.vue'
 import AttachmentLink from '../components/AttachmentLink.vue'
 import MultiCrumb from '../components/MultiCrumb.vue'
+import Octicon from '../components/Octicon.vue'
 
-const _entries = useRtdbArray<Entry>(
-  database.ref(getUserRefPath('/_entries')).orderByChild('at').limitToLast(100) as any,
-)
-const entries = computed(() => {
+const ENTRIES_PAGE_COUNT = 10 // 50
+const numEntries = ref(ENTRIES_PAGE_COUNT)
+const hasLoadedAllEntries = ref(false)
+// const numEntries = useLocalStorageRef('Activity.numEntries', ENTRIES_PAGE_COUNT)
+// const hasLoadedAllEntries = useLocalStorageRef('Activity.hasLoadedAllEntries', false)
+const entriesQuery = computed(() => database.ref(getUserRefPath('/_entries')).orderByChild('at').limitToLast(numEntries.value))
+const [_entries, isLoading] = useRtdbArray<Entry>(entriesQuery, (entry) => ({
+  ...entry,
+  _event: events?.find(({ id }) => id === entry.eventId),
+}))
+watch(_entries, (v) => {
+  if (v?.length && v.length < numEntries.value) {
+    hasLoadedAllEntries.value = true
+  }
+})
+// const loadMoreRef = ref<HTMLElement>()
+function loadMoreEntries() {
+  // const previousLastEntry = loadMoreRef.value?.previousElementSibling
+  numEntries.value += ENTRIES_PAGE_COUNT
+  // setTimeout(() => {
+  //   previousLastEntry?.nextElementSibling?.scrollIntoView({
+  //     behavior: 'smooth',
+  //     block: 'start',
+  //   })
+  // }, 300)
+}
+const groupedEntries = computed(() => {
   return _entries.value
     ?.sort((a, b) => b.at - a.at)
-    .slice(0, 100)
-    .map((entry) => {
-      return {
-        ...entry,
-        _event: events?.find(({ id }) => id === entry.eventId),
-      }
-    })
-})
-const groupedEntries = computed(() => {
-  return entries.value
-    ?.reduce((acc, entry) => {
+    .reduce((acc, entry) => {
       if (acc.length && entry.batchId && entry.batchId === acc[acc.length - 1]?.[0]?.batchId) {
         acc[acc.length - 1].push(entry)
       } else {
@@ -34,6 +48,12 @@ const groupedEntries = computed(() => {
       }
       return acc
     }, [] as Entry[][])
+})
+watch(groupedEntries, (v) => {
+  if (v?.[v?.length - 1]?.[0]?.batchId && !hasLoadedAllEntries.value) {
+    // keep loading entries until the current batch is fully loaded
+    numEntries.value += 1
+  }
 })
 
 function getAggregated(entries: Entry[], getter: (entry: Entry) => any = Boolean) {
@@ -49,20 +69,20 @@ function getRelativeDays(at: number) {
 </script>
 
 <template>
-  <div class="Timeline container-md pl-1 pr-3 pl-md-3 pr-md-4">
+  <div class="Timeline container-md pl-1 pr-1">
     <div
       v-for="(entries, index) in groupedEntries"
       :key="index"
-      class="TimelineItem pt-4"
+      class="TimelineItem pt-3 pb-2 pr-3"
       :class="{ 'TimelineItem--condensed': entries.length <= 1 }"
     >
       <a
-        :href="`#${entries[0].batchId || entries[0].id}`"
+        :href="`#${entries[0].id}`"
         class="TimelineItem-badge"
-        :style="{ boxShadow: entries.length <= 1 ? undefined : `inset 0 0 0 2px ${entries[0]._event?.color}` }"
+        :style="{ boxShadow: entries.length <= 1 ? undefined : `inset 0 0 0 2px ${entries[0]?._event?.color}` }"
       >
-        <Blip v-if="entries.length <= 1" :color="entries[0]._event?.color" />
-        <span v-else :style="{ color: entries[0]._event?.color }">{{ entries.length }}</span>
+        <Blip v-if="entries.length <= 1" :color="entries[0]?._event?.color" />
+        <span v-else :style="{ color: entries[0]?._event?.color }">{{ entries.length }}</span>
       </a>
 
       <div class="TimelineItem-body color-fg-default">
@@ -70,14 +90,14 @@ function getRelativeDays(at: number) {
         
         <template v-if="entries[0].payload?._oldBed">
           <MultiCrumb
-            :values="getAggregated(entries, (entry) => [entry.payload._oldBed?._plot?.name, entry.payload._oldBed?.name].filter(Boolean).join(' / '))"
+            :values="getAggregated(entries, (entry) => [entry.payload?._oldBed?._plot?.name, entry.payload?._oldBed?.name].filter(Boolean).join(' / '))"
             label="beds"
           />
         </template>
         <template v-if="entries[0].payload?._newBed">
           &rarr;
           <MultiCrumb
-            :values="getAggregated(entries, (entry) => [entry.payload._newBed?._plot?.name, entry.payload._newBed?.name].filter(Boolean).join(' / '))"
+            :values="getAggregated(entries, (entry) => [entry.payload?._newBed?._plot?.name, entry.payload?._newBed?.name].filter(Boolean).join(' / '))"
             label="beds"
           />
         </template>
@@ -89,7 +109,7 @@ function getRelativeDays(at: number) {
         </template>
 
         <ul class="color-fg-muted my-2" style="padding-left: 12px;">
-          <li v-for="entry in entries" :key="entry.id">
+          <li v-for="entry in entries" :key="entry.id" :id="`entry-${entry.id}`">
             <span v-if="entry.payload?._oldPlant">
               {{ entry.payload?._oldPlant?.name }}: {{ entry.payload?._oldPlant?._crop?.nickname }}
               <span class="color-fg-default">&rarr;</span>
@@ -127,5 +147,20 @@ function getRelativeDays(at: number) {
         </div>
       </div>
     </div>
+    <div v-if="!hasLoadedAllEntries" ref="loadMoreRef" class="TimelineItem py-6">
+      <div class="TimelineItem-badge">
+        <Octicon name="kebab-horizontal" />
+      </div>
+      <div class="TimelineItem-body">
+        <VPButton
+          :loading="isLoading"
+          class="mt-n1"
+          @click="loadMoreEntries()"
+        >
+          Load More
+        </VPButton>
+      </div>
+    </div>
+    <div v-else class="TimelineItem-break ml-0"></div>
   </div>
 </template>

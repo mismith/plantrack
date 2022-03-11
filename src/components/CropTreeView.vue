@@ -68,7 +68,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const { modelValue, multiple } = toRefs(props)
 
-    const crops = useCrops()
+    const [crops] = useCrops()
 
     function nestedToNodes(nested: Record<string, ITreeNode>): ITreeNode[] {
       const nodes = toKeyFieldArray(nested)

@@ -73,7 +73,7 @@ export default defineComponent({
     Button,
   },
   setup() {
-    const crops = useCrops()
+    const [crops] = useCrops()
     const cropIds = ref([])
 
     const toast = inject<Function>('toast')

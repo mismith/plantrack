@@ -80,7 +80,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { modelValue } = toRefs(props)
-    const tags = useTags()
+    const [tags] = useTags()
 
     const isAddingTag = inject<Ref>('isAddingTag')!
     function handleChange(newValue: string[]) {

@@ -70,7 +70,7 @@ export default defineComponent({
 
     const name = ref(plot.value?.name)
     const parentPlotIds = ref([plot.value?.parentPlotId].filter(Boolean))
-    const plots = usePlots()
+    const [plots] = usePlots()
     const isValid = computed(() => Boolean(name.value))
 
     const toast = inject<Function>('toast')

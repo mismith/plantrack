@@ -44,7 +44,7 @@ export default defineComponent({
   },
   setup(props) {
     const { cropId } = toRefs(props)
-    const crops = useCrops()
+    const [crops] = useCrops()
     const crop = computed(() => crops.value?.find(({ id }) => id === cropId.value))
     const isShowingPlants = ref(false)
     const expectedDaysToHarvest = computed(() => {
@@ -59,7 +59,7 @@ export default defineComponent({
       return undefined
     })
 
-    const plants = usePlants()
+    const [plants] = usePlants()
     const cropPlantIds = ref<string[]>([])
     const cropPlants = computed(() => getPlantsForCropId(cropId.value, plants.value || []))
     watch(cropPlants, () => {

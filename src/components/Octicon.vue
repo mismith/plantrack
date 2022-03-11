@@ -18,7 +18,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { name, size } = toRefs<any>(props)
+    const { name, size } = toRefs(props)
     const octicon = computed(() => octicons[name.value])
 
     return () => h('svg', {

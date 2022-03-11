@@ -1,3 +1,309 @@
+<script setup lang="ts">
+import { computed, inject, reactive, ref, watch } from 'vue'
+
+import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds, useTags, useRestoreKey, useLocalStorageRef } from '../services/data'
+import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
+import { useAsyncWrapper } from '../services/errors'
+
+import SelectMenu from '../components/SelectMenu.vue'
+import PlantTreeView from '../components/PlantTreeView.vue'
+import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
+import Button from '../components/Button.vue'
+import Octicon from '../components/Octicon.vue'
+import TagSelect from '../components/TagSelect.vue'
+import Blip from '../components/Blip.vue'
+
+const WEIGHT_SPLIT = {
+  ALL: 'total',
+  EACH: 'each',
+}
+function round(number: number, numDecimals: number = 2) {
+  const multiplier = 10 ** numDecimals
+  return Math.round(number * multiplier + Number.EPSILON) / multiplier
+}
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+async function uploadAttachment(file: File, id: string = database.ref().push().key!): Promise<Attachment> {
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`Attachment must be under 10MB (${file.name})`)
+  }
+  // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
+  const ref = storage.ref(getUserRefPath(`/attachments/${id}`))
+  await ref.put(file)
+
+  const attachment: Attachment = {
+    id,
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    at: Date.now(),
+  }
+  return attachment
+}
+
+async function addPlantEntry({
+  batchId,
+  plantId,
+  eventId,
+  newBedId,
+  newName,
+  weight,
+  weightUnit,
+  at,
+  note,
+  attachments,
+  tagIds,
+}: {
+  batchId?: string,
+  plantId: string,
+  eventId?: string,
+  newBedId?: string,
+  newName?: string,
+  weight?: number,
+  weightUnit?: string,
+  at?: string,
+  note?: string,
+  attachments?: Entry['attachments'],
+  tagIds?: string[],
+}) {
+  if (!plantId || !eventId) return
+  const plantsRef = database.ref(getUserRefPath('/plants'))
+  const plantRef = plantsRef.child(plantId)
+
+  let payload: Entry['payload']
+  const transplant = async () => {
+    if (!newBedId) throw new Error('no bed specified')
+
+    const bedIdRef = plantRef.child('bedId')
+    const oldBedId = (await bedIdRef.once('value')).val()
+    return {
+      bedIdRef,
+      oldBedId,
+    }
+  }
+  switch (eventId) {
+    case 'transplant': {
+      const { bedIdRef, oldBedId } = await transplant()
+      payload = {
+        oldBedId,
+        newBedId,
+      }
+      await bedIdRef.set(newBedId)
+      break
+    }
+    case 'splice': {
+      const { oldBedId } = await transplant()
+      const newPlantId = database.ref().push().key!
+      payload = {
+        oldBedId,
+        newBedId,
+        oldPlantId: plantId,
+        newPlantId,
+      }
+      break
+    }
+    case 'harvest': {
+      if (weight && weightUnit) {
+        payload = {
+          weight: {
+            value: weight,
+            unit: weightUnit,
+          }
+        }
+      }
+      break
+    }
+    case 'cull': {
+      const bedIdRef = plantRef.child('bedId')
+      const oldBedId = (await bedIdRef.once('value')).val()
+      payload = {
+        oldBedId,
+      }
+      await bedIdRef.remove()
+      break
+    }
+  }
+
+  const newEntry: NewEntity<Entry> = {
+    batchId: batchId || null,
+    eventId,
+    at: at ? new Date(at).valueOf() : ServerValue.TIMESTAMP,
+    payload: payload || null,
+    note: note || null,
+    attachments: attachments || null,
+    tagIds: tagIds?.length && tagIds || null,
+    createdAt: ServerValue.TIMESTAMP,
+  }
+  await plantRef.child('entries').push(newEntry)
+
+  if (eventId === 'splice' && payload?.newBedId && payload?.newPlantId && newName) {
+    const oldPlant = (await plantRef.once('value')).val()
+    const newPlant = {
+      ...oldPlant,
+      bedId: payload.newBedId,
+      name: newName,
+    }
+    await plantsRef.child(payload.newPlantId).set(newPlant)
+  }
+}
+
+const plantIds = ref<string[]>([])
+const eventId = ref<string>()
+const note = ref<string>()
+const [beds] = useBeds()
+const newBedIds = ref<string[]>([])
+const newName = ref<string>()
+const [plants] = usePlants()
+const [crops] = useCrops()
+const cropId = computed(() => plants.value?.find(({ id }) => id === plantIds.value?.[0])?.cropId)
+const newNamePlaceholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
+const weight = ref<string>()
+const weightUnit = ref<string>('g')
+const weightSplit = ref<string>(WEIGHT_SPLIT.ALL)
+const cullToo = ref(false)
+const at = ref<string>()
+const files = ref<FileList>()
+const [tags] = useTags()
+const tagIds = ref<string[]>([])
+
+const defaultBookmarkedEventIds = ['seed', 'sprout', 'harvest', 'cull', 'other']
+const bookmarkedEventIds = useLocalStorageRef<string[]>('Recorder.bookmarkedEventIds', ['seed', 'sprout', 'harvest', 'cull', 'other'])
+const isDefaultBookmarkedEventIds = computed(() => defaultBookmarkedEventIds.length === bookmarkedEventIds.value.length
+  && defaultBookmarkedEventIds.every(id => bookmarkedEventIds.value.includes(id)))
+const bookmarkedEvents = computed(() => events.filter(({ id }) => bookmarkedEventIds.value.includes(id)))
+function resetBookmarkedEventIds() {
+  if (window.confirm('Are you sure?')) {
+    bookmarkedEventIds.value = defaultBookmarkedEventIds
+  }
+}
+function handleBookmarkedEventIdToggle(eventId: string) {
+  bookmarkedEventIds.value = bookmarkedEventIds.value.includes(eventId)
+    ? bookmarkedEventIds.value.filter(id => id !== eventId)
+    : [...bookmarkedEventIds.value, eventId]
+}
+
+const isShowing = reactive({
+  at: false,
+  attachments: false,
+  tagIds: false,
+})
+const atRef = ref<HTMLInputElement>()
+const attachmentsRef = ref<HTMLInputElement>()
+const tagIdsRef = ref<HTMLInputElement>()
+watch(files, (v) => {
+  if (!v?.length) {
+    attachmentsRef.value = undefined; 
+  }
+})
+const isCaptureSupported = (() => {
+  const el = document.createElement('input')
+  return el.capture !== undefined
+})()
+function handleShowAt() {
+  isShowing.at = true
+  window.setTimeout(() => atRef.value?.focus?.())
+}
+function handleShowAttachments(isCamera = false) {
+  isShowing.attachments = true
+  window.setTimeout(() => {
+    const input = attachmentsRef.value
+    if (!input) return
+
+    if (isCamera) {
+      input.setAttribute('capture', '')
+    }
+    input.click?.()
+    if (isCamera) {
+      input.removeAttribute('capture')
+    }
+  })
+}
+function handleShowTags() {
+  isShowing.tagIds = true
+  if (tags.value?.length) {
+    window.setTimeout(() => tagIdsRef.value?.querySelector('summary')?.click())
+  }
+}
+
+const formRef = ref<HTMLFormElement>()
+const isValid = computed(() => {
+  const requireds = plantIds.value.length && eventId.value
+  const conditionals = (() => {
+    switch (eventId.value) {
+      case 'transplant': return newBedIds.value.length
+      case 'splice': return newBedIds.value.length === 1 && plantIds.value.length === 1
+      default: return true
+    }
+  })()
+  return Boolean(requireds && conditionals)
+})
+function handleReset() {
+  plantIds.value = []
+  eventId.value = undefined
+  newBedIds.value = []
+  weight.value = undefined
+  weightUnit.value = 'g'
+  weightSplit.value = WEIGHT_SPLIT.ALL
+  cullToo.value = false
+  at.value = undefined
+  note.value = undefined
+  tagIds.value = []
+  files.value = undefined
+  isShowing.at = false
+  isShowing.attachments = false
+  isShowing.tagIds = false
+  formRef.value?.reset()
+}
+const toast = inject<Function>('toast')
+const [runAsync, isSubmitting] = useAsyncWrapper()
+async function handleSubmit() {
+  await runAsync(async () => {
+    const individualWeight = weight.value
+      ? (
+        weightSplit.value === WEIGHT_SPLIT.ALL
+          ? round(Number.parseFloat(weight.value) / plantIds.value.length)
+          : Number.parseFloat(weight.value)
+      )
+      : undefined
+
+    const batchId = plantIds.value.length > 1 ? database.ref().push().key! : undefined
+    const attachments = await Promise.all(Array.from(files.value || []).map((file) => uploadAttachment(file, batchId)))
+    await Promise.all(plantIds.value.map(async (plantId) => {
+      const params = {
+        batchId,
+        plantId,
+        eventId: eventId.value,
+        newBedId: newBedIds.value?.[0],
+        newName: newName.value || newNamePlaceholder.value,
+        weight: individualWeight,
+        weightUnit: weightUnit.value,
+        at: at.value,
+        note: note.value,
+        tagIds: tagIds.value,
+      }
+      await addPlantEntry({
+        ...params,
+        attachments, // don't include attachments in cull entry
+      })
+
+      if (cullToo.value) {
+        await addPlantEntry({
+          ...params,
+          eventId: 'cull',
+        })
+      }
+    }))
+
+    toast?.('Entry added successfully', 'success')
+
+    handleReset()
+  })
+}
+
+const isAddingPlant = inject('isAddingPlant')
+const isAddingBed = inject('isAddingBed')
+</script>
+
 <template>
   <div class="Recorder container-md width-full mx-auto">
     <form ref="formRef" @submit.prevent="handleSubmit" class="p-3">
@@ -7,7 +313,7 @@
         </header>
         <SelectMenu
           restore-key="Recorder.plantIds"
-          :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants.find(({ id }) => id === plantId)?.name).filter(Boolean)"
+          :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants?.find(({ id }) => id === plantId)?.name).filter(Boolean)"
           title="Plants"
           createable
           createable-type="plant"
@@ -244,369 +550,3 @@
     </form>
   </div>
 </template>
-
-<script lang="ts">
-import { computed, defineComponent, inject, reactive, ref, watch } from 'vue'
-
-import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds, useTags, useRestoreKey } from '../services/data'
-import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
-import { useAsyncWrapper } from '../services/errors'
-
-import SelectMenu from '../components/SelectMenu.vue'
-import PlantTreeView from '../components/PlantTreeView.vue'
-import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
-import Button from '../components/Button.vue'
-import Octicon from '../components/Octicon.vue'
-import TagSelect from '../components/TagSelect.vue'
-import Blip from '../components/Blip.vue'
-
-const WEIGHT_SPLIT = {
-  ALL: 'total',
-  EACH: 'each',
-}
-function round(number: number, numDecimals: number = 2) {
-  const multiplier = 10 ** numDecimals
-  return Math.round(number * multiplier + Number.EPSILON) / multiplier
-}
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-async function uploadAttachment(file: File, id: string = database.ref().push().key!): Promise<Attachment> {
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error(`Attachment must be under 10MB (${file.name})`)
-  }
-  // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
-  const ref = storage.ref(getUserRefPath(`/attachments/${id}`))
-  await ref.put(file)
-
-  const attachment: Attachment = {
-    id,
-    name: file.name,
-    size: file.size,
-    type: file.type,
-    at: Date.now(),
-  }
-  return attachment
-}
-
-async function addPlantEntry({
-  batchId,
-  plantId,
-  eventId,
-  newBedId,
-  newName,
-  weight,
-  weightUnit,
-  at,
-  note,
-  attachments,
-  tagIds,
-}: {
-  batchId?: string,
-  plantId: string,
-  eventId?: string,
-  newBedId?: string,
-  newName?: string,
-  weight?: number,
-  weightUnit?: string,
-  at?: string,
-  note?: string,
-  attachments?: Entry['attachments'],
-  tagIds?: string[],
-}) {
-  if (!plantId || !eventId) return
-  const plantsRef = database.ref(getUserRefPath('/plants'))
-  const plantRef = plantsRef.child(plantId)
-
-  let payload: Entry['payload']
-  const transplant = async () => {
-    if (!newBedId) throw new Error('no bed specified')
-
-    const bedIdRef = plantRef.child('bedId')
-    const oldBedId = (await bedIdRef.once('value')).val()
-    return {
-      bedIdRef,
-      oldBedId,
-    }
-  }
-  switch (eventId) {
-    case 'transplant': {
-      const { bedIdRef, oldBedId } = await transplant()
-      payload = {
-        oldBedId,
-        newBedId,
-      }
-      await bedIdRef.set(newBedId)
-      break
-    }
-    case 'splice': {
-      const { oldBedId } = await transplant()
-      const newPlantId = database.ref().push().key!
-      payload = {
-        oldBedId,
-        newBedId,
-        oldPlantId: plantId,
-        newPlantId,
-      }
-      break
-    }
-    case 'harvest': {
-      if (weight) {
-        payload = {
-          weight: {
-            value: weight,
-            unit: weightUnit,
-          }
-        }
-      }
-      break
-    }
-    case 'cull': {
-      const bedIdRef = plantRef.child('bedId')
-      const oldBedId = (await bedIdRef.once('value')).val()
-      payload = {
-        oldBedId,
-      }
-      await bedIdRef.remove()
-      break
-    }
-  }
-
-  const newEntry: NewEntity<Entry> = {
-    batchId: batchId || null,
-    eventId,
-    at: at ? new Date(at).valueOf() : ServerValue.TIMESTAMP,
-    payload: payload || null,
-    note: note || null,
-    attachments: attachments || null,
-    tagIds: tagIds?.length && tagIds || null,
-    createdAt: ServerValue.TIMESTAMP,
-  }
-  await plantRef.child('entries').push(newEntry)
-
-  if (eventId === 'splice' && payload) {
-    const oldPlant = (await plantRef.once('value')).val()
-    const newPlant = {
-      ...oldPlant,
-      bedId: payload.newBedId,
-      name: newName,
-    }
-    await plantsRef.child(payload.newPlantId).set(newPlant)
-  }
-}
-
-export default defineComponent({
-  name: 'Recorder',
-  components: {
-    SelectMenu,
-    PlantTreeView,
-    TransitionExpand,
-    Button,
-    Octicon,
-    TagSelect,
-    Blip,
-  },
-  setup() {
-    const plantIds = ref<string[]>([])
-    const eventId = ref<string>()
-    const note = ref<string>()
-    const beds = useBeds()
-    const newBedIds = ref<string[]>([])
-    const newName = ref<string>()
-    const plants = usePlants()
-    const crops = useCrops()
-    const cropId = computed(() => plants.value?.find(({ id }) => id === plantIds.value?.[0])?.cropId)
-    const newNamePlaceholder = computed(() => getSuggestedPlantName(cropId.value, crops.value, plants.value))
-    const weight = ref<string>()
-    const weightUnit = ref<string>('g')
-    const weightSplit = ref<string>(WEIGHT_SPLIT.ALL)
-    const cullToo = ref(false)
-    const at = ref<string>()
-    const files = ref<FileList>()
-    const tags = useTags()
-    const tagIds = ref<string[]>([])
-
-    const restoreBookmarkedEventIds = useRestoreKey('bookmarkedEventIds', 'Recorder')
-    const defaultBookmarkedEventIds = ['seed', 'sprout', 'harvest', 'cull', 'other']
-    if (!restoreBookmarkedEventIds.load()) restoreBookmarkedEventIds.save(defaultBookmarkedEventIds)
-    const bookmarkedEventIds = ref<string[]>(restoreBookmarkedEventIds.load())
-    watch(bookmarkedEventIds, (v) => restoreBookmarkedEventIds.save(v))
-    const isDefaultBookmarkedEventIds = computed(() => defaultBookmarkedEventIds.length === bookmarkedEventIds.value.length
-      && defaultBookmarkedEventIds.every(id => bookmarkedEventIds.value.includes(id)))
-    const bookmarkedEvents = computed(() => events.filter(({ id }) => bookmarkedEventIds.value.includes(id)))
-    function resetBookmarkedEventIds() {
-      if (window.confirm('Are you sure?')) {
-        bookmarkedEventIds.value = defaultBookmarkedEventIds
-      }
-    }
-    function handleBookmarkedEventIdToggle(eventId: string) {
-      bookmarkedEventIds.value = bookmarkedEventIds.value.includes(eventId)
-        ? bookmarkedEventIds.value.filter(id => id !== eventId)
-        : [...bookmarkedEventIds.value, eventId]
-    }
-
-    const isShowing = reactive({
-      at: false,
-      attachments: false,
-      tagIds: false,
-    })
-    const atRef = ref<HTMLInputElement>()
-    const attachmentsRef = ref<HTMLInputElement>()
-    const tagIdsRef = ref<HTMLInputElement>()
-    watch(files, (v) => {
-      if (!v?.length) {
-        attachmentsRef.value = undefined; 
-      }
-    })
-    const isCaptureSupported = (() => {
-      const el = document.createElement('input')
-      return el.capture !== undefined
-    })()
-    function handleShowAt() {
-      isShowing.at = true
-      window.setTimeout(() => atRef.value?.focus?.())
-    }
-    function handleShowAttachments(isCamera = false) {
-      isShowing.attachments = true
-      window.setTimeout(() => {
-        const input = attachmentsRef.value
-        if (!input) return
-
-        if (isCamera) {
-          input.setAttribute('capture', '')
-        }
-        input.click?.()
-        if (isCamera) {
-          input.removeAttribute('capture')
-        }
-      })
-    }
-    function handleShowTags() {
-      isShowing.tagIds = true
-      if (tags.value?.length) {
-        window.setTimeout(() => tagIdsRef.value?.querySelector('summary')?.click())
-      }
-    }
-
-    const formRef = ref<HTMLFormElement>()
-    const isValid = computed(() => {
-      const requireds = plantIds.value.length && eventId.value
-      const conditionals = (() => {
-        switch (eventId.value) {
-          case 'transplant': return newBedIds.value.length
-          case 'splice': return newBedIds.value.length === 1 && plantIds.value.length === 1
-          default: return true
-        }
-      })()
-      return Boolean(requireds && conditionals)
-    })
-    function handleReset() {
-      plantIds.value = []
-      eventId.value = undefined
-      newBedIds.value = []
-      weight.value = undefined
-      weightUnit.value = 'g'
-      weightSplit.value = WEIGHT_SPLIT.ALL
-      cullToo.value = false
-      at.value = undefined
-      note.value = undefined
-      tagIds.value = []
-      files.value = undefined
-      isShowing.at = false
-      isShowing.attachments = false
-      isShowing.tagIds = false
-      formRef.value?.reset()
-    }
-    const toast = inject<Function>('toast')
-    const [runAsync, isSubmitting] = useAsyncWrapper()
-    async function handleSubmit() {
-      await runAsync(async () => {
-        const individualWeight = weight.value
-          ? (
-            weightSplit.value === WEIGHT_SPLIT.ALL
-              ? round(Number.parseFloat(weight.value) / plantIds.value.length)
-              : Number.parseFloat(weight.value)
-          )
-          : undefined
-
-        const batchId = plantIds.value.length > 1 ? database.ref().push().key! : undefined
-        const attachments = await Promise.all(Array.from(files.value || []).map((file) => uploadAttachment(file, batchId)))
-        await Promise.all(plantIds.value.map(async (plantId) => {
-          const params = {
-            batchId,
-            plantId,
-            eventId: eventId.value,
-            newBedId: newBedIds.value?.[0],
-            newName: newName.value || newNamePlaceholder.value,
-            weight: individualWeight,
-            weightUnit: weightUnit.value,
-            at: at.value,
-            note: note.value,
-            tagIds: tagIds.value,
-          }
-          await addPlantEntry({
-            ...params,
-            attachments, // don't include attachments in cull entry
-          })
-
-          if (cullToo.value) {
-            await addPlantEntry({
-              ...params,
-              eventId: 'cull',
-            })
-          }
-        }))
-
-        toast?.('Entry added successfully', 'success')
-
-        handleReset()
-      })
-    }
-
-    return {
-      WEIGHT_SPLIT,
-      isAddingPlant: inject('isAddingPlant'),
-      isAddingBed: inject('isAddingBed'),
-
-      plants,
-      plantIds,
-      eventId,
-      note,
-      at,
-      files,
-      events,
-      beds,
-      newBedIds,
-      newName,
-      newNamePlaceholder,
-      weight,
-      weightUnit,
-      weightSplit,
-      cullToo,
-      tagIds,
-
-      defaultBookmarkedEventIds,
-      bookmarkedEventIds,
-      bookmarkedEvents,
-      isDefaultBookmarkedEventIds,
-      resetBookmarkedEventIds,
-      handleBookmarkedEventIdToggle,
-
-      isShowing,
-      atRef,
-      attachmentsRef,
-      tagIdsRef,
-      isCaptureSupported,
-      handleShowAt,
-      handleShowAttachments,
-      handleShowTags,
-
-      formRef,
-      isValid,
-      isSubmitting,
-
-      handleReset,
-      handleSubmit,
-    }
-  },
-})
-</script>

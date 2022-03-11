@@ -1,4 +1,4 @@
-import { onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, Ref, ref, watch } from 'vue'
 import firebase from 'firebase/app'
 import 'firebase/auth'
 import 'firebase/database'
@@ -52,21 +52,30 @@ export function toKeyFieldArray<T extends object>(obj: Record<string, T>, theKey
     ...(value || {}) as T,
   }))
 }
-export function useRtdbArray<T extends object>(reference: firebase.database.Reference) {
-  const arr = ref<T[]>([])
-  const handler = (snapshot: firebase.database.DataSnapshot) => {
-    arr.value = toKeyFieldArray(snapshot.val())
-  }
-  reference.on('value', handler)
-  onUnmounted(() => reference.off('value', handler))
-  return arr
-}
-export function useRtdbObject<T extends Object>(reference: firebase.database.Reference) {
+export function useRtdbObject<T extends object>(
+  source: Ref<firebase.database.Reference | firebase.database.Query> | firebase.database.Reference | firebase.database.Query,
+  transformer: (value: any) => any = (value) => value,
+): [Ref<T | undefined>, Ref<Boolean>] {
+  const loading = ref(false)
   const obj = ref<T>()
   const handler = (snapshot: firebase.database.DataSnapshot) => {
-    obj.value = snapshot.val()
+    obj.value = transformer(snapshot.val())
+    loading.value = false
   }
-  reference.on('value', handler)
-  onUnmounted(() => reference.off('value', handler))
-  return obj
+
+  const reference = computed(() => (source as Ref).value || source)
+  watch(reference, (newRef, oldRef) => {
+    loading.value = true
+    oldRef?.off('value', handler)
+    newRef?.on('value', handler)
+  }, { immediate: true })
+  onUnmounted(() => reference.value?.off('value', handler))
+
+  return [obj, loading]
+}
+export function useRtdbArray<T extends object>(
+  source: Parameters<typeof useRtdbObject>[0],
+  transformer: Parameters<typeof useRtdbObject>[1] = (value) => value,
+): [Ref<T[] | undefined>, Ref<Boolean>] {
+  return useRtdbObject<T[]>(source, (value) => toKeyFieldArray(value).map(transformer))
 }

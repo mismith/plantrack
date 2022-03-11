@@ -134,7 +134,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const { modelValue, multiple, filter, selectableType, restoreKey } = toRefs(props)
     const { nodes, plants, beds, plots } = usePlantDataTree({ filter: filter.value })
-    const crops = useCrops()
+    const [crops] = useCrops()
 
     const treeState = reactive<Record<string, Booleanable>>({
       expanded: [],

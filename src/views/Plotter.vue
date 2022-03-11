@@ -224,8 +224,8 @@ export default defineComponent({
       document.addEventListener('mouseup', handleEnd)
     }
 
-    const plots = usePlots()
-    const beds = useBeds()
+    const [plots] = usePlots()
+    const [beds] = useBeds()
     const selectedBed = ref<Bed>()
     const selectedBedPlot = computed(() => plots.value?.find(({ id }) => id === selectedBed.value?.plotId))
     const selectedBedPlotBounds = computed(

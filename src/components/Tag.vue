@@ -27,7 +27,7 @@ export default defineComponent({
   },
   setup(props) {
     const { tagId } = toRefs(props)
-    const tags = useTags()
+    const [tags] = useTags()
     const tag = computed(() => tags.value?.find(({ id }) => id === tagId.value))
 
     return {

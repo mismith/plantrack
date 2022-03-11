@@ -4,10 +4,10 @@ import { Bed, Crop, Plant, Plot } from '../services/data'
 import { database, getUserRefPath, useRtdbObject } from '../services/firebase'
 
 export function useHydratedEntries() {
-  const plots = useRtdbObject<Record<string, Plot>>(database.ref(getUserRefPath('/plots')))
-  const beds = useRtdbObject<Record<string, Bed>>(database.ref(getUserRefPath('/beds')))
-  const crops = useRtdbObject<Record<string, Crop>>(database.ref(getUserRefPath('/crops')))
-  const plants = useRtdbObject<Record<string, Plant>>(database.ref(getUserRefPath('/plants')))
+  const [plots] = useRtdbObject<Record<string, Plot>>(database.ref(getUserRefPath('/plots')))
+  const [beds] = useRtdbObject<Record<string, Bed>>(database.ref(getUserRefPath('/beds')))
+  const [crops] = useRtdbObject<Record<string, Crop>>(database.ref(getUserRefPath('/crops')))
+  const [plants] = useRtdbObject<Record<string, Plant>>(database.ref(getUserRefPath('/plants')))
 
   const bedsWithPlot = computed(() => Object.entries(beds.value || {}).reduce((acc, [bedId, bed]) => {
     acc[bedId] = {

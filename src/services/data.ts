@@ -1,4 +1,4 @@
-import { computed, reactive, Ref, watch } from 'vue'
+import { computed, reactive, ref, Ref, watch } from 'vue'
 import { differenceInDays, format } from 'date-fns'
 
 import { Booleanable, ITreeNode } from '../components/TreeView'
@@ -61,6 +61,7 @@ export interface Entry extends Entity {
   _plant?: Plant
   batchId?: string
   eventId: string
+  _event?: Event
   at: Timestamp
   payload?: EntryPayload
   note?: string
@@ -159,8 +160,9 @@ export const usePlots = () => useRtdbArray<Plot>(database.ref(getUserRefPath('/p
 export const useBeds = () => useRtdbArray<Bed>(database.ref(getUserRefPath('/beds')))
 export const usePlants = () => useRtdbArray<Plant>(database.ref(getUserRefPath('/plants')))
 export const useCrops = () => {
-  const raw = useRtdbArray<Crop>(database.ref(getUserRefPath('/crops')))
-  return computed(() => raw.value?.sort((a, b) => a.name.localeCompare(b.name)))
+  const [raw, ...args] = useRtdbArray<Crop>(database.ref(getUserRefPath('/crops')))
+  const sorted = computed(() => raw.value?.sort((a, b) => a.name.localeCompare(b.name)))
+  return [sorted, ...args] as [typeof sorted, ...typeof args]
 }
 
 export function arrayToNested<T extends { [k: string]: any }>(
@@ -185,9 +187,9 @@ export function arrayToNested<T extends { [k: string]: any }>(
 
 export const INACTIVE = 'inactive'
 export function usePlantDataTree({ filter = Boolean }: { filter?(node: ITreeNode): boolean } = {}) {
-  const plants = usePlants()
-  const beds = useBeds()
-  const plots = usePlots()
+  const [plants] = usePlants()
+  const [beds] = useBeds()
+  const [plots] = usePlots()
 
   const nodes = computed(() => ([...plots.value || [], {
     id: 'system',
@@ -300,18 +302,37 @@ export function useTreeViewProps(
   }
 }
 
-export function useRestoreKey(key: string, prefix: string) {
-  return {
-    save(v: any) {
-      window.localStorage.setItem(`plantrack.restoreKey.${prefix}.${key}`, JSON.stringify(v))
-    },
-    load() {
+const localStorage = {
+  get(path: string, defaultValue?: any) {
+    const loadedValue = (() => {
       try {
-        return JSON.parse(window.localStorage.getItem(`plantrack.restoreKey.${prefix}.${key}`)!)
+        return JSON.parse(window.localStorage.getItem(path)!)
       } catch (error) {
         console.error(error)
         return undefined
       }
+    })()
+    return loadedValue || defaultValue
+  },
+  set(path: string, value: any) {
+    window.localStorage.setItem(path, JSON.stringify(value))
+  },
+}
+export function useLocalStorageRef<T extends unknown>(key: string, defaultValue?: T) {
+  const path = `plantrack.localStorageRef.${key}`
+  
+  const value = ref<T>(localStorage.get(path, defaultValue))
+  watch(value, (v) => localStorage.set(path, v))
+  return value
+}
+export function useRestoreKey(key: string, prefix: string) {
+  const path = `plantrack.restoreKey.${prefix}.${key}`
+  return {
+    load() {
+      return localStorage.get(path)
+    },
+    save(value: any) {
+      localStorage.set(path, value)
     },
   }
 }

@@ -63,9 +63,9 @@ export default defineComponent({
     EntryTimeline,
   },
   setup() {
-    const beds = useBeds()
-    const plants = usePlants()
-    const crops = useCrops()
+    const [beds] = useBeds()
+    const [plants] = usePlants()
+    const [crops] = useCrops()
 
     const showOnlyActive = ref(false)
   

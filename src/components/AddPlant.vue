@@ -100,7 +100,7 @@ export default defineComponent({
 
     const { nodes, beds, plants } = usePlantDataTree()
 
-    const crops = useCrops()
+    const [crops] = useCrops()
     const cropIds = ref([plant.value?.cropId || crops.value?.[0]?.id])
     const isAddingCrop = inject<Ref>('isAddingCrop')!
     function handleCropCreate() {
