@@ -51,16 +51,16 @@
 <script lang="ts">
 import { defineComponent, inject, ref } from 'vue'
 
-import { useCrops } from '../services/data'
-import { database, getUserRefPath } from '../services/firebase'
-import { downloadCSVRowsAsFile, useExportableData } from '../services/exporter'
+import { useCrops } from '../../services/data'
+import { database, getUserRefPath } from '../../services/firebase'
+import { downloadCSVRowsAsFile, useExportableData } from '../../services/exporter'
 
-import TransitionExpand from '../components/TreeView/TransitionExpand.vue'
-import SelectMenu from '../components/SelectMenu.vue'
-import CropStatsCard from '../components/CropStatsCard.vue'
-import Octicon from '../components/Octicon.vue'
-import Button from '../components/Button.vue'
-import CropTreeView from '../components/CropTreeView.vue'
+import TransitionExpand from '../../components/TreeView/TransitionExpand.vue'
+import SelectMenu from '../../components/SelectMenu.vue'
+import CropStatsCard from '../../components/CropStatsCard.vue'
+import Octicon from '../../components/Octicon.vue'
+import Button from '../../components/Button.vue'
+import CropTreeView from '../../components/CropTreeView.vue'
 
 export default defineComponent({
   components: {

@@ -4,7 +4,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Plot from './views/Plot.vue'
 import Record from './views/Record.vue'
 import Track from './views/Track.vue'
-import Learn from './views/Learn.vue'
+import TrackEntries from './views/Track/Entries.vue'
+import TrackCrops from './views/Track/Crops.vue'
 
 export const routes = [
   {
@@ -31,13 +32,20 @@ export const routes = [
     meta: {
       title: 'Track',
     },
-  },
-  {
-    path: '/learn',
-    component: Learn,
-    meta: {
-      title: 'Learn',
-    },
+    children: [
+      {
+        path: '',
+        redirect: '/track/entries',
+      },
+      {
+        path: 'entries',
+        component: TrackEntries,
+      },
+      {
+        path: 'crops',
+        component: TrackCrops,
+      },
+    ],
   },
   {
     path: '/:pathMatch(.*)*',
