@@ -167,7 +167,7 @@ const [tags] = useTags()
 const tagIds = ref<string[]>([])
 
 const defaultBookmarkedEventIds = ['seed', 'sprout', 'harvest', 'cull', 'other']
-const bookmarkedEventIds = useLocalStorageRef<string[]>('Recorder.bookmarkedEventIds', ['seed', 'sprout', 'harvest', 'cull', 'other'])
+const bookmarkedEventIds = useLocalStorageRef<string[]>('Record.bookmarkedEventIds', ['seed', 'sprout', 'harvest', 'cull', 'other'])
 const isDefaultBookmarkedEventIds = computed(() => defaultBookmarkedEventIds.length === bookmarkedEventIds.value.length
   && defaultBookmarkedEventIds.every(id => bookmarkedEventIds.value.includes(id)))
 const bookmarkedEvents = computed(() => events.filter(({ id }) => bookmarkedEventIds.value.includes(id)))
@@ -305,14 +305,14 @@ const isAddingBed = inject('isAddingBed')
 </script>
 
 <template>
-  <div class="Recorder container-md width-full mx-auto">
+  <div class="Record container-md width-full mx-auto">
     <form ref="formRef" @submit.prevent="handleSubmit" class="p-3">
       <fieldset class="form-group required">
         <header class="form-group-header">
           <label>Plant(s)</label>
         </header>
         <SelectMenu
-          restore-key="Recorder.plantIds"
+          restore-key="Record.plantIds"
           :value="plantIds.length > 1 ? `${plantIds.length} plants selected` : plantIds.map((plantId) => plants?.find(({ id }) => id === plantId)?.name).filter(Boolean)"
           title="Plants"
           createable
@@ -327,7 +327,7 @@ const isAddingBed = inject('isAddingBed')
             <PlantTreeView
               v-if="!isSubmitting && plants?.length"
               v-model="plantIds"
-              restore-key="Recorder.plantIds"
+              restore-key="Record.plantIds"
               multiple
               :editable="edit()"
             />
@@ -341,7 +341,7 @@ const isAddingBed = inject('isAddingBed')
         </header>
         <div class="form-group-body">
           <SelectMenu
-            restore-key="Recorder.eventId"
+            restore-key="Record.eventId"
             :value="eventId"
             title="Events"
             editable
@@ -413,7 +413,7 @@ const isAddingBed = inject('isAddingBed')
             <label>New Bed</label>
           </header>
           <SelectMenu
-            restore-key="Recorder.newBedIds"
+            restore-key="Record.newBedIds"
             :value="beds?.find(({ id }) => id === newBedIds[0])?.name || ''"
             title="Beds"
             createable
@@ -426,7 +426,7 @@ const isAddingBed = inject('isAddingBed')
               <PlantTreeView
                 v-if="beds?.length"
                 v-model="newBedIds"
-                restore-key="Recorder.newBedIds"
+                restore-key="Record.newBedIds"
                 :filter="node => node.type !== 'entry' && node.id !== 'system'"
                 :editable="edit()"
                 @update:model-value="close()"

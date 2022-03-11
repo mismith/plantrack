@@ -1,12 +1,10 @@
 import { h } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Plotter from './views/Plotter.vue'
-import Recorder from './views/Recorder.vue'
-import Activity from './views/Activity.vue'
-import Analyzer from './views/Analyzer.vue'
-import OldTracker from './views/OldTracker.vue'
-import Exporter from './views/Exporter.vue'
+import Plot from './views/Plot.vue'
+import Record from './views/Record.vue'
+import Track from './views/Track.vue'
+import Learn from './views/Learn.vue'
 
 export const routes = [
   {
@@ -15,43 +13,31 @@ export const routes = [
   },
   {
     path: '/plot',
-    component: Plotter,
+    component: Plot,
     meta: {
       // title: 'Plot',
     },
   },
   {
-    path: '/recorder', // @DEPRECATED
-    redirect: '/record',
-  },
-  {
     path: '/record',
-    component: Recorder,
+    component: Record,
     meta: {
       title: 'Record',
     },
   },
   {
-    path: '/activity',
-    component: Activity,
-    meta: {
-      title: 'Activity',
-    },
-  },
-  {
     path: '/track',
-    component: Analyzer,
+    component: Track,
     meta: {
       title: 'Track',
     },
   },
   {
-    path: '/old-tracker',
-    component: OldTracker,
-  },
-  {
-    path: '/export',
-    component: Exporter,
+    path: '/learn',
+    component: Learn,
+    meta: {
+      title: 'Learn',
+    },
   },
   {
     path: '/:pathMatch(.*)*',

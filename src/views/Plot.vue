@@ -1,5 +1,5 @@
 <template>
-  <div class="Plotter">
+  <div class="Plot">
     <header>
       <nav>
         <!-- <button>&slarr;</button> -->
@@ -125,7 +125,7 @@
 
 
     <footer>
-      <nav class="PlotterActions">
+      <nav class="PlotActions">
         <button @click="isAddingPlot = true">Add Plot</button>
         <button @click="isAddingBed = true">Add Bed</button>
         <button @click="isAddingCrop = true">Add Crop</button>
@@ -160,7 +160,7 @@ const bedAccumulator = (beds: Bed[], prop: keyof Bed, fn: (a: any, b: any) => an
 }
 
 export default defineComponent({
-  name: 'Plotter',
+  name: 'Plot',
   setup() {
     const scale = ref(ls.get('scale', 10))
     watch(scale, v => ls.set('scale', v))
@@ -424,7 +424,7 @@ export default defineComponent({
 <style lang="scss">
 $spacing: 8px;
 
-.Plotter {
+.Plot {
   position: relative;
   width: 100%;
   height: 100%;

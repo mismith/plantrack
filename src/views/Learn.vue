@@ -1,5 +1,5 @@
 <template>
-  <div class="Analyzer container-md width-full mx-auto">
+  <div class="container-md width-full mx-auto">
     <form @submit.prevent class="p-3">
       <fieldset class="form-group">
         <header class="form-group-header">
@@ -63,7 +63,6 @@ import Button from '../components/Button.vue'
 import CropTreeView from '../components/CropTreeView.vue'
 
 export default defineComponent({
-  name: 'Analyzer',
   components: {
     TransitionExpand,
     SelectMenu,
