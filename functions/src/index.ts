@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase-admin'
+import { initializeApp } from 'firebase-admin/app'
 import { getDatabase } from 'firebase-admin/database'
 import * as functions from 'firebase-functions'
 
@@ -8,7 +8,7 @@ function isEmulator() {
 
 const app = initializeApp()
 if (isEmulator()) {
-  functions.app.setEmulatedAdminApp(app)
+  functions.app.setEmulatedAdminApp(app as any)
 }
 const db = getDatabase(app)
 
