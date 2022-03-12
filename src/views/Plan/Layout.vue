@@ -1,5 +1,5 @@
 <template>
-  <div class="Plot">
+  <div class="Layout flex-auto d-flex">
     <header>
       <nav>
         <!-- <button>&slarr;</button> -->
@@ -139,8 +139,8 @@
 import { computed, defineComponent, inject, nextTick, onMounted, onUnmounted, reactive, ref, watch, watchEffect } from 'vue'
 import { gsap } from 'gsap'
 import { Draggable } from 'gsap/Draggable'
-import { Bed, useBeds, usePlots } from '../services/data'
-import { database, getUserRefPath } from '../services/firebase'
+import { Bed, useBeds, usePlots } from '../../services/data'
+import { database, getUserRefPath } from '../../services/firebase'
 
 gsap.registerPlugin(Draggable)
 const ls = {
@@ -424,7 +424,7 @@ export default defineComponent({
 <style lang="scss">
 $spacing: 8px;
 
-.Plot {
+.Layout {
   position: relative;
   width: 100%;
   height: 100%;

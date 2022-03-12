@@ -1,7 +1,8 @@
 import { h, reactive } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Plot from './views/Plot.vue'
+import Plan from './views/Plan.vue'
+import PlanLayout from './views/Plan/Layout.vue'
 import Record from './views/Record.vue'
 import Track from './views/Track.vue'
 import TrackEntries from './views/Track/Entries.vue'
@@ -13,11 +14,25 @@ export const routes = [
     redirect: '/record',
   },
   {
-    path: '/plot',
-    component: Plot,
+    path: '/plan',
+    component: Plan,
     meta: {
-      // title: 'Plot',
+      title: 'Plan',
     },
+    children: [
+      {
+        path: '',
+        redirect: '/plan/layout',
+      },
+      {
+        path: 'layout',
+        component: PlanLayout,
+      },
+      {
+        path: 'timing',
+        component: PlanLayout, // @TODO
+      },
+    ],
   },
   {
     path: '/record',
