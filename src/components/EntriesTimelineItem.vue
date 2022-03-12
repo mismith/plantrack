@@ -79,12 +79,14 @@ function getRelativeDays(at: number) {
           {{ entries[0].note }}
         </blockquote>
       </div>
-      <figure v-if="entries[0].attachments" class="mx-0 my-2">
+      <figure v-if="entries[0].attachments" class="d-flex mx-0 my-2">
         <AttachmentLink
           v-for="attachment in entries[0].attachments"
           :key="attachment.id"
           :attachment="attachment"
           preview
+          class="mx-auto"
+          style="background-color: var(--color-border-muted); border: solid 8px var(--color-border-muted); border-radius: 4px;"
         />
       </figure>
       <div v-if="entries[0].tagIds" class="my-2">

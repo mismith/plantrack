@@ -3,8 +3,8 @@
     :href="href"
     target="_blank"
     :title="attachment.name"
-    class="d-inline-block"
-    :class="{ 'tooltipped tooltipped-e tooltipped-multiline tooltipped-no-delay color-fg-danger': isError }"
+    class="d-inline-flex"
+    :class="{ 'tooltipped tooltipped-s tooltipped-multiline tooltipped-no-delay color-fg-danger': isError }"
     :aria-label="isError"
   >
     <slot v-if="isError" name="error">
@@ -20,7 +20,7 @@
         :src="href"
         :alt="attachment.name"
         class="container-sm width-full"
-        style="vertical-align: middle;"
+        style="object-fit: contain; max-width: 300px; max-height: min(50vh, 300px);"
         @error="err => isError = err.message || err"
       />
       <Octicon
