@@ -25,6 +25,11 @@ function getRelativeDays(at: number) {
   if (!relativeDays) return 'Today'
   return `${relativeDays} day${relativeDays === 1 ? '' : 's'} ago`
 }
+function getTotalWeight(entries: Entry[]) {
+  const total = entries.reduce((sum, entry) => sum + Number(entry.payload?.weight?.value || 0), 0)
+  const unit = entries[0].payload?.weight?.unit
+  return `${Number.isInteger(total) ? total : total.toFixed(3).replace(/0$/g, '')}${unit}`
+}
 </script>
 
 <template>
@@ -44,25 +49,31 @@ function getRelativeDays(at: number) {
     <div class="TimelineItem-body color-fg-default">
       <strong class="mr-2">{{ entries[0].eventId }}</strong>
       
-      <template v-if="entries[0].payload?._oldBed">
-        <MultiCrumb
-          :values="getAggregated(entries, (entry) => [entry.payload?._oldBed?._plot?.name, entry.payload?._oldBed?.name].filter(Boolean).join(' / '))"
-          label="beds"
-        />
-      </template>
-      <template v-if="entries[0].payload?._newBed">
-        &rarr;
-        <MultiCrumb
-          :values="getAggregated(entries, (entry) => [entry.payload?._newBed?._plot?.name, entry.payload?._newBed?.name].filter(Boolean).join(' / '))"
-          label="beds"
-        />
-      </template>
-      <template v-if="!(entries[0].payload?._oldBed || entries[0].payload?._newBed)">
-        <MultiCrumb
-          :values="getAggregated(entries, (entry) => [entry._plant?._bed?._plot?.name, entry._plant?._bed?.name].filter(Boolean).join(' / '))"
-          label="beds"
-        />
-      </template>
+      <span class="mr-2">
+        <template v-if="entries[0].payload?._oldBed">
+          <MultiCrumb
+            :values="getAggregated(entries, (entry) => [entry.payload?._oldBed?._plot?.name, entry.payload?._oldBed?.name].filter(Boolean).join(' / '))"
+            label="beds"
+          />
+        </template>
+        <template v-if="entries[0].payload?._newBed">
+          &rarr;
+          <MultiCrumb
+            :values="getAggregated(entries, (entry) => [entry.payload?._newBed?._plot?.name, entry.payload?._newBed?.name].filter(Boolean).join(' / '))"
+            label="beds"
+          />
+        </template>
+        <template v-if="!(entries[0].payload?._oldBed || entries[0].payload?._newBed)">
+          <MultiCrumb
+            :values="getAggregated(entries, (entry) => [entry._plant?._bed?._plot?.name, entry._plant?._bed?.name].filter(Boolean).join(' / '))"
+            label="beds"
+          />
+        </template>
+      </span>
+
+      <span v-if="entries[0]?.payload?.weight" class="branch-name tooltipped tooltipped-s tooltipped-no-delay mr-2" aria-label="Total harvest">
+        {{ getTotalWeight(entries) }}
+      </span>
 
       <ul class="color-fg-muted my-2" style="padding-left: 12px;">
         <li v-for="entry in entries" :key="entry.id" :id="`entry-${entry.id}`">

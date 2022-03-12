@@ -14,10 +14,13 @@ defineProps({
 </script>
 
 <template>
-  <span v-if="values.length <= 1" class="color-fg-muted">
+  <Button v-if="!values.length" class="Label Label--secondary tooltipped tooltipped-s tooltipped-no-delay" aria-label="Something went wrong and the values cannot be found">
+    &lt;missing&gt;
+  </Button>
+  <span v-else-if="values.length === 1" class="color-fg-muted">
     {{ values[0] }}
   </span>
-  <Button v-else class="Label Label--secondary tooltipped tooltipped-s tooltipped-no-delay" :aria-label="values.join('\n')">
+  <Button v-else class="Label tooltipped tooltipped-s tooltipped-no-delay" :aria-label="values.join('\n')">
     {{ values.length }} {{ label }}
   </Button>
 </template>
