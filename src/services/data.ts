@@ -85,6 +85,7 @@ export interface Bed extends Entity {
   y?: number
   width?: number
   height?: number
+  rotation?: number
 }
 export interface Plot extends Entity {
   name: string
@@ -273,7 +274,7 @@ export function useTreeViewProps(
 
   function onChange(changes: Record<string, any>) {
     Object.assign(state, changes)
-    
+
     if (changes.selected) {
       handleChange(state.selected.find(predicate))
     }
@@ -319,7 +320,7 @@ export function usePersistentRef<T extends unknown>(key: string, defaultValue?: 
   const path = `plantrack.persistentRef.${key}`
   
   const value = ref<T>(persistance.get(path, defaultValue, storageType))
-  watch(value, (v) => persistance.set(path, v, storageType))
+  watch(value, (v) => persistance.set(path, v, storageType), { deep: true })
   return value
 }
 export function useRestoreKey(key: string, prefix: string) {

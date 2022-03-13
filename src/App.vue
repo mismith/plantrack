@@ -157,6 +157,7 @@ export default defineComponent({
       document.documentElement.dataset.colorMode = enabled ? 'dark' : 'light'
       window.localStorage.setItem(colorSchemeKey, enabled ? 'dark' : 'light')
     }, { immediate: true })
+    provide('isDarkMode', isDarkMode)
 
     const isAddingPlant = ref<Boolean | Function | undefined>(false)
     const isAddingCrop = ref<Boolean | Function | undefined>(false)

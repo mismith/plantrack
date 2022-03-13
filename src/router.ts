@@ -27,10 +27,16 @@ export const routes = [
       {
         path: 'layout',
         component: PlanLayout,
+        meta: {
+          title: 'Layout',
+        },
       },
       {
-        path: 'timing',
+        path: 'crops',
         component: PlanLayout, // @TODO
+        meta: {
+          title: 'Crops',
+        },
       },
     ],
   },
