@@ -161,6 +161,7 @@ onMounted(() => {
     e.stopPropagation()
     if (e.touches && e.touches.length === 2) {
       if (self.state === 'start') {
+        canvas.selection = false
         gestureStart = {
           zoom: canvas.getZoom(),
           x: e.layerX,
@@ -172,6 +173,7 @@ onMounted(() => {
         storeViewportTransform()
 
         if (self.state === 'end') {
+          canvas.selection = true
           gestureStart = undefined
         } else {
           gestureStart.x = e.layerX
