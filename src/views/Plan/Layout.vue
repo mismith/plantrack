@@ -1,16 +1,25 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, watch } from 'vue'
+import { inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import { fabric } from 'fabric-with-gestures'
 
-import { Bed, useBeds, usePersistentRef, usePlots } from '../../services/data';
-import { database, getUserRefPath } from '../../services/firebase';
-import { snapTo, snapMoving, snapScaling } from '../../services/fabric';
+import { Bed, useBeds, usePersistentRef, usePlots } from '../../services/data'
+import { database, getUserRefPath } from '../../services/firebase'
+import { snapTo, snapMoving, snapScaling } from '../../services/fabric'
+import VPButton from '../../components/Button.vue'
 
-const canvasRef = ref<HTMLCanvasElement>()
-let canvas: fabric.Canvas
+const canvasContainerRef = ref<HTMLCanvasElement>()
+let canvas: fabric.Canvas // @HACK: use global var instead of ref since fabric doesn't like vue's Proxy-fication of the canvas
+
+const isShowingGridlines = usePersistentRef('Layout.isShowingGridlines', false)
+const gridSize = usePersistentRef('Layout.gridSize', 10)
+const isShowingPlotBounds = usePersistentRef('Layout.isShowingPlotBounds', true)
+const isShowingPlotNames = usePersistentRef('Layout.isShowingPlotNames', true)
+
+const selectedObjects = ref([])
 
 function redraw() {
   canvas.clear()
+
   const bedGroupsByPlotId = beds.value?.reduce((acc, bed) => {
     if (!(bed.width && bed.height)) return acc
 
@@ -55,42 +64,87 @@ function redraw() {
     return acc
   }, {} as Record<string, fabric.Group[]>)
 
-  Object.entries(bedGroupsByPlotId || {}).map(([plotId, bedGroups]) => {
-    const plotGroup = new fabric.Group(bedGroups)
-    const bbox = plotGroup.getBoundingRect()
-    plotGroup.destroy()
+  if (isShowingPlotBounds.value) {
+    Object.entries(bedGroupsByPlotId || {}).map(([plotId, bedGroups]) => {
+      const plotGroup = new fabric.Group(bedGroups)
+      const bbox = plotGroup.getBoundingRect()
+      plotGroup.destroy()
 
-    const plotName = plots.value?.find(({ id }) => id === plotId)?.name
-    if (plotName) {
-      const label = new fabric.Text(plotName, {
-        originX: 'left',
-        originY: 'bottom',
+      if (isShowingPlotNames.value) {
+        const plotName = plots.value?.find(({ id }) => id === plotId)?.name
+        if (plotName) {
+          const label = new fabric.Text(plotName, {
+            originX: 'left',
+            originY: 'bottom',
+            left: bbox.left - 2,
+            top: bbox.top - 2,
+            fill: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-subtle'),
+            fontSize: 10,
+            fontFamily: '-apple-system, sans-serif',
+            selectable: false,
+            evented: false,
+          })
+          canvas.add(label)
+          canvas.sendToBack(label)
+        }
+      }
+
+      const plot = new fabric.Rect({
         left: bbox.left - 2,
         top: bbox.top - 2,
-        fill: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-subtle'),
-        fontSize: 10,
-        fontFamily: '-apple-system, sans-serif',
+        width: bbox.width + 3,
+        height: bbox.height + 3,
+        fill: 'transparent',
+        stroke: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-subtle'),
+        strokeDashArray: [2, 2],
+        strokeWidth: 0.5,
         selectable: false,
         evented: false,
       })
-      canvas.add(label)
-    }
-
-    const plot = new fabric.Rect({
-      left: bbox.left - 2,
-      top: bbox.top - 2,
-      width: bbox.width + 3,
-      height: bbox.height + 3,
-      fill: 'transparent',
-      stroke: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-subtle'),
-      strokeDashArray: [2, 2],
-      strokeWidth: 0.5,
-      selectable: false,
-      evented: false,
+      canvas.add(plot)
+      canvas.sendToBack(plot)
     })
-    canvas.add(plot)
-    canvas.sendToBack(plot)
-  })
+  }
+
+  if (isShowingGridlines.value) {
+    const allObjects = new fabric.Group(canvas.getObjects())
+    const bbox = allObjects.getBoundingRect()
+    allObjects.destroy()
+
+    const gutter = 100
+    const limits = {
+      left: Math.round(Math.round(bbox.left / gridSize.value) * gridSize.value) - gutter,
+      top: Math.round(Math.round(bbox.top / gridSize.value) * gridSize.value) - gutter,
+      right: Math.round(Math.round((bbox.left + bbox.width) / gridSize.value) * gridSize.value) + gutter,
+      bottom: Math.round(Math.round((bbox.top + bbox.height) / gridSize.value) * gridSize.value) + gutter,
+    }
+    for(let x = limits.left + gridSize.value; x < limits.right; x += gridSize.value) {
+      const line = new fabric.Line(
+        [x, limits.top, x, limits.bottom],
+        {
+          stroke: getComputedStyle(document.documentElement).getPropertyValue('--color-border-muted'),
+          strokeWidth: 0.25,
+          selectable: false,
+          evented: false,
+        },
+      )
+      canvas.add(line)
+      canvas.sendToBack(line)
+    }
+    for(let y = limits.top + gridSize.value; y < limits.bottom; y += gridSize.value) {
+      const line = new fabric.Line(
+        [limits.left, y, limits.right, y],
+        {
+          stroke: getComputedStyle(document.documentElement).getPropertyValue('--color-border-muted'),
+          strokeWidth: 0.25,
+          selectable: false,
+          evented: false,
+        },
+      )
+      canvas.add(line)
+      canvas.sendToBack(line)
+    }
+  }
 }
 
 const viewportTransform = usePersistentRef<number[]>('Layout.viewportTransform')
@@ -104,15 +158,54 @@ function restoreViewportTransform() {
     canvas?.setViewportTransform(viewportTransform.value)
   }
 }
+function handleZoom(scale: number) {
+  canvas?.zoomToPoint(canvas.getVpCenter(), Number.parseFloat(scale))
+  storeViewportTransform()
+}
+function handleFit() {
+  const gutter = 100
+  const allObjects = new fabric.Group(canvas.getObjects().filter(({ selectable }) => selectable))
+  const center = allObjects.getCenterPoint()
+  const { width, height } = allObjects
+  const zoom = Math.min(canvas.width / (width + gutter), canvas.height / (height + gutter))
+  allObjects.destroy()
+
+  canvas.setViewportTransform([
+    zoom, 0, 0,
+    zoom, (-center.x * zoom) + (canvas.width / 2), (-center.y  * zoom) + (canvas.height / 2),
+  ]);
+  storeViewportTransform()
+}
+
+function handleResize() {
+  if (!canvasContainerRef.value || !canvas) return
+
+  const { width, height } = canvasContainerRef.value?.getBoundingClientRect() as any;
+  canvas.setDimensions({ width, height })
+}
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+const resizeObserver = new ResizeObserver(handleResize)
+onUnmounted(() => {
+  resizeObserver.disconnect()
+})
+
 
 onMounted(() => {
-  if (!canvasRef.value) return
+  if (!canvasContainerRef.value) return
+  resizeObserver.observe(canvasContainerRef.value)
 
-  const { width, height } = canvasRef.value?.parentElement?.getBoundingClientRect() as any;
-  canvasRef.value.width = width;
-  canvasRef.value.height = height;
+  const { width, height } = canvasContainerRef.value?.getBoundingClientRect() as any;
+  const canvasEl = canvasContainerRef.value.querySelector('canvas')
+  if (!canvasEl) return
+  canvasEl.width = width;
+  canvasEl.height = height;
 
-  canvas = new fabric.Canvas(canvasRef.value)
+  canvas = new fabric.Canvas(canvasEl)
 
   restoreViewportTransform()
 
@@ -225,20 +318,83 @@ onMounted(() => {
     }
   })
 
+  canvas?.on('selection:created', () => {
+    selectedObjects.value = canvas.getActiveObjects()
+  })
+  canvas?.on('selection:updated', () => {
+    selectedObjects.value = canvas.getActiveObjects()
+  })
+  canvas?.on('selection:cleared', () => {
+    selectedObjects.value = canvas.getActiveObjects()
+  })
+
   redraw()
 })
 
-// const [plots] = usePlots()
 const [beds] = useBeds()
 const [plots] = usePlots()
-watch([beds, plots], redraw)
-
 const isDarkMode = inject('isDarkMode')
-watch(isDarkMode, () => redraw())
+watch([
+  beds,
+  plots,
+  isShowingGridlines,
+  gridSize,
+  isShowingPlotBounds,
+  isShowingPlotNames,
+  isDarkMode,
+], () => redraw())
 </script>
 
 <template>
-  <div class="flex-auto">
-    <canvas ref="canvasRef" />
+  <div class="d-flex flex-auto">
+    <div ref="canvasContainerRef" class="color-bg-inset flex-auto overflow-hidden">
+      <canvas />
+    </div>
+    <aside class="border-left border-color-muted" style="max-width: 300px;">
+      <form @submit.prevent class="px-2">
+        <div class="form-checkbox">
+          <label>
+            <input type="checkbox" v-model="isShowingGridlines" />
+            Show gridlines
+          </label>
+        </div>
+        <div class="ml-3">
+          <label>
+            Grid size
+            <input type="number" v-model="gridSize" min="1" max="1000" :disabled="!isShowingGridlines" />
+          </label>
+        </div>
+
+        <div class="form-checkbox">
+          <label>
+            <input type="checkbox" v-model="isShowingPlotBounds" />
+            Show plot bounds
+          </label>
+        </div>
+        <div class="form-checkbox ml-3">
+          <label>
+            <input type="checkbox" v-model="isShowingPlotNames" :disabled="!isShowingPlotBounds" />
+            Show plot names
+          </label>
+        </div>
+
+        <div>
+          <label>
+            Zoom
+            <input
+              type="range"
+              :value="canvas?.getZoom() || 1"
+              :min="1"
+              :max="100"
+              :step="0.0001"
+              @input="(e) => handleZoom(e.target.value)"
+            />
+          </label>
+        </div>
+        <div>
+          <VPButton @click="handleFit">Zoom/Pan to Fit</VPButton>
+        </div>
+      </form>
+    </aside>
   </div>
 </template>
