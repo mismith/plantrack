@@ -12,7 +12,7 @@
     "@primer/css": "^19.1.1",
     "@primer/octicons": "^16.2.0",
     "date-fns": "^2.24.0",
-    "fabric": "^5.2.1",
+    "fabric-with-gestures": "^4.5.0",
     "firebase": "^8.10.0",
     "lodash.set": "^4.3.2",
     "vue": "^3.2.14",

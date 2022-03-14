@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inject, onMounted, ref, watch } from 'vue'
-import { fabric } from 'fabric'
+import { fabric } from 'fabric-with-gestures'
 
 import { Bed, useBeds, usePersistentRef } from '../../services/data';
 import { database, getUserRefPath } from '../../services/firebase';
@@ -33,9 +33,7 @@ function redraw() {
     let attempts = 0
     while (text.getScaledWidth() > width && text.fontSize! > 1 && attempts < 100) {
       attempts++
-      text.set({
-        fontSize: text.fontSize! - 0.5,
-      })
+      text.set({ fontSize: text.fontSize! - 0.5 })
     }
     const group = new fabric.Group([rect, text], {
       data: {
@@ -109,61 +107,77 @@ onMounted(() => {
   canvas?.on('object:moving', snapMoving)
   canvas?.on('object:scaling', snapScaling)
 
-  // two-finger move: pan / tw-finger move + alt: zoom / two-finger pinch: zoom
-  canvas?.on('mouse:wheel', function ({ e }) {
+  // two-finger move: pan / two-finger pinch: zoom / two-finger move + alt: zoom
+  canvas?.on('mouse:wheel', ({ e }) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.ctrlKey) {
       const zoom = (canvas?.getZoom() || 1) * (0.99 ** e.deltaY);
       canvas?.zoomToPoint({ x: e.offsetX, y: e.offsetY }, zoom);
     } else {
-      this.viewportTransform[4] -= e.deltaX;
-      this.viewportTransform[5] -= e.deltaY;
-      this.requestRenderAll();
+      canvas.viewportTransform[4] -= e.deltaX;
+      canvas.viewportTransform[5] -= e.deltaY;
+      canvas.requestRenderAll();
     }
     storeViewportTransform()
   })
 
   // alt-drag: pan
-  canvas?.on('mouse:down', function ({ e }) {
-    if (e.altKey) {
+  canvas?.on('mouse:down', ({ e }) => {
+    if (e.altKey && !e.touches?.length) {
       e.preventDefault()
       e.stopPropagation()
-      this.isDragging = true
-      this.selection = false
-      this.lastPosX = e.clientX
-      this.lastPosY = e.clientY
+      canvas.isDragging = true
+      canvas.selection = false
+      canvas.lastPosX = e.clientX
+      canvas.lastPosY = e.clientY
+    }
+    if (e.touches?.length >= 2) {
+      canvas.selection = false
     }
   });
-  canvas?.on('mouse:move', function ({ e }) {
-    if (this.isDragging) {
-      this.viewportTransform[4] += e.clientX - this.lastPosX
-      this.viewportTransform[5] += e.clientY - this.lastPosY
-      this.requestRenderAll()
-      this.lastPosX = e.clientX
-      this.lastPosY = e.clientY
+  canvas?.on('mouse:move', ({ e }) => {
+    if (canvas.isDragging) {
+      canvas.viewportTransform[4] += e.clientX - canvas.lastPosX
+      canvas.viewportTransform[5] += e.clientY - canvas.lastPosY
+      canvas.requestRenderAll()
+      canvas.lastPosX = e.clientX
+      canvas.lastPosY = e.clientY
       storeViewportTransform()
     }
   });
-  canvas?.on('mouse:up', function () {
+  canvas?.on('mouse:up', () => {
     // on mouse up we want to recalculate new interaction
     // for all objects, so we call setViewportTransform
-    this.setViewportTransform(this.viewportTransform)
-    this.isDragging = false
-    this.selection = true
+    canvas.setViewportTransform(canvas.viewportTransform)
+    canvas.isDragging = false
+    canvas.selection = true
   });
 
-  // two-finger pinch: zoom ?
-  let zoomStartScale = 1
-  canvas?.on('touch:gesture', function ({ e, self }) {
+  // two-finger move: pan / two-finger pinch: zoom
+  let gestureStart: Record<string, number> | undefined
+  canvas?.on('touch:gesture', ({ e, self }) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.touches && e.touches.length == 2) {
+    if (e.touches && e.touches.length === 2) {
       if (self.state === 'start') {
-        zoomStartScale = self.canvas.getZoom()
+        gestureStart = {
+          zoom: canvas.getZoom(),
+          x: e.layerX,
+          y: e.layerY,
+        }
+      } else if (gestureStart) {
+        canvas.relativePan({ x: e.layerX - gestureStart.x, y: e.layerY - gestureStart.y })
+        canvas.zoomToPoint({ x: self.x, y: self.y }, gestureStart.zoom * self.scale)
+        storeViewportTransform()
+
+        if (self.state === 'end') {
+          gestureStart = undefined
+        } else {
+          gestureStart.x = e.layerX
+          gestureStart.y = e.layerY
+        }
       }
-      self.canvas.zoomToPoint({ x: self.x, y: self.y }, zoomStartScale * self.scale)
-      storeViewportTransform()
     }
   })
 
