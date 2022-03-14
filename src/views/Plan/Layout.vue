@@ -197,29 +197,29 @@ onMounted(() => {
   });
 
   // two-finger move: pan / two-finger pinch: zoom
-  let gestureStart: Record<string, number> | undefined
+  let touchCache: Record<string, number> | undefined
   canvas?.on('touch:gesture', ({ e, self }) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.touches && e.touches.length === 2) {
       if (self.state === 'start') {
         canvas.selection = false
-        gestureStart = {
+        touchCache = {
           zoom: canvas.getZoom(),
           x: e.layerX,
           y: e.layerY,
         }
-      } else if (gestureStart) {
-        canvas.relativePan({ x: e.layerX - gestureStart.x, y: e.layerY - gestureStart.y })
-        canvas.zoomToPoint({ x: self.x, y: self.y }, gestureStart.zoom * self.scale)
+      } else if (touchCache) {
+        canvas.relativePan({ x: e.layerX - touchCache.x, y: e.layerY - touchCache.y })
+        canvas.zoomToPoint({ x: self.x, y: self.y }, touchCache.zoom * self.scale)
         storeViewportTransform()
 
         if (self.state === 'end') {
           canvas.selection = true
-          gestureStart = undefined
+          touchCache = undefined
         } else {
-          gestureStart.x = e.layerX
-          gestureStart.y = e.layerY
+          touchCache.x = e.layerX
+          touchCache.y = e.layerY
         }
       }
     }
