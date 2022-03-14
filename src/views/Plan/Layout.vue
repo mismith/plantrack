@@ -2,7 +2,7 @@
 import { inject, onMounted, ref, watch } from 'vue'
 import { fabric } from 'fabric-with-gestures'
 
-import { Bed, useBeds, usePersistentRef } from '../../services/data';
+import { Bed, useBeds, usePersistentRef, usePlots } from '../../services/data';
 import { database, getUserRefPath } from '../../services/firebase';
 import { snapTo, snapMoving, snapScaling } from '../../services/fabric';
 
@@ -11,7 +11,9 @@ let canvas: fabric.Canvas
 
 function redraw() {
   canvas.clear()
-  beds.value?.forEach((bed) => {
+  const bedGroupsByPlotId = beds.value?.reduce((acc, bed) => {
+    if (!(bed.width && bed.height)) return acc
+
     const width = bed.width || 10
     const height = bed.height || 10
 
@@ -20,10 +22,10 @@ function redraw() {
       originY: 'center',
       width,
       height,
-      fill: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-default'),
+      fill: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-muted'),
     })
     const text = new fabric.Text(bed.name || bed.id, {
-      fill: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-subtle'),
+      fill: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-on-emphasis'),
       originX: 'center',
       originY: 'center',
       fontSize: 16, // max size
@@ -48,6 +50,46 @@ function redraw() {
       lockSkewingY: true,
     })
     canvas?.add(group)
+
+    acc[bed.plotId] = (acc[bed.plotId] || []).concat(group)
+    return acc
+  }, {} as Record<string, fabric.Group[]>)
+
+  Object.entries(bedGroupsByPlotId || {}).map(([plotId, bedGroups]) => {
+    const plotGroup = new fabric.Group(bedGroups)
+    const bbox = plotGroup.getBoundingRect()
+    plotGroup.destroy()
+
+    const plotName = plots.value?.find(({ id }) => id === plotId)?.name
+    if (plotName) {
+      const label = new fabric.Text(plotName, {
+        originX: 'left',
+        originY: 'bottom',
+        left: bbox.left - 2,
+        top: bbox.top - 2,
+        fill: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-subtle'),
+        fontSize: 10,
+        fontFamily: '-apple-system, sans-serif',
+        selectable: false,
+        evented: false,
+      })
+      canvas.add(label)
+    }
+
+    const plot = new fabric.Rect({
+      left: bbox.left - 2,
+      top: bbox.top - 2,
+      width: bbox.width + 3,
+      height: bbox.height + 3,
+      fill: 'transparent',
+      stroke: getComputedStyle(document.documentElement).getPropertyValue('--color-fg-subtle'),
+      strokeDashArray: [2, 2],
+      strokeWidth: 0.5,
+      selectable: false,
+      evented: false,
+    })
+    canvas.add(plot)
+    canvas.sendToBack(plot)
   })
 }
 
@@ -99,7 +141,7 @@ onMounted(() => {
           break;
         }
       }
-      await database.ref(getUserRefPath('/beds')).child(bed.id).update(updates)
+      await bedsRef.child(bed.id).update(updates)
     }))
   })
 
@@ -188,7 +230,8 @@ onMounted(() => {
 
 // const [plots] = usePlots()
 const [beds] = useBeds()
-watch(beds, redraw)
+const [plots] = usePlots()
+watch([beds, plots], redraw)
 
 const isDarkMode = inject('isDarkMode')
 watch(isDarkMode, () => redraw())
