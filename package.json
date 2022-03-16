@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "emulate": "firebase emulators:start --import=.firebase/emulator-data",
-    "dev:www": "vite --https --host",
+    "dev:www": "vite --host",
     "dev:functions": "npm run --prefix functions/ dev",
     "dev": "npm-run-all --parallel 'emulate -- --export-on-exit' dev:www dev:functions",
     "build": "vuedx-typecheck . && vite build"
