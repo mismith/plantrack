@@ -25,6 +25,7 @@ import Button from '../components/Button.vue'
 import Octicon from '../components/Octicon.vue'
 import TagSelect from '../components/TagSelect.vue'
 import Blip from '../components/Blip.vue'
+import FilePreview from '../components/FilePreview.vue'
 
 const WEIGHT_SPLIT = {
   ALL: 'total',
@@ -175,7 +176,7 @@ const weightUnit = ref<string>('g')
 const weightSplit = ref<string>(WEIGHT_SPLIT.ALL)
 const cullToo = ref(false)
 const at = ref<string>()
-const files = ref<FileList>()
+const files = ref<File[]>()
 const [tags] = useTags()
 const tagIds = ref<string[]>([])
 
@@ -201,21 +202,25 @@ const isShowing = reactive({
   tagIds: false,
 })
 const atRef = ref<HTMLInputElement>()
-const attachmentsRef = ref<HTMLInputElement>()
-const tagIdsRef = ref<HTMLInputElement>()
-watch(files, (v) => {
-  if (!v?.length) {
-    attachmentsRef.value = undefined; 
-  }
-})
-const isCaptureSupported = (() => {
-  const el = document.createElement('input')
-  return el.capture !== undefined
-})()
 function handleShowAt() {
   isShowing.at = true
   window.setTimeout(() => atRef.value?.focus?.())
 }
+const attachmentsRef = ref<HTMLInputElement>()
+function handleAttachmentsChange({ target }: Event & { target: { files: FileList } }) {
+  if (!target.files?.length) return
+  if (!files.value) files.value = []
+
+  files.value.push(...Array.from(target.files))
+  
+  if (attachmentsRef.value) {
+   attachmentsRef.value.value = ''
+  }
+}
+const isCaptureSupported = (() => {
+  const el = document.createElement('input')
+  return el.capture !== undefined
+})()
 function handleShowAttachments(isCamera = false) {
   isShowing.attachments = true
   window.setTimeout(() => {
@@ -231,6 +236,7 @@ function handleShowAttachments(isCamera = false) {
     }
   })
 }
+const tagIdsRef = ref<HTMLInputElement>()
 function handleShowTags() {
   isShowing.tagIds = true
   if (tags.value?.length) {
@@ -497,13 +503,22 @@ const isAddingBed = inject('isAddingBed')
           <header class="form-group-header">
             <label>Attachment(s)</label>
           </header>
+          <div v-if="files?.length" class="mb-2">
+            <div v-for="(file, index) in files" :key="`${index}-${file.name}`" class="d-flex flex-items-center">
+              <FilePreview :file="file" style="object-fit: contain; max-width: 16px; max-height: 16px;" />
+              <span class="pl-2">{{ file.name }}</span>
+              <Button class="btn-octicon" @click="files?.splice(index, 1)">
+                <Octicon name="x" />
+              </Button>
+            </div>
+          </div>
           <div class="d-flex">
             <input
               ref="attachmentsRef"
               type="file"
               multiple
               class="form-control width-full mr-0"
-              @change="files = $event.target.files"
+              @change="handleAttachmentsChange"
             />
             <button type="button" class="btn-octicon" @click="files = undefined; isShowing.attachments = false;">
               <Octicon name="x-circle-fill" />
@@ -536,7 +551,7 @@ const isAddingBed = inject('isAddingBed')
       </TransitionExpand>
 
       <aside class="d-flex flex-wrap flex-justify-center mb-3" style="gap: 8px;">
-        <Button v-if="!isShowing.attachments && isCaptureSupported" class="flex-auto" @click="handleShowAttachments(true)">
+        <Button v-if="isCaptureSupported" class="flex-auto" @click="handleShowAttachments(true)">
           <Octicon name="image" class="mr-2" />
           Add Photo
         </Button>
