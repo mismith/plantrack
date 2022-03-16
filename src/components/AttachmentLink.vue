@@ -21,7 +21,7 @@
         :alt="attachment.name"
         class="container-sm"
         style="object-fit: contain; max-width: 300px; max-height: min(50vh, 300px);"
-        @error="err => isError = err.message || err"
+        @error="(err: any) => isError = err.message || err"
       />
       <Octicon
         v-else

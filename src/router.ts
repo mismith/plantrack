@@ -33,7 +33,9 @@ export const routes = [
       },
       {
         path: 'crops',
-        component: PlanLayout, // @TODO
+        component: {
+          render: () => h('h1', { class: 'd-flex m-auto', innerHTML: '<h1 class="m-auto">Coming Soon</h1>' }), // @TODO
+        },
         meta: {
           title: 'Crops',
         },

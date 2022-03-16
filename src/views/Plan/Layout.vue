@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, inject, onMounted, onUnmounted, ref, RendererElement, watch } from 'vue'
 import { fabric } from 'fabric-with-gestures'
 
 import { Bed, useBeds, usePersistentRef, usePlots } from '../../services/data'
@@ -15,6 +15,7 @@ import {
   useTouchViewportTransforming,
 } from '../../services/fabric'
 import VPButton from '../../components/Button.vue'
+import Octicon from '../../components/Octicon.vue'
 
 const canvasContainerRef = ref<HTMLCanvasElement>()
 let canvas: fabric.Canvas // @HACK: use global var instead of ref since fabric doesn't like vue's Proxy-fication of the canvas
@@ -190,11 +191,17 @@ function handleFit() {
   storeViewportTransform()
 }
 
+const planAppendRef = inject<RendererElement>('Plan.appendRef')
+const isToolsShowing = ref(false)
+const isToolsSidebar = ref(false)
+
 function handleResize() {
   if (!canvasContainerRef.value || !canvas) return
 
   const { width, height } = canvasContainerRef.value?.getBoundingClientRect() as any;
   canvas.setDimensions({ width, height })
+
+  isToolsSidebar.value =(canvasContainerRef.value?.offsetWidth || 0) >= 600
 }
 onMounted(() => {
   window.addEventListener('resize', handleResize)
@@ -290,12 +297,22 @@ watch([
 </script>
 
 <template>
-  <div class="d-flex flex-auto">
+  <div class="d-flex flex-auto position-relative">
     <div ref="canvasContainerRef" class="color-bg-inset flex-auto overflow-hidden">
       <canvas />
     </div>
-    <aside class="border-left border-color-muted" style="max-width: 300px;">
-      <form @submit.prevent class="px-2">
+    <Teleport v-if="planAppendRef" :to="planAppendRef">
+      <VPButton class="px-2 mr-2" @click="isToolsShowing = !isToolsShowing">
+        <Octicon name="gear" />
+      </VPButton>
+    </Teleport>
+    <aside
+      v-if="isToolsShowing"
+      class="color-bg-default p-3"
+      :class="isToolsSidebar ? 'border-left border-color-muted' : 'position-absolute top-0 right-0 Box'"
+      style="max-width: 300px;"
+    >
+      <form @submit.prevent>
         <div class="form-checkbox">
           <label>
             <input type="checkbox" v-model="isShowingGridlines" />
@@ -322,19 +339,6 @@ watch([
           </label>
         </div>
 
-        <div>
-          <label>
-            Zoom
-            <input
-              type="range"
-              :value="canvas?.getZoom() || 1"
-              :min="1"
-              :max="100"
-              :step="0.0001"
-              @input="(e) => handleZoom((e.target as any).value)"
-            />
-          </label>
-        </div>
         <div>
           <VPButton @click="handleFit">Zoom/Pan to Fit</VPButton>
         </div>
