@@ -10,7 +10,10 @@
     "lib": ["esnext", "dom", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019"],
     "types": ["vite/client"],
     "plugins": [{ "name": "@vuedx/typescript-plugin-vue" }],
-    "isolatedModules": true
+    "isolatedModules": true,
+    "paths": { 
+      "fabric-with-gestures": ["./node_modules/@types/fabric"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

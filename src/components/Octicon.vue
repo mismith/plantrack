@@ -1,30 +1,30 @@
-<script lang="ts">
-import { computed, defineComponent, h, toRefs } from 'vue'
-import octicons from '@primer/octicons'
+<script setup lang="ts">
+import { computed, h, PropType, toRefs } from 'vue'
+import octicons, { IconName, IconSize } from '@primer/octicons'
 
-export default defineComponent({
-  name: 'Octicon',
-  props: {
-    name: {
-      type: String,
-      required: true,
-    },
-    size: {
-      type: Number,
-      default: 16,
-      validator(v: number) {
-        return [16, 24].includes(v)
-      },
-    },
+const props = defineProps({
+  name: {
+    type: String as PropType<IconName>,
+    required: true,
   },
-  setup(props) {
-    const { name, size } = toRefs(props)
-    const octicon = computed(() => octicons[name.value])
-
-    return () => h('svg', {
-      ...octicon.value.heights[size.value].options,
-      innerHTML: octicon.value.heights[size.value].path,
-    })
+  size: {
+    type: Number as PropType<IconSize>,
+    default: 16,
+    validator(v: number) {
+      return [16, 24].includes(v)
+    },
   },
 })
+
+const { name, size } = toRefs(props)
+const octicon = computed(() => octicons[name.value])
+
+const render = () => h('svg', {
+  ...octicon.value?.heights?.[size.value]?.options,
+  innerHTML: octicon.value?.heights?.[size.value]?.path,
+})
 </script>
+
+<template>
+  <render />
+</template>

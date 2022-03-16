@@ -1,7 +1,20 @@
 <script setup lang="ts">
 import { computed, inject, reactive, ref, watch } from 'vue'
 
-import { events, Entry, NewEntity, Attachment, getSuggestedPlantName, usePlants, useCrops, useBeds, useTags, useRestoreKey, usePersistentRef } from '../services/data'
+import {
+  events,
+  Entry,
+  NewEntity,
+  // Bed, // @TODO: why aren't these importing properly at runtime?
+  // Plant, // @TODO: why aren't these importing properly at runtime?
+  Attachment,
+  getSuggestedPlantName,
+  usePlants,
+  useCrops,
+  useBeds,
+  useTags,
+  usePersistentRef,
+} from '../services/data'
 import { database, getUserRefPath, ServerValue, storage } from '../services/firebase'
 import { useAsyncWrapper } from '../services/errors'
 

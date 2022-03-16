@@ -4,7 +4,16 @@ import { fabric } from 'fabric-with-gestures'
 
 import { Bed, useBeds, usePersistentRef, usePlots } from '../../services/data'
 import { database, getUserRefPath } from '../../services/firebase'
-import { snapTo, snapMoving, snapScaling } from '../../services/fabric'
+import {
+  snapTo,
+  useSnappedMovement,
+  useSnappedScaling,
+  useSnappedRotation,
+  ANGLE_SNAP,
+  useMouseViewportTransforming,
+  useMouseWheelViewportTransforming,
+  useTouchViewportTransforming,
+} from '../../services/fabric'
 import VPButton from '../../components/Button.vue'
 
 const canvasContainerRef = ref<HTMLCanvasElement>()
@@ -15,7 +24,7 @@ const gridSize = usePersistentRef('Layout.gridSize', 10)
 const isShowingPlotBounds = usePersistentRef('Layout.isShowingPlotBounds', true)
 const isShowingPlotNames = usePersistentRef('Layout.isShowingPlotNames', true)
 
-const selectedObjects = ref([])
+const selectedObjects = ref<fabric.Object[]>([])
 
 function redraw() {
   canvas.clear()
@@ -53,7 +62,7 @@ function redraw() {
       top: bed.y || 0,
       left: bed.x || 0,
       angle: bed.rotation || 0,
-      snapAngle: 5,
+      snapAngle: ANGLE_SNAP,
       centeredRotation: true,
       lockSkewingX: true,
       lockSkewingY: true,
@@ -158,15 +167,19 @@ function restoreViewportTransform() {
     canvas?.setViewportTransform(viewportTransform.value)
   }
 }
-function handleZoom(scale: number) {
+function handleZoom(scale: string) {
   canvas?.zoomToPoint(canvas.getVpCenter(), Number.parseFloat(scale))
   storeViewportTransform()
 }
 function handleFit() {
-  const gutter = 100
+  if (!(canvas.width && canvas.height)) return
+
   const allObjects = new fabric.Group(canvas.getObjects().filter(({ selectable }) => selectable))
-  const center = allObjects.getCenterPoint()
   const { width, height } = allObjects
+  if (!(width && height)) return
+
+  const center = allObjects.getCenterPoint()
+  const gutter = 100
   const zoom = Math.min(canvas.width / (width + gutter), canvas.height / (height + gutter))
   allObjects.destroy()
 
@@ -210,27 +223,27 @@ onMounted(() => {
   restoreViewportTransform()
 
   const bedsRef = database.ref(getUserRefPath('/beds'))
-  canvas?.on('object:modified', async function ({ action, target, transform: { original } }) {
+  canvas?.on('object:modified', async function ({ action, target, transform: { original } }: any) {
     // @TODO: fix grouped rotation
     const objects = canvas.getActiveObjects()
     const beds = objects.filter(({ data }) => data?.bed?.id).map(({ data }) => data.bed)
-    await Promise.all(beds.map(async (bed) => {
+    await Promise.all(beds.map(async (bed: Bed) => {
       const updates: Partial<Bed> = {}
       switch (action) {
         case 'rotate': {
-          updates.rotation = snapTo(bed.rotation + target.angle - original.angle, 5)
+          updates.rotation = snapTo((bed.rotation || 0) + (target?.angle || 0) - original.angle, ANGLE_SNAP)
           // fall through
         }
         case 'scale':
         case 'scaleX':
         case 'scaleY': {
-          updates.width = snapTo(bed.width * target.scaleX)
-          updates.height = snapTo(bed.height * target.scaleY)
+          updates.width = snapTo((bed.width || 0) * (target?.scaleX || 0))
+          updates.height = snapTo((bed.height || 0) * (target?.scaleY || 0))
           // fall through
         }
         case 'drag': {
-          updates.x = snapTo(bed.x + target.left - original.left)
-          updates.y = snapTo(bed.y + target.top - original.top)
+          updates.x = snapTo((bed.x || 0) + (target?.left || 0) - original.left)
+          updates.y = snapTo((bed.y || 0) + (target?.top || 0) - original.top)
           break;
         }
       }
@@ -239,85 +252,16 @@ onMounted(() => {
   })
 
   // snap to grid
-  canvas?.on('object:moving', snapMoving)
-  canvas?.on('object:scaling', snapScaling)
+  useSnappedMovement(canvas)
+  useSnappedScaling(canvas)
+  useSnappedRotation(canvas)
 
-  // two-finger move: pan / two-finger pinch: zoom / two-finger move + alt: zoom
-  canvas?.on('mouse:wheel', ({ e }) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.ctrlKey) {
-      const zoom = (canvas?.getZoom() || 1) * (0.99 ** e.deltaY);
-      canvas?.zoomToPoint({ x: e.offsetX, y: e.offsetY }, zoom);
-    } else {
-      canvas.viewportTransform[4] -= e.deltaX;
-      canvas.viewportTransform[5] -= e.deltaY;
-      canvas.requestRenderAll();
-    }
-    storeViewportTransform()
-  })
+  // viewport transforming
+  useMouseViewportTransforming(canvas, storeViewportTransform)
+  useMouseWheelViewportTransforming(canvas, storeViewportTransform)
+  useTouchViewportTransforming(canvas, storeViewportTransform)
 
-  // alt-drag: pan
-  canvas?.on('mouse:down', ({ e }) => {
-    if (e.altKey && !e.touches?.length) {
-      e.preventDefault()
-      e.stopPropagation()
-      canvas.isDragging = true
-      canvas.selection = false
-      canvas.lastPosX = e.clientX
-      canvas.lastPosY = e.clientY
-    }
-    if (e.touches?.length >= 2) {
-      canvas.selection = false
-    }
-  });
-  canvas?.on('mouse:move', ({ e }) => {
-    if (canvas.isDragging) {
-      canvas.viewportTransform[4] += e.clientX - canvas.lastPosX
-      canvas.viewportTransform[5] += e.clientY - canvas.lastPosY
-      canvas.requestRenderAll()
-      canvas.lastPosX = e.clientX
-      canvas.lastPosY = e.clientY
-      storeViewportTransform()
-    }
-  });
-  canvas?.on('mouse:up', () => {
-    // on mouse up we want to recalculate new interaction
-    // for all objects, so we call setViewportTransform
-    canvas.setViewportTransform(canvas.viewportTransform)
-    canvas.isDragging = false
-    canvas.selection = true
-  });
-
-  // two-finger move: pan / two-finger pinch: zoom
-  let touchCache: Record<string, number> | undefined
-  canvas?.on('touch:gesture', ({ e, self }) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.touches && e.touches.length === 2) {
-      if (self.state === 'start') {
-        canvas.selection = false
-        touchCache = {
-          zoom: canvas.getZoom(),
-          x: e.layerX,
-          y: e.layerY,
-        }
-      } else if (touchCache) {
-        canvas.relativePan({ x: e.layerX - touchCache.x, y: e.layerY - touchCache.y })
-        canvas.zoomToPoint({ x: self.x, y: self.y }, touchCache.zoom * self.scale)
-        storeViewportTransform()
-
-        if (self.state === 'end') {
-          canvas.selection = true
-          touchCache = undefined
-        } else {
-          touchCache.x = e.layerX
-          touchCache.y = e.layerY
-        }
-      }
-    }
-  })
-
+  // selection syncing
   canvas?.on('selection:created', () => {
     selectedObjects.value = canvas.getActiveObjects()
   })
@@ -387,7 +331,7 @@ watch([
               :min="1"
               :max="100"
               :step="0.0001"
-              @input="(e) => handleZoom(e.target.value)"
+              @input="(e) => handleZoom((e.target as any).value)"
             />
           </label>
         </div>
