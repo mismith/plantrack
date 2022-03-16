@@ -19,7 +19,7 @@
         v-if="preview && isImage"
         :src="href"
         :alt="attachment.name"
-        class="container-sm width-full"
+        class="container-sm"
         style="object-fit: contain; max-width: 300px; max-height: min(50vh, 300px);"
         @error="err => isError = err.message || err"
       />
