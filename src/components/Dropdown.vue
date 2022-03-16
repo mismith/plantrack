@@ -5,8 +5,8 @@
     class="Dropdown dropdown details-reset details-overlay" 
     @toggle="handleToggle"
   >
-    <slot name="summary">
-      <summary aria-haspopup="true" style="cursor: inherit;">
+    <slot name="summary" v-bind="{ summaryProps }">
+      <summary v-bind="summaryProps" style="cursor: inherit;">
         <slot name="text" />
         <div class="dropdown-caret"></div>
       </summary>
@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, toRefs, watch } from 'vue'
+import { computed, defineComponent, ref, toRefs, watch } from 'vue'
 
 export default defineComponent({
   name: 'Dropdown',
@@ -38,6 +38,10 @@ export default defineComponent({
   setup(props, { emit }) {
     const { modelValue } = toRefs(props)
 
+    const summaryProps = computed(() => ({
+      ariaHaspopup: true,
+    }))
+
     const detailsRef = ref()
     watch(modelValue, (v) => {
       if (v) {
@@ -51,6 +55,7 @@ export default defineComponent({
     }
 
     return {
+      summaryProps,
       detailsRef,
       handleToggle,
     }

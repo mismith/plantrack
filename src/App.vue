@@ -25,8 +25,8 @@
         <Octicon :name="isDarkMode ? 'sun' : 'moon'" style="color: inherit;" />
       </Button>
       <Dropdown v-if="user" direction="sw" menu-class="mt-2" class="ml-2">
-        <template #summary>
-          <summary title="Account" aria-haspopup="true" class="Header-link btn btn-invisible px-2">
+        <template #summary="{ summaryProps }">
+          <summary v-bind="summaryProps" title="Account" class="Header-link btn btn-invisible px-2">
             <Octicon name="person" class="mr-0" style="color: inherit;" />
             <span class="dropdown-caret" />
           </summary>
