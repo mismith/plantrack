@@ -90,15 +90,15 @@ function getTotalWeight(entries: Entry[]) {
           {{ entries[0].note }}
         </blockquote>
       </div>
-      <figure v-if="entries[0].attachments" class="d-flex mx-0 my-2">
+      <figure v-if="entries[0].attachments" class="d-flex flex-justify-start my-2 overflow-auto">
         <AttachmentLink
           v-for="attachment in entries[0].attachments"
           :key="attachment.id"
           :attachment="attachment"
           preview
-          class="mx-auto"
           style="background-color: var(--color-border-muted); border: solid 8px var(--color-border-muted); border-radius: 4px;"
         />
+        <div v-if="entries[0].attachments.length > 1" class="pr-3" />
       </figure>
       <div v-if="entries[0].tagIds" class="my-2">
         <Tag
@@ -117,3 +117,22 @@ function getTotalWeight(entries: Entry[]) {
     </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+figure {
+  position: relative;
+  width: calc(100vw - 1px);
+  left: calc(50% - 12px);
+  padding-left: 40px;
+  margin-left: -50vw;
+  gap: 8px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    padding-left: calc(50vw - 50% + 8px);
+  }
+}
+</style>

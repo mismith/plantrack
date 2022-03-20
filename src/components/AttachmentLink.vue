@@ -14,7 +14,10 @@
         style="color: inherit;"
       />
     </slot>
-    <slot v-else-if="!isLoading">
+    <slot v-else-if="isLoading" name="loading">
+      <Spinner />
+    </slot>
+    <slot v-else>
       <img
         v-if="preview && isImage"
         :src="href"
@@ -29,9 +32,6 @@
         :width="preview ? 128 : undefined"
         :height="preview ? 128 : undefined"
       />
-    </slot>
-    <slot v-else name="loading">
-      <Spinner />
     </slot>
   </a>
 </template>
@@ -63,7 +63,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { attachment } = toRefs(props)
+    const { attachment, preview } = toRefs(props)
     const href = ref()
     const isImage = computed(() => attachment.value?.type.startsWith('image/'))
     const isLoading = ref(false)
@@ -77,6 +77,15 @@ export default defineComponent({
       try {
         const ref = storage.ref(getUserRefPath(`/attachments/${id}`))
         href.value = await ref.getDownloadURL()
+        
+        if (isImage.value && preview.value) {
+          await new Promise((resolve, reject) => {
+            const img = document.createElement('img')
+            img.onload = resolve
+            img.onerror = reject
+            img.src = href.value
+          })
+        }
       } catch (err: any) {
         isError.value = err.message || err
       }

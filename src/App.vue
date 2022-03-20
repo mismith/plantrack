@@ -239,10 +239,10 @@ export default defineComponent({
 html,
 body,
 #app {
-  min-height: 100%;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  min-height: 100%;
   font-family: sans-serif;
   padding: 0;
   margin: 0;

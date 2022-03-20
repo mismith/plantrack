@@ -39,7 +39,7 @@ function round(number: number, numDecimals: number = 2) {
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 async function uploadAttachment(file: File, id: string = database.ref().push().key!): Promise<Attachment> {
   if (file.size > MAX_FILE_SIZE) {
-    throw new Error(`Attachment must be under 10MB (${file.name})`)
+    throw new Error(`Attachments must be under 10MB (${file.name})`)
   }
   // if (!file.type.startsWith('image/')) throw new Error('Attachment must be an image')
   const ref = storage.ref(getUserRefPath(`/attachments/${id}`))
@@ -286,7 +286,7 @@ async function handleSubmit() {
       : undefined
 
     const batchId = plantIds.value.length > 1 ? database.ref().push().key! : undefined
-    const attachments = await Promise.all(Array.from(files.value || []).map((file) => uploadAttachment(file, batchId)))
+    const attachments = await Promise.all(Array.from(files.value || []).map((file) => uploadAttachment(file)))
     await Promise.all(plantIds.value.map(async (plantId) => {
       const params = {
         batchId,
