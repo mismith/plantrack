@@ -86,7 +86,7 @@ function getTotalWeight(entries: Entry[]) {
       </ul>
 
       <div v-if="entries[0].note" class="markdown-body my-2">
-        <blockquote class="color-fg-default">
+        <blockquote class="color-fg-default" style="white-space: pre-line;">
           {{ entries[0].note }}
         </blockquote>
       </div>
