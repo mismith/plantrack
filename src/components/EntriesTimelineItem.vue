@@ -96,7 +96,6 @@ function getTotalWeight(entries: Entry[]) {
           :key="attachment.id"
           :attachment="attachment"
           preview
-          style="background-color: var(--color-border-muted); border: solid 8px var(--color-border-muted); border-radius: 4px;"
         />
         <div v-if="entries[0].attachments.length > 1" class="pr-3" />
       </figure>

@@ -5,6 +5,7 @@
     :title="attachment.name"
     class="d-inline-flex"
     :class="{ 'tooltipped tooltipped-s tooltipped-multiline tooltipped-no-delay color-fg-danger': isError }"
+    :style="preview ? 'background-color: var(--color-border-muted); border: solid 8px var(--color-border-muted); border-radius: 4px;' : undefined"
     :aria-label="isError"
   >
     <slot v-if="isError" name="error">
@@ -22,8 +23,7 @@
         v-if="preview && isImage"
         :src="href"
         :alt="attachment.name"
-        class="container-sm"
-        style="object-fit: contain; max-width: 300px; max-height: min(50vh, 300px);"
+        style="object-fit: contain; width: 100%; max-width: 300px; max-height: min(50vh, 300px);"
         @error="(err: any) => isError = err.message || err"
       />
       <Octicon
