@@ -21,7 +21,7 @@
     <slot v-else>
       <img
         v-if="preview && isImage"
-        :src="href"
+        :src="src"
         :alt="attachment.name"
         style="object-fit: contain; width: 100%; max-width: 300px; max-height: min(50vh, 300px);"
         @error="(err: any) => isError = err.message || err"
@@ -65,6 +65,7 @@ export default defineComponent({
   setup(props) {
     const { attachment, preview } = toRefs(props)
     const href = ref()
+    const src = ref()
     const isImage = computed(() => attachment.value?.type.startsWith('image/'))
     const isLoading = ref(false)
     const isError = ref()
@@ -77,13 +78,20 @@ export default defineComponent({
       try {
         const ref = storage.ref(getUserRefPath(`/attachments/${id}`))
         href.value = await ref.getDownloadURL()
-        
+        src.value = href.value
+
         if (isImage.value && preview.value) {
-          await new Promise((resolve, reject) => {
+          await new Promise(async (resolve, reject) => {
+            try {
+              const thumbRef = storage.ref(getUserRefPath(`/attachments/thumbnails/${id}`))
+              src.value = await thumbRef.getDownloadURL()
+            } catch (error) {
+              // ignore / fallback to full image src
+            }
             const img = document.createElement('img')
             img.onload = resolve
             img.onerror = reject
-            img.src = href.value
+            img.src = src.value
           })
         }
       } catch (err: any) {
@@ -94,6 +102,7 @@ export default defineComponent({
 
     return {
       href,
+      src,
       isImage,
       isLoading,
       isError,
