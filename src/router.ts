@@ -6,6 +6,7 @@ import PlanLayout from './views/Plan/Layout.vue'
 import Record from './views/Record.vue'
 import Track from './views/Track.vue'
 import TrackEntries from './views/Track/Entries.vue'
+import TrackPhotos from './views/Track/Photos.vue'
 import TrackCrops from './views/Track/Crops.vue'
 
 export const routes = [
@@ -63,6 +64,10 @@ export const routes = [
       {
         path: 'entries',
         component: TrackEntries,
+      },
+      {
+        path: 'photos',
+        component: TrackPhotos,
       },
       {
         path: 'crops',
