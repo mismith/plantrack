@@ -83,7 +83,7 @@ export default defineComponent({
         if (isImage.value && preview.value) {
           await new Promise(async (resolve, reject) => {
             try {
-              const thumbRef = storage.ref(getUserRefPath(`/attachments/thumbnails/${id}`))
+              const thumbRef = storage.ref(getUserRefPath(`/attachments/thumbnails/${id}_300x300`))
               src.value = await thumbRef.getDownloadURL()
             } catch (error) {
               // ignore / fallback to full image src
